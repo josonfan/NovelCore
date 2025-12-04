@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # --- 数据库服务：MySQL ---
+  mysql:
+    image: mysql:8.0
+    container_name: my-mysql
+    # 设置重启策略：除非明确停止，否则容器会在退出时总是重启
+    restart: always
+    environment:
+      # ⚠️ 务必替换为你自己的安全密码
+      MYSQL_ROOT_PASSWORD: XK6MemT8cDSkHRyp
+      MYSQL_DATABASE: novelcore
+      MYSQL_USER: novelcore
+      MYSQL_PASSWORD: XK6MemT8cDSkHRyp
+    # 将容器的 3306 端口映射到主机的 3306 端口
+    ports:
+      - "3306:3306"
+    # 将数据持久化到本地卷，防止容器删除时数据丢失
+    volumes:
+      - mysql_data:/var/lib/mysql
+    # 可选：如果需要自定义配置，取消注释以下行
+    # command: --default-authentication-plugin=mysql_native_password
+
+  # --- 缓存服务：Redis ---
+  redis:
+    image: redis:7.0-alpine
+    container_name: my-redis
+    restart: always
+    # 将容器的 6379 端口映射到主机的 6379 端口
+    ports:
+      - "6379:6379"
+    # 将数据持久化到本地卷
+    volumes:
+      - redis_data:/data
+
+# --- 定义持久化卷 ---
+volumes:
+  mysql_data:
+  redis_data:
