@@ -15,7 +15,7 @@ services:
       MYSQL_PASSWORD: XK6MemT8cDSkHRyp
     # 将容器的 3306 端口映射到主机的 3306 端口
     ports:
-      - "3306:3306"
+      - "0.0.0.0:3306:3306"
     # 将数据持久化到本地卷，防止容器删除时数据丢失
     volumes:
       - mysql_data:/var/lib/mysql
@@ -29,7 +29,7 @@ services:
     restart: always
     # 将容器的 6379 端口映射到主机的 6379 端口
     ports:
-      - "6379:6379"
+      - "0.0.0.0:6379:6379"
     # 将数据持久化到本地卷
     volumes:
       - redis_data:/data
