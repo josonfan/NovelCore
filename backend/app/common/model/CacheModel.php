@@ -89,7 +89,9 @@ class CacheModel extends Model
         }
         $key = $this->getCacheKey($id);
         $ok = $this->setCacheData($key, $data, $ttl);
-        Async::delayUseCustomQueue(0, \app\common\model\CacheModel::class, 'persistById', getAsyncQueueKey(md5((string)$id)), static::class, $id, $data);
+        $updKey = $this->getCacheKey($id, 'upd');
+        $this->setCacheData($updKey, $data, 0);
+        Async::delayUseCustomQueue(0, \app\common\model\CacheModel::class, 'persistByIdRef', getAsyncQueueKey(md5((string)$id)), static::class, $id, $updKey);
         return $ok;
     }
     /**
@@ -123,12 +125,45 @@ class CacheModel extends Model
         $data = !empty($data) ? $data->toArray() : [];
         return $data;
     }
+    /**
+     * 异步持久化缓存数据
+     * @param string $modelClass 模型类名
+     * @param int $id 主键值
+     * @param array $data 缓存数据
+     * @return bool
+     */
     public static function persistById(string $modelClass, int $id, array $data): bool
     {
         try {
             $m = new $modelClass();
             $pk = $m->getPk();
             return (bool)$m->where($pk, $id)->save($data);
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+    /**
+     * 异步持久化缓存数据
+     * @param string $modelClass 模型类名
+     * @param int $id 主键值
+     * @param string $updKey 缓存键名
+     * @return bool
+     */
+    public static function persistByIdRef(string $modelClass, int $id, string $updKey): bool
+    {
+        try {
+            $m = new $modelClass();
+            $pk = $m->getPk();
+            $data = Cache::get($updKey);
+            if ($data) {
+                $data = json_decode(gzuncompress($data), true);
+            }
+            if (!$data || !is_array($data)) {
+                return false;
+            }
+            self::persistById($modelClass, $id, $data);
+            Cache::delete($updKey);
+            return true;
         } catch (\Throwable $e) {
             return false;
         }
