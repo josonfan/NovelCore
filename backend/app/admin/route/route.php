@@ -2,16 +2,13 @@
 use think\facade\Route;
 
 Route::group('Admins', function () {
-    Route::post('add', 'Admins/add')->middleware('AdminAuth')->middleware('RbacAuth');
-    
-    Route::post('assignRoles', 'Admins/assignRoles')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::post('add', 'Admins/add')->middleware('AdminAuth')->middleware('RbacAuth');    
     Route::rule('detail', 'Admins/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('index', 'Admins/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
-    
-
+    Route::post('assignRoles', 'Admins/assignRoles')->middleware('AdminAuth')->middleware('RbacAuth');
 });
-Route::group('Login', function () {
-    Route::rule('login', 'Login/login', 'POST|GET');
+Route::group('Login', function () {    
+    Route::rule('login', 'Login/login', 'POST|GET');    
     Route::rule('logout', 'Login/logout', 'POST|GET')->middleware('AdminAuth');
     Route::rule('info', 'Login/info', 'GET|POST')->middleware('AdminAuth');
     Route::rule('update', 'Login/update', 'POST')->middleware('AdminAuth');

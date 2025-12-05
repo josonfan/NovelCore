@@ -37,10 +37,17 @@ class RbacService
      */
     public static function createPermission(array $data)
     {
-        validate(\app\admin\validate\Permission::class)->scene('create')->check($data);
-        $perm = new Permissions($data);
-        $perm->writeById((int)$perm['id'], $perm->toArray());
-        return $perm;
+        try{
+            validate(\app\admin\validate\Permission::class)->scene('create')->check($data);
+            $perm = new Permissions($data);
+            $perm->created_at = time();
+            $perm->writeById((int)$perm['id'], $perm->toArray());
+            return $perm;
+        }catch(ValidateException $e){
+            throw new ValidateException($e->getError());
+        }catch(\Exception $e){
+            throw new \Exception($e->getMessage());
+        }
     }
     /**
      * 为管理员分配角色
@@ -50,13 +57,24 @@ class RbacService
      */
     public static function assignRoles(int $adminId, array $roleIds)
     {
-        AdminRole::where('admin_id', $adminId)->delete();
-        foreach ($roleIds as $rid) {
-            if (!$rid) continue;
-            $m = new AdminRole(['admin_id' => $adminId, 'role_id' => (int)$rid]);
-            $m->save();
+        try{
+            if ($adminId === 1) {
+                throw new ValidateException('超级管理员不可变更角色');
+            }
+            
+            validate(\app\admin\validate\AdminRole::class)->scene('assign')->check(['admin_id' => $adminId, 'role_ids' => $roleIds]);
+            AdminRole::where('admin_id', $adminId)->delete();
+            foreach ($roleIds as $rid) {
+                if (!$rid) continue;
+                $m = new AdminRole(['admin_id' => $adminId, 'role_id' => (int)$rid]);
+                $m->save();
+            }
+            return true;
+        }catch(ValidateException $e){
+            throw new ValidateException($e->getError());
+        }catch(\Exception $e){
+            throw new \Exception($e->getMessage());
         }
-        return true;
     }
     /**
      * 为角色分配权限
