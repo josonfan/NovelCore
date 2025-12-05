@@ -5,7 +5,6 @@ use app\BaseController;
 
 class Backend extends BaseController
 {
-    // 
     /**
      * ajax返回
      * @param int $status 状态码

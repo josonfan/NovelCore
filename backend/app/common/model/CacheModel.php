@@ -77,7 +77,7 @@ class CacheModel extends Model
             $data = $this->cacheInfo($id);
         }else{
             $key = $this->getCacheKey($id);
-            $data = $this->getCache($key);
+            $data = $this->getCache($key);            
             if ($data === false || $data === null) {
                 $data = $this->cacheInfo($id);
                 $this->setCacheData($key, $data, $ttl);
@@ -128,12 +128,17 @@ class CacheModel extends Model
         $ttl = env('CACHE.TTL', 600);
         if (empty($id)) {
             $updKey = $this->getCacheKey(md5(json_encode($data, JSON_UNESCAPED_UNICODE)), 'upd');
+            $info = $data;
         }else{
+            $info = $this->infoById($id);
+            foreach ($data as $k => $v) {
+                $info[$k] = $v;
+            }
             $key = $this->getCacheKey($id);
-            $ok = $this->setCacheData($key, $data, $ttl);
+            $this->setCacheData($key, $info, $ttl);
             $updKey = $this->getCacheKey($id, 'upd');
         }
-        $this->setCacheData($updKey, $data, 0);
+        $ok = $this->setCacheData($updKey, $info, 0);
         Async::delayUseCustomQueue(0, \app\common\model\CacheModel::class, 'persistByIdRef', getAsyncQueueKey(md5((string)$id)), static::class, $id, $updKey);
         return $ok;
     }
