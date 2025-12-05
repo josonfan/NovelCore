@@ -68,7 +68,7 @@ class CacheModel extends Model
             return true;
         }
         if (!$data) {
-            return Cache::set($cache_key, null);
+            return Cache::delete($cache_key);
         }
         $result = false;
         $isGzcompress = gzcompress(json_encode($data));

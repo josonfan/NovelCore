@@ -22,7 +22,7 @@ function start_async_task {
     if is_process_running "$pid_file"; then
         echo "${queue_name} is already running"
     else
-        nohup /usr/bin/php think queue:work --queue "$queue_name" --timeout 3600 >> "runtime/${log_prefix}_$(date +%Y-%m-%d).log" 2>&1 &
+        nohup php think queue:work --queue "$queue_name" --timeout 3600 >> "runtime/${log_prefix}_$(date +%Y-%m-%d).log" 2>&1 &
         echo "$!" > "$pid_file"
         echo "${queue_name} start success"
     fi

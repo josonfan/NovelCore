@@ -14,7 +14,7 @@ class Backend extends BaseController
      * @param string $token token
      * @return json
      */
-    protected function ajaxReturn($status,$msg,$data='',$token=''){
+    protected function ajaxReturn($status,$msg,$data=null,$token=''){
         $res = ['code'=>$status,'msg'=>$msg];
         isset($data) && $res['data'] = $data;
         !empty($token) && $res['token'] = $token;
