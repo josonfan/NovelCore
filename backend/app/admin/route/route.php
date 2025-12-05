@@ -6,6 +6,7 @@ Route::group('Admins', function () {
     Route::rule('info', 'Admins/info', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::post('assignRoles', 'Admins/assignRoles')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('detail', 'Admins/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('index', 'Admins/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::get('roles', 'Admins/roles')->middleware('AdminAuth')->middleware('RbacAuth');
 
 });

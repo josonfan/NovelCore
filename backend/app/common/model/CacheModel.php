@@ -37,18 +37,54 @@ class CacheModel extends Model
         $cache_key = implode("_", $arg_list);
         return $cache_key;
     }
-    public function infoById(int $id, int $ttl = 600)
+    /**
+     * 获取列表
+     * @param array $where 查询条件
+     * @param string $field 查询字段
+     * @param string $orderby 排序字段
+     * @param int $limit 每页数量
+     * @param int $page 页码
+     * @return array
+     */
+    public function getList(array $where = [], string $field = '*', string $orderby = '', int $limit = 10, int $page = 1): array
     {
+        try {
+            $fields = $this->is_cache ? $this->getPk() : $field;
+            $res = $this->where($where)->field($fields)->order($orderby)->paginate([
+                'list_rows' => $limit,
+                'page' => $page,
+            ])->toArray();
+            if ($this->is_cache && !empty($res['data'])) {
+                foreach ($res['data'] as $key => $val) {
+                    $res['data'][$key] = $this->infoById((int)$val[$this->getPk()], $field);
+                }
+            }
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
+        }
+        return ['list' => $res['data'], 'count' => $res['total']];
+    }
+    /**
+     * 获取缓存数据
+     * @param int $id 主键值
+     * @param int $ttl 缓存过期时间
+     * @return array|false
+     */
+    public function infoById(int $id, $field = '*')
+    {
+        $ttl = env('CACHE.TTL', 600);
         if (!$this->is_cache) {
-            return $this->cacheInfo($id);
-        }
-        $key = $this->getCacheKey($id);
-        $data = $this->getCache($key);
-        if ($data === false || $data === null) {
             $data = $this->cacheInfo($id);
-            $this->setCacheData($key, $data, $ttl);
+        }else{
+            $key = $this->getCacheKey($id);
+            $data = $this->getCache($key);
+            if ($data === false || $data === null) {
+                $data = $this->cacheInfo($id);
+                $this->setCacheData($key, $data, $ttl);
+            }
         }
-        return $data;
+        
+        return getArrayByFields($data,$field);
     }
     /**
      * 设置缓存数据
@@ -77,6 +113,13 @@ class CacheModel extends Model
         }
         return $result;
     }
+    /**
+     * 异步写入缓存数据
+     * @param int $id 主键值
+     * @param array $data 缓存数据
+     * @param int $ttl 缓存过期时间
+     * @return bool
+     */
     public function writeById(int $id, array $data, int $ttl = 0): bool
     {
         if (!$this->is_cache) {
@@ -109,7 +152,7 @@ class CacheModel extends Model
             $data = json_decode(gzuncompress($data), true);
         }
         return $data;
-    }
+    }    
     /**
      * 获取缓存数据
      * @param int $id
