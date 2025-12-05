@@ -3,12 +3,16 @@ use think\facade\Route;
 
 Route::group('Admins', function () {
     Route::post('add', 'Admins/add')->middleware('AdminAuth')->middleware('RbacAuth');
-    Route::get('index', 'Admins/index')->middleware('AdminAuth')->middleware('RbacAuth');
-    Route::post('assignRoles', 'Admins/assignRoles')->middleware('AdminAuth');
+    Route::rule('info', 'Admins/info', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::post('assignRoles', 'Admins/assignRoles')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'Admins/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::get('roles', 'Admins/roles')->middleware('AdminAuth')->middleware('RbacAuth');
+
 });
-
-Route::post('Login/login', 'Login/login');
-
+Route::group('Login', function () {
+    Route::rule('login', 'Login/login', 'POST|GET');
+    Route::rule('logout', 'Login/logout', 'POST|GET')->middleware('AdminAuth');
+});
 Route::group('Roles', function () {
     Route::post('create', 'Roles/create')->middleware('AdminAuth');
     Route::post('assignPermissions', 'Roles/assignPermissions')->middleware('AdminAuth');
@@ -21,5 +25,9 @@ Route::group('Permissions', function () {
 });
 
 Route::group('Menus', function () {
-    Route::get('index', 'Menus/index')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('index', 'Menus/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+});
+
+Route::miss(function(){
+    return json(['code'=>404,'msg'=>'接口不存在']);
 });
