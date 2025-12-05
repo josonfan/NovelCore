@@ -109,7 +109,7 @@ class CacheModel extends Model
         $result = false;
         $isGzcompress = gzcompress(json_encode($data));
         if ($isGzcompress) {
-            $result = Cache::set($cache_key, $isGzcompress, $ttl);
+            $result = Cache::set($cache_key, $isGzcompress, (int)$ttl);
         }
         return $result;
     }
