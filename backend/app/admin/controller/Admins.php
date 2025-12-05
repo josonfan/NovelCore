@@ -4,7 +4,11 @@ use app\admin\service\AdminsService;
 use app\admin\service\RbacService;
 class Admins extends Backend
 {
-    // 列表
+    /**
+     * 管理员列表
+     *
+     * @return \think\Response
+     */
     public function index(){
         $page = $this->request->param('page', 1, 'intval');
         $limit = $this->request->param('limit', 10, 'intval');
@@ -16,7 +20,11 @@ class Admins extends Backend
         return $this->ajaxReturn(200,'成功',$list);
     }
     
-    // 详情
+    /**
+     * 管理员详情
+     *
+     * @return \think\Response
+     */
     public function detail(){
         $id = (int)($this->request->param('id') ?? 0);
         $m = new \app\admin\model\Admins();
@@ -26,7 +34,11 @@ class Admins extends Backend
         }
         return $this->ajaxReturn(200,'成功',$info);
     }
-    // 添加
+    /**
+     * 添加管理员
+     *
+     * @return \think\Response
+     */
     public function add()
     {
         $postField = 'username,password';
@@ -34,6 +46,11 @@ class Admins extends Backend
         $user = AdminsService::add($data);
         return $this->ajaxReturn(200,'添加成功',$user);
     }
+    /**
+     * 绑定角色
+     *
+     * @return \think\Response
+     */
     public function assignRoles()
     {
         $postField = 'admin_id,role_ids';
