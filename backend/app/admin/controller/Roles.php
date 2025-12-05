@@ -2,9 +2,28 @@
 namespace app\admin\controller;
 
 use app\admin\service\RbacService;
-
+/**
+ * 角色管理
+ */
 class Roles extends Backend
 {
+    /**
+     * 获取角色列表
+     */
+    public function index()
+    {
+        $page = $this->request->param('page', 1, 'intval');
+        $limit = $this->request->param('limit', 10, 'intval');
+        $where = [];
+        $field = 'id,name,description,created_at';
+        $orderby = 'id desc';
+        $m = new \app\admin\model\Roles();
+        $list = $m->getList(formatWhere($where), $field, $orderby, $limit, $page);
+        return $this->ajaxReturn(200, '成功', $list);
+    }
+    /**
+     * 创建角色
+     */
     public function create()
     {
         $postField = 'name,description';
@@ -12,7 +31,22 @@ class Roles extends Backend
         $role = RbacService::createRole($data);
         return $this->ajaxReturn(200, '创建成功', $role);
     }
-
+    /**
+     * 获取角色详情
+     */
+    public function detail()
+    {
+        $id = (int)($this->request->param('id') ?? 0);
+        $m = new \app\admin\model\Roles();
+        $info = $m->infoById($id, 'id,name,description,created_at');
+        if (empty($info)) {
+            return $this->ajaxReturn(404, '角色不存在');
+        }
+        return $this->ajaxReturn(200, '成功', $info);
+    }
+    /**
+     * 为角色绑定权限
+     */
     public function assignPermissions()
     {
         $postField = 'role_id,perm_ids';
@@ -23,10 +57,4 @@ class Roles extends Backend
         return $this->ajaxReturn(200, '绑定成功');
     }
 
-    public function index()
-    {
-        $list = RbacService::roles();
-        return $this->ajaxReturn(200, '成功', $list);
-    }
 }
-

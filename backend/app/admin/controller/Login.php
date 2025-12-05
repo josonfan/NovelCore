@@ -17,6 +17,16 @@ class Login extends Backend
         }
         return $this->ajaxReturn(400,'登录失败');
     }
+    // 个人信息
+    public function info(){
+        $uid = (int)($this->request->uid ?? 0);
+        $m = new \app\admin\model\Admins();
+        $info = $m->infoById($uid, 'id,username,nickname,last_login_at,status,created_at');
+        if (empty($info)) {
+            return $this->ajaxReturn(404,'用户不存在');
+        }
+        return $this->ajaxReturn(200,'成功',$info);
+    }
     // 退出登录
     public function logout(){
         LoginService::logout();
