@@ -1,6 +1,6 @@
 <?php
 // 应用公共文件
-
+use think\facade\Db;
 if (!function_exists('filter_res_data')) {
     /**
      * 前端数据格式化
@@ -70,5 +70,38 @@ if (!function_exists('getAsyncQueueKey')) {
         $queue = array_keys($queues);        
         $queueIndex = hexdec(substr($uuid, 0, 8)) % count($queue);
         return $queue[$queueIndex];
+    }
+}
+if (!function_exists('formatWhere')) {
+    /**
+     * tp官方数组查询方法废弃，数组转化为现有支持的查询方法
+     * @param array $data 原始查询条件
+     * @return array
+     */
+    function formatWhere($data){
+        $where = [];
+        foreach( $data as $k=>$v){
+            if(is_array($v)){
+                if(((string) $v[1] <> null && !is_array($v[1])) || (is_array($v[1]) && (string) $v[1][0] <> null)){
+                    switch(strtolower($v[0])){
+                        //模糊查询
+                        case 'like':
+                            $v[1] = '%'.$v[1].'%';
+                            break;
+
+                        //表达式查询
+                        case 'exp':
+                            $v[1] = Db::raw($v[1]);
+                            break;
+                    }
+                    $where[] = [$k,$v[0],$v[1]];
+                }
+            }else{
+                if((string) $v != null){
+                    $where[] = [$k,'=',$v];
+                }
+            }
+        }
+        return $where;
     }
 }

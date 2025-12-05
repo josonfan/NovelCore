@@ -4,26 +4,35 @@ use app\admin\service\AdminsService;
 use app\admin\service\RbacService;
 class Admins extends Backend
 {
+    // 列表
+    public function index(){
+        $page = $this->request->param('page', 1, 'intval');
+        $limit = $this->request->param('limit', 10, 'intval');
+        $where = [];        
+        $field = 'id,username,nickname,last_login_at,status,created_at';
+        $orderby = 'id desc';
+        $m = new \app\admin\model\Admins();
+        $list = $m->listAdmins(formatWhere($where),$field,$orderby,$limit,$page);
+        return $this->ajaxReturn(200,'成功',$list);
+    }
     // 个人信息
     public function info(){
         $uid = (int)($this->request->uid ?? 0);
         $m = new \app\admin\model\Admins();
-        $info = $m->infoById($uid, 600);
+        $info = $m->infoById($uid, 'id,username,nickname,last_login_at,status,created_at');
         if (empty($info)) {
             return $this->ajaxReturn(404,'用户不存在');
         }
-        $info = getArrayByFields($info,'id,username,nickname,last_login_at,status,created_at');
         return $this->ajaxReturn(200,'成功',$info);
     }
     // 详情
     public function detail(){
         $id = (int)($this->request->param('id') ?? 0);
         $m = new \app\admin\model\Admins();
-        $info = $m->infoById($id, 600);
+        $info = $m->infoById($id, 'id,username,nickname,last_login_at,status,created_at');
         if (empty($info)) {
             return $this->ajaxReturn(404,'用户不存在');
         }
-        $info = getArrayByFields($info,'id,username,nickname,last_login_at,status,created_at');
         return $this->ajaxReturn(200,'成功',$info);
     }
     // 添加
