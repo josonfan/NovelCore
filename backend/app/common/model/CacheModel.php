@@ -117,22 +117,22 @@ class CacheModel extends Model
      * 异步写入缓存数据
      * @param int $id 主键值
      * @param array $data 缓存数据
-     * @param int $ttl 缓存过期时间
      * @return bool
      */
-    public function writeById(int $id, array $data, int $ttl = 0): bool
+    public function writeById(int $id, array $data): bool
     {
-        if (!$this->is_cache) {
-            try {
-                $pk = $this->getPk();
-                return (bool)$this->where($pk, $id)->save($data);
-            } catch (\Throwable $e) {
-                return false;
-            }
+        if (!$this->is_cache) {            
+            $ok = self::persistById(static::class, $id, $data);
+            return $ok;
+        } 
+        $ttl = env('CACHE.TTL', 600);
+        if (empty($id)) {
+            $updKey = $this->getCacheKey(md5(json_encode($data, JSON_UNESCAPED_UNICODE)), 'upd');
+        }else{
+            $key = $this->getCacheKey($id);
+            $ok = $this->setCacheData($key, $data, $ttl);
+            $updKey = $this->getCacheKey($id, 'upd');
         }
-        $key = $this->getCacheKey($id);
-        $ok = $this->setCacheData($key, $data, $ttl);
-        $updKey = $this->getCacheKey($id, 'upd');
         $this->setCacheData($updKey, $data, 0);
         Async::delayUseCustomQueue(0, \app\common\model\CacheModel::class, 'persistByIdRef', getAsyncQueueKey(md5((string)$id)), static::class, $id, $updKey);
         return $ok;
@@ -176,11 +176,14 @@ class CacheModel extends Model
      * @return bool
      */
     public static function persistById(string $modelClass, int $id, array $data): bool
-    {
+    {        
         try {
             $m = new $modelClass();
             $pk = $m->getPk();
-            return (bool)$m->where($pk, $id)->save($data);
+            if (!empty($id)) {
+                $data[$pk] = $id;
+            }
+            return (bool)$m->save($data);
         } catch (\Throwable $e) {
             return false;
         }

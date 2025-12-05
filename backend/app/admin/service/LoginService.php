@@ -22,7 +22,7 @@ class LoginService
             if (!$user) throw new ValidateException('账户不存在');
             if (!password_verify($password, $user['password'])) throw new ValidateException('用户名或密码错误');
             $user->last_login_at = date('Y-m-d H:i:s');
-            $model->writeById((int)$user['id'], $user->toArray(), 600);
+            $model->writeById((int)$user['id'], $user->toArray());
             $user = getArrayByFields($user,'id,username,nickname,last_login_at,status,created_at');
             // 登录成功
             return $user;
