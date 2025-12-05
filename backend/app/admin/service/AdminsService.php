@@ -30,7 +30,7 @@ class AdminsService extends BaseService
             if(empty($data['nickname'])) $data['nickname'] = $data['username'];
             $data['created_at'] = time();
             $user = new Admins($data);
-            $user->save();
+            $user->writeById((int)$user['id'], $user->toArray(), 600);
             return $user;
         }catch(ValidateException $e){
             throw new ValidateException($e->getError());

@@ -39,6 +39,9 @@ class CacheModel extends Model
     }
     public function infoById(int $id, int $ttl = 600)
     {
+        if (!$this->is_cache) {
+            return $this->cacheInfo($id);
+        }
         $key = $this->getCacheKey($id);
         $data = $this->getCache($key);
         if ($data === false || $data === null) {
@@ -76,6 +79,14 @@ class CacheModel extends Model
     }
     public function writeById(int $id, array $data, int $ttl = 0): bool
     {
+        if (!$this->is_cache) {
+            try {
+                $pk = $this->getPk();
+                return (bool)$this->where($pk, $id)->save($data);
+            } catch (\Throwable $e) {
+                return false;
+            }
+        }
         $key = $this->getCacheKey($id);
         $ok = $this->setCacheData($key, $data, $ttl);
         Async::delayUseCustomQueue(0, \app\common\model\CacheModel::class, 'persistById', getAsyncQueueKey(md5((string)$id)), static::class, $id, $data);
