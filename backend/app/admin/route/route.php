@@ -26,7 +26,13 @@ Route::group('Permissions', function () {
 });
 
 Route::group('Menus', function () {
-    Route::rule('index', 'Menus/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('index', 'Menus/index', 'GET|POST')->middleware('AdminAuth');
+    Route::rule('list', 'Menus/list', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'Menus/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('create', 'Menus/create', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('update', 'Menus/update', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('delete', 'Menus/delete', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('bindPermissions', 'Menus/bindPermissions', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
 });
 
 Route::miss(function(){
