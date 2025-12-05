@@ -10,7 +10,11 @@ use think\Exception;
 use think\facade\Log;
 class LoginService
 {
-    // 登录
+    /**
+     * 登录
+     * @param array $data 登录数据
+     * @return array|false
+     */
     public static function login($data){
         try{
             validate(\app\admin\validate\Login::class)->scene('login')->check($data);

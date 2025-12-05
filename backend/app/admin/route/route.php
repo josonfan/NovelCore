@@ -14,7 +14,8 @@ Route::group('Login', function () {
     Route::rule('login', 'Login/login', 'POST|GET');
     Route::rule('logout', 'Login/logout', 'POST|GET')->middleware('AdminAuth');
     Route::rule('info', 'Login/info', 'GET|POST')->middleware('AdminAuth');
-    Route::rule('roles', 'Login/roles', 'GET|POST')->middleware('AdminAuth');
+    Route::rule('update', 'Login/update', 'POST')->middleware('AdminAuth');
+    Route::rule('changePassword', 'Login/changePassword', 'POST')->middleware('AdminAuth');
 });
 Route::group('Roles', function () {
     Route::post('create', 'Roles/create')->middleware('AdminAuth')->middleware('RbacAuth');

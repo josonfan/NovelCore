@@ -1,10 +1,15 @@
 <?php
 namespace app\admin\controller;
 use app\admin\service\LoginService;
+use app\admin\service\AdminsService;
 use app\common\service\JwtService;
 class Login extends Backend
 {
-    // 登录
+    /**
+     * 登录
+     * @param array $data 登录数据
+     * @return array|false
+     */
     public function login()
     {
         $postField = 'username,password';
@@ -17,17 +22,48 @@ class Login extends Backend
         }
         return $this->ajaxReturn(400,'登录失败');
     }
-    // 个人信息
+    /**
+     * 个人信息
+     * @return array|false
+     */
     public function info(){
         $uid = (int)($this->request->uid ?? 0);
-        $m = new \app\admin\model\Admins();
-        $info = $m->infoById($uid, 'id,username,nickname,last_login_at,status,created_at');
+        $info = AdminsService::infoById($uid, 'id,username,nickname,last_login_at,status,created_at');
         if (empty($info)) {
             return $this->ajaxReturn(404,'用户不存在');
         }
         return $this->ajaxReturn(200,'成功',$info);
     }
-    // 退出登录
+    /**
+     * 编辑用户信息
+     * @param array $data 编辑数据
+     * @return array|false
+     */
+    public function update(){
+        $postField = 'nickname';
+		$data = $this->request->only(explode(',',$postField),'post',null);
+        $uid = $this->request->uid;
+        $ok = AdminsService::edit($uid, $data);
+        if($ok){
+            return $this->ajaxReturn(200,'更新成功');
+        }
+        return $this->ajaxReturn(400,'更新失败');
+    }
+    /** 修改密码 */
+    public function changePassword(){
+        $postField = 'password,new_password,confirm_password';
+		$data = $this->request->only(explode(',',$postField),'post',null);
+        $uid = $this->request->uid;
+        $ok = AdminsService::changePassword($uid, $data);
+        if($ok){
+            return $this->ajaxReturn(200,'更新成功');
+        }
+        return $this->ajaxReturn(400,'更新失败');
+    }
+    /**
+     * 退出登录
+     * @return array|false
+     */
     public function logout(){
         LoginService::logout();
         return $this->ajaxReturn(200,'退出成功');
