@@ -12,7 +12,7 @@ function stop_process {
     fi
 }
 
-for i in $(seq 0 50);
+for i in $(seq 0 5);
 do
     stop_process "blad_async${i}_pid"
 done

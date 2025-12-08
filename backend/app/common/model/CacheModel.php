@@ -185,10 +185,16 @@ class CacheModel extends Model
         try {
             $m = new $modelClass();
             $pk = $m->getPk();
-            if (!empty($id)) {
-                $data[$pk] = $id;
+            if (empty($id)) {
+                $id = $data[$pk]??0;
             }
-            return (bool)$m->save($data);
+            if(empty($id)){
+                $res =  (bool)$m->save($data);
+            }else{                
+                unset($data[$pk]);
+                $res = (bool)$m->where($pk,$id)->save($data);
+            }
+            return $res;
         } catch (\Throwable $e) {
             return false;
         }
@@ -211,7 +217,7 @@ class CacheModel extends Model
             }
             if (!$data || !is_array($data)) {
                 return false;
-            }
+            }            
             self::persistById($modelClass, $id, $data);
             Cache::delete($updKey);
             return true;

@@ -31,7 +31,9 @@ class Menus extends Backend
     {
         $page = $this->request->param('page', 1, 'intval');
         $limit = $this->request->param('limit', 10, 'intval');
+
         $where = [];
+        $where['parent_id'] = $this->request->param('parent_id', 0, 'intval');
         $field = 'id,parent_id,name,code,path,route,icon,type,visible,is_active,sort_order,created_at,updated_at';
         $orderby = 'id desc';
         $res = MenuService::list(formatWhere($where), $field, $orderby, $limit, $page);
@@ -102,5 +104,16 @@ class Menus extends Backend
         $permIds = array_filter(array_map('intval', explode(',', (string)($data['perm_ids'] ?? ''))));
         $ok = MenuService::bindPermissions($menuId, $permIds);
         return $this->ajaxReturn(200, '绑定成功', ['success' => $ok]);
+    }
+    
+    /**
+     * 上级菜单选项（最多3级）
+     * 仅返回启用的菜单，结构包含 id/name/parent_id/children
+     * @return \think\Response
+     */
+    public function options()
+    {
+        $res = MenuService::options(3);
+        return $this->ajaxReturn(200, '成功', $res);
     }
 }

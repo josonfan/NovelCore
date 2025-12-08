@@ -77,10 +77,14 @@ class MenuService
     public static function create(array $data)
     {
         try {
+            $parentId = (int)($data['parent_id'] ?? 0);
+            $newDepth = $parentId > 0 ? (self::getDepth($parentId) + 1) : 1;
+            if ($newDepth > 3) {
+                throw new ValidateException('菜单层级最多3级');
+            }
             validate(\app\admin\validate\Menu::class)->scene('create')->check($data);
-            $data['created_at'] = time();
-            $data['updated_at'] = time();
             $m = new Menus($data);
+            $m->created_at = time();
             $m->writeById((int)$m['id'], $m->toArray());
             return $m;
         } catch (ValidateException $e) {
@@ -93,7 +97,11 @@ class MenuService
     public static function update(int $id, array $data): bool
     {
         try {
-           
+            $parentId = (int)($data['parent_id'] ?? 0);
+            $newDepth = $parentId > 0 ? (self::getDepth($parentId) + 1) : 1;
+            if ($newDepth > 3) {
+                throw new ValidateException('菜单层级最多3级');
+            }
             validate(\app\admin\validate\Menu::class)->scene('update')->check($data);
             $m = new Menus();
             return $m->writeById($id, $data);
@@ -109,7 +117,7 @@ class MenuService
         $m = new Menus();
         $pk = $m->getPk();
         $ok = (bool)$m->where($pk, $id)->delete();
-        $m->setCacheData($m->getCacheKey($id), null);
+        \think\facade\Cache::delete(env('DATABASE.PREFIX', 'blad_') . 'menus_' . $id);
         MenuPermission::where('menu_id', $id)->delete();
         return $ok;
     }
@@ -123,5 +131,76 @@ class MenuService
             $mp->save();
         }
         return true;
+    }
+
+    public static function options(int $maxDepth = 3): array
+    {
+        $menus = Menus::where('is_active', 1)->order('sort_order desc, id asc')->select()->toArray();
+        $byParent = [];
+        foreach ($menus as $m) {
+            $byParent[(int)$m['parent_id']][] = $m;
+        }
+        return self::buildOptions(0, $byParent, 1, $maxDepth);
+    }
+
+    private static function buildOptions(int $parentId, array $byParent, int $depth, int $maxDepth): array
+    {
+        $children = $byParent[$parentId] ?? [];
+        $out = [];
+        foreach ($children as $m) {
+            $node = [
+                'id' => (int)$m['id'],
+                'name' => (string)$m['name'],
+                'parent_id' => (int)$m['parent_id'],
+            ];
+            $node['children'] = $depth < $maxDepth ? self::buildOptions((int)$m['id'], $byParent, $depth + 1, $maxDepth) : [];
+            $out[] = $node;
+        }
+        return $out;
+    }
+
+    public static function treeAll(int $maxDepth = 3): array
+    {
+        $menus = Menus::where('is_active', 1)->order('sort_order desc, id asc')->select()->toArray();
+        $byParent = [];
+        foreach ($menus as $m) {
+            $byParent[(int)$m['parent_id']][] = $m;
+        }
+        return self::buildTreeAll(0, $byParent, 1, $maxDepth);
+    }
+
+    private static function buildTreeAll(int $parentId, array $byParent, int $depth, int $maxDepth): array
+    {
+        $children = $byParent[$parentId] ?? [];
+        $out = [];
+        foreach ($children as $m) {
+            $node = [
+                'id' => (int)$m['id'],
+                'parent_id' => (int)$m['parent_id'],
+                'name' => (string)$m['name'],
+                'code' => (string)($m['code'] ?? ''),
+                'path' => (string)($m['path'] ?? ''),
+                'route' => (string)($m['route'] ?? ''),
+                'icon' => (string)($m['icon'] ?? ''),
+                'type' => (string)($m['type'] ?? ''),
+                'visible' => (int)($m['visible'] ?? 1),
+                'is_active' => (int)($m['is_active'] ?? 1),
+                'sort_order' => (int)($m['sort_order'] ?? 0),
+                'created_at' => $m['created_at'] ?? null,
+                'updated_at' => $m['updated_at'] ?? null,
+            ];
+            $node['children'] = $depth < $maxDepth ? self::buildTreeAll((int)$m['id'], $byParent, $depth + 1, $maxDepth) : [];
+            $out[] = $node;
+        }
+        return $out;
+    }
+
+    private static function getDepth(int $menuId): int
+    {
+        if ($menuId <= 0) return 0;
+        $m = new Menus();
+        $info = $m->infoById($menuId, 'id,parent_id');
+        if (empty($info)) return 0;
+        return 1 + self::getDepth((int)$info['parent_id']);
     }
 }
