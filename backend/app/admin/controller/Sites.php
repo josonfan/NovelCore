@@ -35,7 +35,7 @@ class Sites extends Backend
     }
     public function update()
     {
-        $postField = 'id,name,code,base_api_url,primary_domain,is_active,remark';
+        $postField = 'id,name,base_api_url,primary_domain,is_active,remark';
         $data = $this->request->only(explode(',', $postField), 'post', null);
         $id = (int)($data['id'] ?? 0);
         unset($data['id']);
@@ -58,4 +58,3 @@ class Sites extends Backend
         return $this->ajaxReturn(200, '启停成功', ['id' => $id, 'success' => $ok]);
     }
 }
-
