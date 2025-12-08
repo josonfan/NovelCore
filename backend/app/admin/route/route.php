@@ -1,19 +1,42 @@
 <?php
 use think\facade\Route;
 
+/**
+ * Admins 接口
+ * - add: 创建管理员（POST）
+ * - detail: 管理员详情（GET|POST）
+ * - index: 管理员列表（GET|POST）
+ * - assignRoles: 为管理员绑定角色（POST）
+ */
 Route::group('Admins', function () {
     Route::post('add', 'Admins/add')->middleware('AdminAuth')->middleware('RbacAuth');    
     Route::rule('detail', 'Admins/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('index', 'Admins/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::post('assignRoles', 'Admins/assignRoles')->middleware('AdminAuth')->middleware('RbacAuth');
 });
+/**
+ * Login 接口（认证与个人信息）
+ * - login: 登录（POST|GET）
+ * - logout: 退出（POST|GET）
+ * - info: 个人信息（GET|POST）
+ * - update: 更新个人信息（POST）
+ * - changePassword: 修改密码（POST）
+ * - context: 登录后上下文（GET|POST，用户+角色+权限+菜单聚合）
+ */
 Route::group('Login', function () {    
     Route::rule('login', 'Login/login', 'POST|GET');    
     Route::rule('logout', 'Login/logout', 'POST|GET')->middleware('AdminAuth');
     Route::rule('info', 'Login/info', 'GET|POST')->middleware('AdminAuth');
     Route::rule('update', 'Login/update', 'POST')->middleware('AdminAuth');
     Route::rule('changePassword', 'Login/changePassword', 'POST')->middleware('AdminAuth');
+    Route::rule('context', 'Login/context', 'GET|POST')->middleware('AdminAuth');
 });
+/**
+ * Roles 接口（角色管理）
+ * - create: 创建角色（POST）
+ * - assignPermissions: 绑定权限（POST）
+ * - index/detail/update/delete: 列表/详情/更新/删除
+ */
 Route::group('Roles', function () {
     Route::post('create', 'Roles/create')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::post('assignPermissions', 'Roles/assignPermissions')->middleware('AdminAuth')->middleware('RbacAuth');
@@ -23,6 +46,10 @@ Route::group('Roles', function () {
     Route::rule('delete', 'Roles/delete', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
 });
 
+/**
+ * Permissions 接口（权限点管理）
+ * - create/index/detail/update/delete
+ */
 Route::group('Permissions', function () {
     Route::post('create', 'Permissions/create')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('index', 'Permissions/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
@@ -31,6 +58,11 @@ Route::group('Permissions', function () {
     Route::rule('delete', 'Permissions/delete', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
 });
 
+/**
+ * Menus 接口（菜单管理与权限可见性）
+ * - index: 返回当前管理员可见菜单树（GET|POST）
+ * - list/detail/create/update/delete/bindPermissions/options
+ */
 Route::group('Menus', function () {
     Route::rule('index', 'Menus/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('list', 'Menus/list', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
@@ -42,6 +74,9 @@ Route::group('Menus', function () {
     Route::rule('options', 'Menus/options', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
 });
 
+/**
+ * Sites 接口（站点管理）
+ */
 Route::group('Sites', function () {
     Route::rule('index', 'Sites/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('detail', 'Sites/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
@@ -51,6 +86,9 @@ Route::group('Sites', function () {
     Route::rule('toggle', 'Sites/toggle', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
 });
 
+/**
+ * DomainList 接口（域名管理）
+ */
 Route::group('DomainList', function () {
     Route::rule('index', 'DomainList/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('detail', 'DomainList/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
@@ -59,6 +97,9 @@ Route::group('DomainList', function () {
     Route::rule('delete', 'DomainList/delete', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
 });
 
+/**
+ * Categories 接口（分类管理）
+ */
 Route::group('Categories', function () {
     Route::rule('index', 'Categories/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('detail', 'Categories/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
@@ -68,6 +109,9 @@ Route::group('Categories', function () {
     Route::rule('toggle', 'Categories/toggle', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
 });
 
+/**
+ * Tags 接口（标签管理）
+ */
 Route::group('Tags', function () {
     Route::rule('index', 'Tags/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('detail', 'Tags/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
@@ -77,6 +121,9 @@ Route::group('Tags', function () {
     Route::rule('toggle', 'Tags/toggle', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
 });
 
+/**
+ * Novels 接口（小说管理）
+ */
 Route::group('Novels', function () {
     Route::rule('index', 'Novels/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('detail', 'Novels/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
@@ -86,6 +133,9 @@ Route::group('Novels', function () {
     Route::rule('bindTags', 'Novels/bindTags', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
 });
 
+/**
+ * Chapters 接口（章节管理）
+ */
 Route::group('Chapters', function () {
     Route::rule('index', 'Chapters/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('detail', 'Chapters/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
@@ -94,6 +144,9 @@ Route::group('Chapters', function () {
     Route::rule('delete', 'Chapters/delete', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
 });
 
+/**
+ * 未匹配路由的兜底处理
+ */
 Route::miss(function(){
     return json(['code'=>404,'msg'=>'接口不存在']);
 });

@@ -68,4 +68,19 @@ class Login extends Backend
         LoginService::logout();
         return $this->ajaxReturn(200,'退出成功');
     }
+    /**
+     * 登录后上下文：用户信息 + 角色ID + 权限 + 菜单树
+     * @return array|false
+     */
+    public function context(){
+        $uid = (int)($this->request->uid ?? 0);
+        $user = AdminsService::infoById($uid, 'id,username,nickname,last_login_at,status,created_at');
+        if (empty($user)) {
+            return $this->ajaxReturn(404,'用户不存在');
+        }
+        $roles = \app\admin\model\AdminRole::where('admin_id', $uid)->column('role_id');
+        $perms = \app\admin\service\RbacService::getAdminPermissions($uid);
+        $menus = \app\admin\service\MenuService::treeForAdmin($uid);
+        return $this->ajaxReturn(200,'成功',[ 'user'=>$user, 'roles'=>$roles, 'permissions'=>$perms, 'menus'=>$menus ]);
+    }
 }
