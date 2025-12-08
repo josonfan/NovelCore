@@ -1,15 +1,15 @@
 <template>
   <div class="login-wrap">
     <div class="panel">
-      <div class="brand">NovelCore 管理后台</div>
+      <div class="brand">{{ t('common.system_name') }}</div>
       <el-form :model="form" @submit.prevent="onSubmit" class="form">
         <el-form-item>
-          <el-input v-model="form.username" placeholder="用户名" />
+          <el-input v-model="form.username" :placeholder="t('login.username')" />
         </el-form-item>
         <el-form-item>
-          <el-input v-model="form.password" type="password" placeholder="密码" />
+          <el-input v-model="form.password" type="password" :placeholder="t('login.password')" />
         </el-form-item>
-        <el-button type="primary" size="large" class="submit" @click="onSubmit">登录</el-button>
+        <el-button type="primary" size="large" class="submit" @click="onSubmit">{{ t('login.submit') }}</el-button>
       </el-form>
     </div>
   </div>
@@ -23,10 +23,12 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../store'
 import { http } from '../api/http'
 import { ElMessage } from 'element-plus'
+import { useI18n } from 'vue-i18n'
 
 const form = reactive({ username: '', password: '' })
 const router = useRouter()
 const auth = useAuthStore()
+const { t } = useI18n()
 
 async function onSubmit() {
   try {
@@ -75,7 +77,7 @@ async function onSubmit() {
 .bg-gradient {
   position: fixed;
   inset: 0;
-  background: radial-gradient(600px 400px at 20% 10%, rgba(59,130,246,.15), transparent), radial-gradient(600px 400px at 80% 50%, rgba(139,92,246,.12), transparent);
+  background: radial-gradient(600px 400px at 20% 10%, rgba(59,130,246,.12), transparent), radial-gradient(600px 400px at 80% 50%, rgba(99,102,241,.10), transparent);
   z-index: -2;
 }
 .bg-blur {

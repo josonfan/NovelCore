@@ -57,4 +57,27 @@ class Roles extends Backend
         return $this->ajaxReturn(200, '绑定成功');
     }
 
+    /**
+     * 更新角色
+     */
+    public function update()
+    {
+        $postField = 'id,name,description';
+        $data = $this->request->only(explode(',', $postField), 'post', null);
+        $id = (int)($data['id'] ?? 0);
+        unset($data['id']);
+        $ok = RbacService::updateRole($id, $data);
+        return $this->ajaxReturn(200, '更新成功', ['id' => $id, 'success' => $ok]);
+    }
+
+    /**
+     * 删除角色
+     */
+    public function delete()
+    {
+        $id = (int)($this->request->param('id') ?? 0);
+        $ok = RbacService::deleteRole($id);
+        return $this->ajaxReturn(200, '删除成功', ['id' => $id, 'success' => $ok]);
+    }
+
 }

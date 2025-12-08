@@ -1,44 +1,52 @@
 <template>
-  <div class="layout">
+  <div :class="['layout', { collapsed }]">
     <aside class="sidebar">
-      <div class="brand">NovelCore</div>
+      <div class="logo-bar" @click="goHome" role="button" tabindex="0" aria-label="返回首页" @keydown.enter="goHome">
+        <LogoIcon :size="22" />
+      </div>
       <el-skeleton :loading="loading" animated style="padding: 8px">
         <template #template>
           <el-skeleton-item variant="p" style="height: 20px; margin: 8px 0" />
           <el-skeleton-item variant="p" style="height: 20px; margin: 8px 0" />
           <el-skeleton-item variant="p" style="height: 20px; margin: 8px 0" />
         </template>
-        <el-menu :default-active="active" class="menu" router>
+        <el-menu :default-active="active" class="menu" router :collapse="collapsed" :collapse-transition="false">
           <template v-for="m in menus" :key="m.id">
-            <el-sub-menu v-if="m.children && m.children.length" :index="resolveIndex(m)">
+            <el-sub-menu v-if="m.children && m.children.length" :index="resolveIndex(m)" :title="collapsed ? m.name : ''">
               <template #title>
-                <span>
-                  <component :is="resolveIcon(m.icon)" v-if="resolveIcon(m.icon)" style="margin-right:8px" />
-                  {{ m.name }}
-                </span>
+                <el-icon v-if="resolveIcon(m.icon)" :size="16" class="menu-icon">
+                  <component :is="resolveIcon(m.icon)" />
+                </el-icon>
+                <span class="menu-text">{{ m.name }}</span>
               </template>
               <template v-for="c in m.children" :key="c.id">
-                <el-sub-menu v-if="c.children && c.children.length" :index="resolveIndex(c)">
+                <el-sub-menu v-if="c.children && c.children.length" :index="resolveIndex(c)" :title="collapsed ? c.name : ''">
                   <template #title>
-                    <span>
-                      <component :is="resolveIcon(c.icon)" v-if="resolveIcon(c.icon)" style="margin-right:8px" />
-                      {{ c.name }}
-                    </span>
+                    <el-icon v-if="resolveIcon(c.icon)" :size="16" class="menu-icon">
+                      <component :is="resolveIcon(c.icon)" />
+                    </el-icon>
+                    <span class="menu-text">{{ c.name }}</span>
                   </template>
-                  <el-menu-item v-for="gc in c.children" :key="gc.id" :index="resolveIndex(gc)">
-                    <component :is="resolveIcon(gc.icon)" v-if="resolveIcon(gc.icon)" style="margin-right:8px" />
-                    {{ gc.name }}
+                  <el-menu-item v-for="gc in c.children" :key="gc.id" :index="resolveIndex(gc)" :title="collapsed ? gc.name : ''">
+                    <el-icon v-if="resolveIcon(gc.icon)" :size="16" class="menu-icon">
+                      <component :is="resolveIcon(gc.icon)" />
+                    </el-icon>
+                    <span class="menu-text">{{ gc.name }}</span>
                   </el-menu-item>
                 </el-sub-menu>
                 <el-menu-item v-else :index="resolveIndex(c)">
-                  <component :is="resolveIcon(c.icon)" v-if="resolveIcon(c.icon)" style="margin-right:8px" />
+                  <el-icon v-if="resolveIcon(c.icon)" :size="16" class="menu-icon">
+                    <component :is="resolveIcon(c.icon)" />
+                  </el-icon>
                   {{ c.name }}
                 </el-menu-item>
               </template>
             </el-sub-menu>
-            <el-menu-item v-else :index="resolveIndex(m)">
-              <component :is="resolveIcon(m.icon)" v-if="resolveIcon(m.icon)" style="margin-right:8px" />
-              {{ m.name }}
+            <el-menu-item v-else :index="resolveIndex(m)" :title="collapsed ? m.name : ''">
+              <el-icon v-if="resolveIcon(m.icon)" :size="16" class="menu-icon">
+                <component :is="resolveIcon(m.icon)" />
+              </el-icon>
+              <span class="menu-text">{{ m.name }}</span>
             </el-menu-item>
           </template>
         </el-menu>
@@ -46,7 +54,32 @@
     </aside>
     <main class="content">
       <header class="header">
-        <el-button type="primary" @click="logout">退出</el-button>
+        <div style="flex:1;display:flex;align-items:center;gap:8px">
+          <el-button text circle @click="toggleCollapse" aria-label="折叠菜单" title="折叠菜单">
+            <el-icon :size="18"><component :is="collapseIcon" /></el-icon>
+          </el-button>
+          <Breadcrumbs />
+        </div>
+        <div class="header-right">
+          <el-popover placement="bottom-end" width="220" trigger="click">
+            <template #reference>
+              <el-button text circle>
+                <el-icon :size="18"><component :is="(Icons as any).Brush || (Icons as any).Setting" /></el-icon>
+              </el-button>
+            </template>
+            <div class="theme-swatches">
+              <div
+                v-for="c in palettes"
+                :key="c.p"
+                class="swatch"
+                :class="{ 'is-active': c.p === activePrimary }"
+                :style="{ background: c.p }"
+                @click="applyPalette(c.p, c.s)"
+              />
+            </div>
+          </el-popover>
+          <UserDropdown />
+        </div>
       </header>
       <section class="body">
         <router-view />
@@ -62,20 +95,27 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../store'
 import { fetchMenuTree } from '../api/menus'
 import * as Icons from '@element-plus/icons-vue'
+import LogoIcon from '../components/LogoIcon.vue'
+import UserDropdown from '../components/UserDropdown.vue'
+import Breadcrumbs from '../components/Breadcrumbs.vue'
+import { pathOf } from '../router/routes'
 
 const router = useRouter()
 const auth = useAuthStore()
 const active = computed(() => router.currentRoute.value.path || '/')
 const menus = ref([])
 const loading = ref(true)
-
-function logout() {
-  auth.clear()
-  router.push('/login')
+const collapsed = ref(false)
+function goHome(){
+  router.push(pathOf('/'))
 }
+const palettes = ref([ { p: '#3B82F6', s: '#2563EB' }, { p: '#409EFF', s: '#337ecc' }, { p: '#22C55E', s: '#16A34A' }, { p: '#F59E0B', s: '#D97706' }, { p: '#EF4444', s: '#DC2626' }, { p: '#8B5CF6', s: '#7C3AED' } ])
+const activePrimary = ref('')
+
+function logout() {}
 
 function resolveIndex(m: any) {
-  return m.route || m.path || '/'
+  return pathOf(m.path || m.route || '/')
 }
 
 function resolveIcon(name?: string) {
@@ -88,10 +128,36 @@ function resolveIcon(name?: string) {
   return (Icons as any)[pascal] || null
 }
 
+const collapseIcon = computed(() => (collapsed.value ? (Icons as any).Expand : (Icons as any).Fold))
+function toggleCollapse() {
+  collapsed.value = !collapsed.value
+  try {
+    localStorage.setItem('nc-sidebar-collapsed', collapsed.value ? '1' : '0')
+  } catch (_) {}
+}
+
+function applyPalette(p: string, s: string) {
+  activePrimary.value = p
+  document.documentElement.style.setProperty('--nc-primary', p)
+  document.documentElement.style.setProperty('--nc-primary-600', s)
+  try {
+    localStorage.setItem('nc-primary', p)
+    localStorage.setItem('nc-primary600', s)
+  } catch (_) {}
+}
+
 onMounted(async () => {
   try {
     const token = localStorage.getItem('token') || ''
     if (!token) return
+    try {
+      collapsed.value = localStorage.getItem('nc-sidebar-collapsed') === '1'
+    } catch (_) {}
+    try {
+      const sp = localStorage.getItem('nc-primary') || ''
+      const ss = localStorage.getItem('nc-primary600') || ''
+      if (sp && ss) applyPalette(sp, ss)
+    } catch (_) {}
     const data = await fetchMenuTree()
     menus.value = data || []
   } finally {
@@ -103,35 +169,43 @@ onMounted(async () => {
 <style scoped>
 .layout {
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: 200px 1fr;
   height: 100vh;
 }
+.layout :deep(.el-menu){ border-right: none; }
+.layout.collapsed { grid-template-columns: 64px 1fr; }
 .sidebar {
   background: #ffffff;
   border-right: 1px solid #e5e7eb;
-  padding: 16px;
+  padding: 0;
 }
-.brand {
-  font-weight: 700;
-  font-size: 18px;
-  margin-bottom: 12px;
-}
+ .logo-bar{ padding: calc((var(--nc-header-height) - 22px)/2) 0; display:flex; align-items:center; justify-content:center; color: var(--nc-primary); border-bottom: 1px solid var(--nc-border); box-sizing: border-box; }
 .menu {
   background: transparent;
   border-right: none;
 }
+.menu-icon {
+  margin-right: 8px;
+}
+.menu-entry{ display:inline-flex; align-items:center; gap: 8px; }
+.sidebar svg {
+  width: 1em;
+  height: 1em;
+}
 .content {
   display: grid;
-  grid-template-rows: 60px 1fr;
+  grid-template-rows: var(--nc-header-height) 1fr;
 }
 .header {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding: 0 16px;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--nc-border);
+  box-sizing: border-box;
 }
+.header-right { display: flex; align-items: center; gap: 12px; }
 .body {
-  padding: 16px;
+  padding: 24px;
 }
 </style>

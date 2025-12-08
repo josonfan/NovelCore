@@ -39,6 +39,21 @@ class RbacService
     {
         try{
             validate(\app\admin\validate\Permission::class)->scene('create')->check($data);
+            $data['field'] = (string)($data['field'] ?? '');
+            $fieldVal = $data['field'] ?? null;
+            $exists = Permissions::where('resource', (string)$data['resource'])
+                ->where('action', (string)$data['action'])
+                ->where(function($q) use ($fieldVal){
+                    if ($fieldVal === null || $fieldVal === '') {
+                        $q->whereNull('field')->whereOr('field','');
+                    } else {
+                        $q->where('field', (string)$fieldVal);
+                    }
+                })
+                ->find();
+            if ($exists) {
+                return $exists;
+            }
             $perm = new Permissions($data);
             $perm->created_at = time();
             $perm->writeById((int)$perm['id'], $perm->toArray());
@@ -48,6 +63,78 @@ class RbacService
         }catch(\Exception $e){
             throw new \Exception($e->getMessage());
         }
+    }
+
+    /**
+     * 更新角色
+     */
+    public static function updateRole(int $id, array $data): bool
+    {
+        try{
+            // name 格式校验与唯一性手工校验（如有传入）
+            if (isset($data['name'])) {
+                $name = (string)$data['name'];
+                if ($name === '' || !preg_match('/^[A-Za-z0-9_-]+$/', $name)) {
+                    throw new ValidateException('角色名称只允许字母数字下划线和破折号');
+                }
+                $exists = Roles::where('name', $name)->where('id', '<>', $id)->value('id');
+                if ($exists) {
+                    throw new ValidateException('角色名称已存在');
+                }
+            }
+            $m = new Roles();
+            return $m->writeById($id, $data);
+        }catch(ValidateException $e){
+            throw new ValidateException($e->getError());
+        }catch(\Exception $e){
+            throw new \Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * 删除角色
+     */
+    public static function deleteRole(int $id): bool
+    {
+        $m = new Roles();
+        $pk = $m->getPk();
+        $ok = (bool)$m->where($pk, $id)->delete();
+        \think\facade\Cache::delete(env('DATABASE.PREFIX', 'blad_') . 'roles_' . $id);
+        RolePermission::where('role_id', $id)->delete();
+        AdminRole::where('role_id', $id)->delete();
+        return $ok;
+    }
+
+    /**
+     * 更新权限
+     */
+    public static function updatePermission(int $id, array $data): bool
+    {
+        try{
+            $v = validate(\app\admin\validate\Permission::class)->scene('create');
+            $v->remove('resource','require');
+            $v->remove('action','require');
+            $v->check($data);
+            $m = new Permissions();
+            return $m->writeById($id, $data);
+        }catch(ValidateException $e){
+            throw new ValidateException($e->getError());
+        }catch(\Exception $e){
+            throw new \Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * 删除权限
+     */
+    public static function deletePermission(int $id): bool
+    {
+        $m = new Permissions();
+        $pk = $m->getPk();
+        $ok = (bool)$m->where($pk, $id)->delete();
+        \think\facade\Cache::delete(env('DATABASE.PREFIX', 'blad_') . 'permissions_' . $id);
+        RolePermission::where('perm_id', $id)->delete();
+        return $ok;
     }
     /**
      * 为管理员分配角色
