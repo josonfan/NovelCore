@@ -3,8 +3,18 @@ namespace app\admin\controller;
 
 use app\admin\service\DomainListService;
 
+/**
+ * 域名管理控制器
+ * 提供域名列表、详情、创建、更新、删除等接口
+ */
 class DomainList extends Backend
 {
+    /**
+     * 域名列表
+     * @param int $page 页码（query: page）
+     * @param int $limit 每页数量（query: limit）
+     * @return \think\Response
+     */
     public function index()
     {
         $page = $this->request->param('page', 1, 'intval');
@@ -15,6 +25,11 @@ class DomainList extends Backend
         $res = DomainListService::list(formatWhere($where), $field, $orderby, $limit, $page);
         return $this->ajaxReturn(200, '成功', $res);
     }
+    /**
+     * 域名详情
+     * @param int $id 域名ID（query: id）
+     * @return \think\Response
+     */
     public function detail()
     {
         $id = (int)($this->request->param('id') ?? 0);
@@ -25,6 +40,11 @@ class DomainList extends Backend
         }
         return $this->ajaxReturn(200, '成功', $info);
     }
+    /**
+     * 创建域名
+     * @param array $data 提交数据（post: site_id,domain,type,priority,is_active,remark）
+     * @return \think\Response
+     */
     public function create()
     {
         $postField = 'site_id,domain,type,priority,is_active,remark';
@@ -33,6 +53,11 @@ class DomainList extends Backend
         $out = getArrayByFields($m->toArray(), 'id,site_id,domain,type,priority,is_active,remark,created_at,updated_at');
         return $this->ajaxReturn(200, '创建成功', $out);
     }
+    /**
+     * 更新域名
+     * @param array $data 提交数据（post: id,site_id,domain,type,priority,is_active,remark）
+     * @return \think\Response
+     */
     public function update()
     {
         $postField = 'id,site_id,domain,type,priority,is_active,remark';
@@ -42,6 +67,11 @@ class DomainList extends Backend
         $ok = DomainListService::update($id, $data);
         return $this->ajaxReturn(200, '更新成功', ['id' => $id, 'success' => $ok]);
     }
+    /**
+     * 删除域名
+     * @param int $id 域名ID（query: id）
+     * @return \think\Response
+     */
     public function delete()
     {
         $id = (int)($this->request->param('id') ?? 0);
@@ -49,4 +79,3 @@ class DomainList extends Backend
         return $this->ajaxReturn(200, '删除成功', ['id' => $id, 'success' => $ok]);
     }
 }
-
