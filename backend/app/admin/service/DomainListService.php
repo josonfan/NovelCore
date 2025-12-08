@@ -3,6 +3,7 @@ namespace app\admin\service;
 
 use app\admin\model\DomainList;
 use think\exception\ValidateException;
+use think\facade\Cache;
 
 class DomainListService
 {
@@ -23,8 +24,8 @@ class DomainListService
         try {
             validate(\app\admin\validate\Domain::class)->scene('create')->check($data);
             $m = new DomainList($data);
-            $m->save();
-            $m->primeCacheById((int)$m['id'], $m->toArray());
+            $m->created_at = time();
+            $m->writeById((int)$m['id'], $m->toArray());
             return $m;
         } catch (ValidateException $e) {
             throw new ValidateException($e->getError());
@@ -48,11 +49,10 @@ class DomainListService
 
     public static function delete(int $id): bool
     {
-        $m = new DomainList();
+        $m = new DomainList();        
         $pk = $m->getPk();
         $ok = (bool)$m->where($pk, $id)->delete();
-        $m->setCacheData($m->getCacheKey($id), null);
+        \think\facade\Cache::delete(env('DATABASE.PREFIX', 'blad_') . 'domain_list_' . $id);
         return $ok;
     }
 }
-

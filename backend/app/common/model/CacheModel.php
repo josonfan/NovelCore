@@ -225,4 +225,20 @@ class CacheModel extends Model
             return false;
         }
     }
+
+    /**
+     * 预热主键缓存
+     * @param int $id 主键值
+     * @param array $data 数据
+     * @return bool
+     */
+    public function primeCacheById(int $id, array $data): bool
+    {
+        if (!$this->is_cache) {
+            return true;
+        }
+        $ttl = env('CACHE.TTL', 600);
+        $key = $this->getCacheKey($id);
+        return $this->setCacheData($key, $data, $ttl);
+    }
 }
