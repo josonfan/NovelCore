@@ -56,11 +56,12 @@
         </el-table-column>
         <el-table-column prop="sort_order" label="排序" width="80" />
         <el-table-column prop="created_at" label="创建时间" min-width="160" />
-        <el-table-column label="操作" width="160" fixed="right">
+        <el-table-column label="操作" width="220" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link @click="onEdit(row)">编辑</el-button>
             <el-button type="danger" link @click="onDelete(row)">删除</el-button>
             <el-button link @click="onDetail(row)">详情</el-button>
+            <el-button link type="primary" @click="onBind(row)">绑定权限</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -138,13 +139,24 @@
         <el-descriptions-item label="更新时间">{{ detail?.updated_at }}</el-descriptions-item>
       </el-descriptions>
     </el-dialog>
+
+    <el-dialog v-model="showBind" title="绑定权限" width="560px">
+      <el-checkbox-group v-model="bindPermIds">
+        <el-checkbox v-for="p in permOptions" :key="p.value" :label="p.value">{{ p.label }}</el-checkbox>
+      </el-checkbox-group>
+      <template #footer>
+        <el-button @click="showBind=false">取消</el-button>
+        <el-button type="primary" @click="saveBind">保存</el-button>
+      </template>
+    </el-dialog>
     </div>
   </div>
   </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
-import { fetchMenuList, fetchMenuDetail, createMenu, updateMenu, deleteMenu, fetchMenuOptions } from '../api/menus'
+import { fetchMenuList, fetchMenuDetail, createMenu, updateMenu, deleteMenu, fetchMenuOptions, bindMenuPermissions } from '../api/menus'
+import { fetchPermissionList } from '../api/permissions'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import IconPicker from '../components/IconPicker.vue'
@@ -181,6 +193,10 @@ const parentSelect = ref()
 const showDetail = ref(false)
 const detail = ref<any>(null)
 const options = ref<any[]>([])
+const showBind = ref(false)
+const bindMenuId = ref<number|undefined>(undefined)
+const permOptions = ref<Array<{ label:string; value:number }>>([])
+const bindPermIds = ref<Array<number>>([])
 const mapNodes = (nodes: any[]): any[] => (nodes || []).map((n: any) => ({ id: String(n.id), label: String(n.name || n.label || ''), children: mapNodes(n.children || []) }))
 const treeSelectDataFilter = computed(() => [{ id: '0', label: '顶级菜单', children: mapNodes(options.value || []) }])
 const treeSelectDataForm = computed(() => [{ id: '0', label: '顶级菜单', children: mapNodes(options.value || []) }])
@@ -285,6 +301,25 @@ async function onDetail(row: any) {
   const d = await fetchMenuDetail(row.id)
   detail.value = d
   showDetail.value = true
+}
+
+async function onBind(row: any) {
+  bindMenuId.value = Number(row.id)
+  const list = await fetchPermissionList()
+  permOptions.value = (list || []).map((x:any)=>({ label: `${x.name} (${x.resource}/${x.action}${x.field?('/'+x.field):''})`, value: Number(x.id) }))
+  bindPermIds.value = []
+  showBind.value = true
+}
+
+async function saveBind(){
+  if (!bindMenuId.value) return
+  const res = await bindMenuPermissions(bindMenuId.value, bindPermIds.value)
+  if (res?.code === 200) {
+    ElMessage.success('已绑定')
+    showBind.value = false
+  } else {
+    ElMessage.error(res?.msg || '绑定失败')
+  }
 }
 
 onMounted(load)

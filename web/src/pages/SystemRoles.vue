@@ -20,6 +20,11 @@
           <el-table-column prop="name" label="角色名" min-width="180" />
           <el-table-column prop="description" label="描述" min-width="200" />
           <el-table-column prop="created_at" label="创建时间" min-width="160" />
+          <el-table-column label="操作" width="200">
+            <template #default="{ row }">
+              <el-button link type="primary" @click="onAssign(row)">绑定权限</el-button>
+            </template>
+          </el-table-column>
           <el-table-column label="操作" width="160" fixed="right">
             <template #default="{ row }">
               <el-button type="primary" link @click="onEdit(row)">编辑</el-button>
@@ -51,6 +56,17 @@
           <el-button type="primary" @click="saveForm">保存</el-button>
         </template>
       </el-dialog>
+      <el-dialog v-model="showAssign" title="绑定权限" width="560px">
+        <div class="assign-wrap">
+          <el-checkbox-group v-model="checkedPerms">
+            <el-checkbox v-for="p in permList" :key="p.id" :label="p.id">{{ p.name }} ({{ p.resource }}/{{ p.action }})</el-checkbox>
+          </el-checkbox-group>
+        </div>
+        <template #footer>
+          <el-button @click="showAssign=false">取消</el-button>
+          <el-button type="primary" @click="saveAssign">保存</el-button>
+        </template>
+      </el-dialog>
     </div>
   </div>
   </template>
@@ -59,7 +75,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { fetchRoleList, createRole } from '../api/roles'
+import { fetchRoleList, createRole, assignRolePermissions } from '../api/roles'
+import { fetchPermissionList } from '../api/permissions'
 
 const { t } = useI18n()
 const page = ref(1)
@@ -71,6 +88,10 @@ const kw = ref('')
 const showForm = ref(false)
 const formMode = ref<'add'|'edit'>('add')
 const form = ref<any>({ name: '', description: '' })
+const showAssign = ref(false)
+const currentRoleId = ref<number | null>(null)
+const permList = ref<any[]>([])
+const checkedPerms = ref<Array<number|string>>([])
 
 const filtered = computed(() => {
   if (!kw.value) return rows.value
@@ -103,6 +124,30 @@ function onEdit(row: any) {
   formMode.value = 'edit'
   form.value = { id: row.id, name: row.name, description: row.description }
   showForm.value = true
+}
+
+async function onAssign(row: any) {
+  currentRoleId.value = row.id
+  const list = await fetchPermissionList()
+  permList.value = list || []
+  checkedPerms.value = []
+  showAssign.value = true
+}
+
+async function saveAssign() {
+  if (!currentRoleId.value) return
+  try {
+    const res = await assignRolePermissions(currentRoleId.value, checkedPerms.value)
+    if (res?.code === 200) {
+      ElMessage.success('已绑定')
+      showAssign.value = false
+    } else {
+      ElMessage.error(res?.msg || '绑定失败')
+    }
+  } catch (e: any) {
+    const resp = e?.response?.data
+    ElMessage.error(resp?.message || resp?.msg || '绑定失败')
+  }
 }
 
 async function saveForm() {
@@ -143,5 +188,5 @@ onMounted(load)
 .pager { display: flex; justify-content: flex-end; margin-top: 12px; }
 :deep(.el-table__header .el-table__cell){ background: #f3f4f6; color: var(--nc-text); font-weight: 600; }
 :deep(.el-table__cell){ padding: 10px 12px; }
+.assign-wrap { max-height: 360px; overflow: auto; padding: 8px; }
 </style>
-

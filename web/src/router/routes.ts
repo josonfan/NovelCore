@@ -1,4 +1,4 @@
-export type RouteKey = 'login' | 'home' | 'dashboard' | 'system' | 'system-menu' | 'system-roles'
+export type RouteKey = 'login' | 'home' | 'dashboard' | 'system' | 'system-menu' | 'system-roles' | 'system-permissions' | 'system-sites' | 'system-domain' | 'system-admins'
 
 export const ROUTES: Record<RouteKey, { path: string; name: string; title: string }> = {
   login: { path: '/login', name: 'login', title: '登录' },
@@ -7,6 +7,10 @@ export const ROUTES: Record<RouteKey, { path: string; name: string; title: strin
   system: { path: '/system', name: 'system', title: '系统管理' },
   'system-menu': { path: '/system/menu', name: 'system-menu', title: '菜单管理' },
   'system-roles': { path: '/system/roles', name: 'system-roles', title: '角色管理' },
+  'system-permissions': { path: '/system/permissions', name: 'system-permissions', title: '权限管理' },
+  'system-sites': { path: '/system/sites', name: 'system-sites', title: '站点管理' },
+  'system-domain': { path: '/system/domain', name: 'system-domain', title: '域名管理' },
+  'system-admins': { path: '/system/admins', name: 'system-admins', title: '管理员管理' },
 }
 
 export function pathOf(keyOrPath: string): string {
