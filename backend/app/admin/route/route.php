@@ -97,6 +97,70 @@ Route::group('DomainList', function () {
     Route::rule('delete', 'DomainList/delete', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
 });
 
+Route::group('StorageConfig', function () {
+    Route::rule('index', 'StorageConfig/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'StorageConfig/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detailBySite', 'StorageConfig/detailBySite', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('save', 'StorageConfig/save', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    
+});
+
+Route::group('EmailConfig', function () {
+    Route::rule('index', 'EmailConfig/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'EmailConfig/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detailBySite', 'EmailConfig/detailBySite', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('save', 'EmailConfig/save', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    
+});
+
+Route::group('SearchConfig', function () {
+    Route::rule('index', 'SearchConfig/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'SearchConfig/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detailBySite', 'SearchConfig/detailBySite', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('save', 'SearchConfig/save', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    
+});
+
+Route::group('AiConfig', function () {
+    Route::rule('index', 'AiConfig/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'AiConfig/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detailBySite', 'AiConfig/detailBySite', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('save', 'AiConfig/save', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    
+});
+
+Route::group('RecommendationConfig', function () {
+    Route::rule('index', 'RecommendationConfig/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'RecommendationConfig/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detailBySite', 'RecommendationConfig/detailBySite', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('save', 'RecommendationConfig/save', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    
+});
+
+Route::group('CustomerServiceConfig', function () {
+    Route::rule('index', 'CustomerServiceConfig/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'CustomerServiceConfig/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detailBySite', 'CustomerServiceConfig/detailBySite', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('save', 'CustomerServiceConfig/save', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    
+});
+
+Route::group('CommentReviewConfig', function () {
+    Route::rule('index', 'CommentReviewConfig/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'CommentReviewConfig/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detailBySite', 'CommentReviewConfig/detailBySite', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('save', 'CommentReviewConfig/save', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    
+});
+
+Route::group('TelegramAuditConfig', function () {
+    Route::rule('index', 'TelegramAuditConfig/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'TelegramAuditConfig/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detailBySite', 'TelegramAuditConfig/detailBySite', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('save', 'TelegramAuditConfig/save', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    
+});
+
 /**
  * Categories 接口（分类管理）
  */

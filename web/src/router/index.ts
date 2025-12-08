@@ -3,6 +3,7 @@ import type { RouteRecordRaw } from 'vue-router'
 import Login from '../pages/Login.vue'
 import Dashboard from '../pages/Dashboard.vue'
 import AppLayout from '../layouts/AppLayout.vue'
+import SystemSiteConfig from '../pages/SystemSiteConfig.vue'
 import { ROUTES } from './routes'
 
 const routes: RouteRecordRaw[] = [
@@ -16,6 +17,11 @@ const routes: RouteRecordRaw[] = [
       { path: ROUTES.system.path.slice(1), name: ROUTES.system.name, component: () => import('../pages/System.vue'), meta: { title: ROUTES.system.title } },
       { path: ROUTES['system-menu'].path.slice(1), name: ROUTES['system-menu'].name, component: () => import('../pages/SystemMenu.vue'), meta: { title: ROUTES['system-menu'].title } },
       { path: ROUTES['system-roles'].path.slice(1), name: ROUTES['system-roles'].name, component: () => import('../pages/SystemRoles.vue'), meta: { title: ROUTES['system-roles'].title } },
+      { path: ROUTES['system-permissions'].path.slice(1), name: ROUTES['system-permissions'].name, component: () => import('../pages/SystemPermissions.vue'), meta: { title: ROUTES['system-permissions'].title } },
+      { path: 'system/site/:id/config', name: 'system-site-config', component: SystemSiteConfig, meta: { title: '站点配置' } },
+      { path: ROUTES['system-sites'].path.slice(1), name: ROUTES['system-sites'].name, component: () => import('../pages/SystemSites.vue'), meta: { title: ROUTES['system-sites'].title } },
+      { path: ROUTES['system-domain'].path.slice(1), name: ROUTES['system-domain'].name, component: () => import('../pages/SystemDomainList.vue'), meta: { title: ROUTES['system-domain'].title } },
+      { path: ROUTES['system-admins'].path.slice(1), name: ROUTES['system-admins'].name, component: () => import('../pages/SystemAdmins.vue'), meta: { title: ROUTES['system-admins'].title } },
     ],
   },
 ]
@@ -34,6 +40,12 @@ router.beforeEach((to) => {
     return { path: '/' }
   }
   return true
+})
+
+router.onError((err) => {
+  const s = String(err || '')
+  if (s.includes('Failed to fetch dynamically imported module') || s.includes('ERR_ABORTED')) return
+  console.error(err)
 })
 
 export default router
