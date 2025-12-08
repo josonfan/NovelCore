@@ -7,7 +7,7 @@ class Site extends Validate
 {
     protected $scene = [
         'create' => ['name','code','base_api_url','api_token','is_active'],
-        'update' => ['name','code','base_api_url','primary_domain','remark','is_active'],
+        'update' => ['name','base_api_url','primary_domain','remark','is_active'],
     ];
     protected $rule = [
         'name' => 'require|chsDash|unique:sites',
@@ -30,4 +30,3 @@ class Site extends Validate
         'is_active.in' => '启用状态仅支持 0 或 1',
     ];
 }
-
