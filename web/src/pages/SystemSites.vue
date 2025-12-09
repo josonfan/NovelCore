@@ -68,6 +68,10 @@
         <el-descriptions-item label="更新时间">{{ detail?.updated_at }}</el-descriptions-item>
       </el-descriptions>
     </el-dialog>
+
+    <el-dialog v-model="showConfig" title="站点配置" width="860px">
+      <SystemSiteConfig :siteId="currentSiteId" />
+    </el-dialog>
   </div>
 </template>
 
@@ -75,6 +79,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
+import SystemSiteConfig from './SystemSiteConfig.vue'
 import { fetchSiteList, fetchSiteDetail, createSite, updateSite, toggleSite, deleteSite } from '../api/sites'
 
 const router = useRouter()
@@ -89,6 +94,8 @@ const formMode = ref<'add'|'edit'>('add')
 const form = ref<any>({ name: '', code: '', base_api_url: '', primary_domain: '', api_token: '', is_active: 1, remark: '' })
 const showDetail = ref(false)
 const detail = ref<any>(null)
+const showConfig = ref(false)
+const currentSiteId = ref<number|string>('')
 
 const filtered = computed(() => {
   if (!kw.value) return rows.value
@@ -141,7 +148,8 @@ async function onDetail(row:any){ const d=await fetchSiteDetail(row.id); detail.
 function onConfig(row:any){
   const token = localStorage.getItem('token') || ''
   if (!token) { router.push('/login'); return }
-  router.push({ name: 'system-site-config', params: { id: row.id } })
+  currentSiteId.value = row.id
+  showConfig.value = true
 }
 
 onMounted(load)

@@ -65,4 +65,15 @@ class Novels extends Backend
         $ok = NovelsService::bindTags($novelId, $tagIds);
         return $this->ajaxReturn(200, '绑定成功', ['success' => $ok]);
     }
+    public function audit()
+    {
+        $postField = 'id,audit_status,audit_remark';
+        $data = $this->request->only(explode(',', $postField), 'post', null);
+        $id = (int)($data['id'] ?? 0);
+        $status = (int)($data['audit_status'] ?? 0);
+        $remark = (string)($data['audit_remark'] ?? '');
+        $adminId = (int)($this->request->uid ?? 0);
+        $ok = NovelsService::audit($id, $status, $remark, $adminId);
+        return $this->ajaxReturn(200, '审核已更新', ['id' => $id, 'success' => $ok]);
+    }
 }

@@ -17,6 +17,11 @@ export async function fetchChapterDetail(id: number | string) {
   return res.data?.data as Chapter
 }
 
+export async function fetchChapterContent(id: number | string) {
+  const res = await http.post('Chapters/content', { id })
+  return res.data?.data as { id: number | string; title?: string; content?: string }
+}
+
 export async function createChapter(payload: Partial<Chapter>) {
   const res = await http.post('Chapters/create', payload)
   return res.data

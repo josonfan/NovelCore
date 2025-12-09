@@ -93,7 +93,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../store'
-import { fetchMenuTree } from '../api/menus'
+import { fetchContext } from '../api/auth'
 import * as Icons from '@element-plus/icons-vue'
 import LogoIcon from '../components/LogoIcon.vue'
 import UserDropdown from '../components/UserDropdown.vue'
@@ -165,8 +165,18 @@ onMounted(async () => {
       const ss = localStorage.getItem('nc-primary600') || ''
       if (sp && ss) applyPalette(sp, ss)
     } catch (_) {}
-    const data = await fetchMenuTree()
-    menus.value = data || []
+    const ctx = await fetchContext()
+    auth.setContext(ctx)
+    function norm(list: any[]): any[] {
+      const arr = Array.isArray(list) ? list : []
+      return arr
+        .map((m: any) => ({
+          ...m,
+          children: norm(m?.children || []),
+        }))
+        .filter((m: any) => String(m?.type || 'menu').toLowerCase() === 'menu' && Number(m?.visible ?? 1) !== 0 && Number(m?.is_active ?? 1) !== 0)
+    }
+    menus.value = norm(ctx?.menus || [])
   } finally {
     loading.value = false
   }

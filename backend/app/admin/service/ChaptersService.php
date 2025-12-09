@@ -31,7 +31,24 @@ class ChaptersService
     public static function detail(int $id, string $field = '*')
     {
         $m = new Chapters();
-        return $m->infoById($id, $field);
+        $info = $m->infoById($id, $field);
+        if (empty($info)) {
+            return $info;
+        }
+        $cc = new ChapterContents();
+        $row = $cc->infoById($id, 'content');
+        $info['content'] = $row['content'] ?? null;
+        return $info;
+    }
+
+    public static function content(int $id): ?string
+    {
+        $cc = new ChapterContents();
+        $row = $cc->infoById($id, 'content');
+        if (empty($row) || !isset($row['content'])) {
+            return null;
+        }
+        return (string)$row['content'];
     }
 
     /**

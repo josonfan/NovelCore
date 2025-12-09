@@ -7,7 +7,7 @@ export type Tag = {
   is_active?: number
 }
 
-export async function fetchTagList(params?: { page?: number; limit?: number }) {
+export async function fetchTagList(params?: { page?: number; limit?: number; kw?: string }) {
   const res = await http.get('Tags/index', { params })
   return res.data?.data || { list: [], count: 0 }
 }
@@ -30,4 +30,9 @@ export async function updateTag(id: number | string, payload: Partial<Tag>) {
 export async function deleteTag(id: number | string) {
   const res = await http.post('Tags/delete', { id })
   return res.data
+}
+
+export async function fetchTagOptions(type: string) {
+  const res = await http.post('Tags/options', { type })
+  return res.data?.data as Array<{ type: string; label: string; children: Array<{ id: number | string; name: string }> }>
 }
