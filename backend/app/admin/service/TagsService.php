@@ -36,7 +36,11 @@ class TagsService
     public static function update(int $id, array $data): bool
     {
         try {
-            validate(\app\admin\validate\Tag::class)->scene('update')->check($data);
+            $validator = validate(\app\admin\validate\Tag::class)->scene('update');
+            if (array_key_exists('slug', $data)) {
+                $validator->rule(['slug' => 'require|alphaDash|unique:tags,slug,' . $id . ',id']);
+            }
+            $validator->check($data);
             $m = new Tags();
             return $m->writeById($id, $data);
         } catch (ValidateException $e) {

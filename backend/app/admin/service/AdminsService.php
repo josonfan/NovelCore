@@ -9,7 +9,10 @@ use think\exception\ValidateException;
 
 class AdminsService extends BaseService
 {
-    // 列表
+    /**
+     * 管理员列表（简版）
+     * @return \think\Collection
+     */
     public static function index(){
         $list = Admins::select();
         return $list;
