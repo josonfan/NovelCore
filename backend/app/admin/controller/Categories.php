@@ -27,7 +27,7 @@ class Categories extends Backend
     }
     public function create()
     {
-        $postField = 'name,slug,sort_order,is_active,seo_title,seo_keywords,seo_description';
+        $postField = 'name,sort_order,is_active,seo_title,seo_keywords,seo_description';
         $data = $this->request->only(explode(',', $postField), 'post', null);
         $m = CategoriesService::create($data);
         $out = getArrayByFields($m->toArray(), 'id,name,slug,sort_order,is_active,seo_title,seo_keywords,seo_description,created_at,updated_at');

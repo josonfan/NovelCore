@@ -6,19 +6,18 @@ use think\Validate;
 class Tag extends Validate
 {
     protected $scene = [
-        'create' => ['name','slug','type','is_active'],
-        'update' => ['name','slug','type','is_active'],
+        'create' => ['name','type','is_active'],
+        'update' => ['name','type','is_active'],
     ];
     protected $rule = [
         'name' => 'require|chsDash',
-        'slug' => 'require|alphaDash|unique:tags',
+        'slug' => 'alphaDash|unique:tags',
         'type' => 'require|in:theme,plot,role,r18,status,other',
         'is_active' => 'in:0,1',
     ];
     protected $message = [
         'name.require' => '标签名称不能为空',
         'name.chsDash' => '标签名称只允许中文、字母、数字、下划线及破折号',
-        'slug.require' => '标签标识不能为空',
         'slug.alphaDash' => '标签标识只允许字母数字下划线和破折号',
         'slug.unique' => '标签标识已存在',
         'type.require' => '标签类型不能为空',
@@ -26,4 +25,3 @@ class Tag extends Validate
         'is_active.in' => 'is_active 仅支持 0 或 1',
     ];
 }
-

@@ -12,3 +12,22 @@ export async function fetchTagList(params?: { page?: number; limit?: number }) {
   return res.data?.data || { list: [], count: 0 }
 }
 
+export async function fetchTagDetail(id: number | string) {
+  const res = await http.post('Tags/detail', { id })
+  return res.data?.data as Tag
+}
+
+export async function createTag(payload: Partial<Tag>) {
+  const res = await http.post('Tags/create', payload)
+  return res.data
+}
+
+export async function updateTag(id: number | string, payload: Partial<Tag>) {
+  const res = await http.post('Tags/update', { id, ...payload })
+  return res.data
+}
+
+export async function deleteTag(id: number | string) {
+  const res = await http.post('Tags/delete', { id })
+  return res.data
+}
