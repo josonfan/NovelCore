@@ -134,7 +134,8 @@ class TagsService
                 }
             }
             $m = new Tags();
-            return $m->writeById($id, $data);
+            $ok = $m->writeById($id, $data);
+            return $ok;
         } catch (ValidateException $e) {
             throw new ValidateException($e->getError());
         } catch (\Exception $e) {
@@ -154,7 +155,8 @@ class TagsService
     public static function toggle(int $id, int $isActive): bool
     {
         $m = new Tags();
-        return $m->writeById($id, ['is_active' => $isActive]);
+        $ok = $m->writeById($id, ['is_active' => $isActive]);
+        return $ok;
     }
 
     public static function options(string $type = ''): array

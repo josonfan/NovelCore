@@ -124,7 +124,8 @@ class CategoriesService
         try {
             validate(\app\admin\validate\Category::class)->scene('update')->check($data);
             $m = new Categories();
-            return $m->writeById($id, $data);
+            $ok = $m->writeById($id, $data);
+            return $ok;
         } catch (ValidateException $e) {
             throw new ValidateException($e->getError());
         } catch (\Exception $e) {

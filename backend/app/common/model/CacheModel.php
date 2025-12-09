@@ -190,13 +190,34 @@ class CacheModel extends Model
             }
             if(empty($id)){
                 $res =  (bool)$m->save($data);
+                $id = (int)($m->$pk ?? 0);
+                $op = 'create';
             }else{                
                 unset($data[$pk]);
                 $res = (bool)$m->where($pk,$id)->save($data);
+                $op = 'update';
+            }
+            if ($res) {
+                $name = method_exists($m,'getName') ? (string)$m->getName() : '';
+                $type = self::contentTypeFromTable($name);
+                $enabled = (array)(config('sync.enable_types') ?? []);
+                if ($type && in_array($type, $enabled, true)) {
+                    \app\common\service\SyncService::enqueue($type, (int)$id, $op);
+                }
             }
             return $res;
         } catch (\Throwable $e) {
             return false;
+        }
+    }
+    protected static function contentTypeFromTable(string $name): ?string
+    {
+        switch ($name) {
+            case 'categories': return 'category';
+            case 'tags': return 'tag';
+            case 'novels': return 'novel';
+            case 'chapters': return 'chapter';
+            default: return null;
         }
     }
     /**
