@@ -7,7 +7,7 @@ class Category extends Validate
 {
     protected $scene = [
         'create' => ['name','slug','sort_order','is_active'],
-        'update' => ['name','slug','sort_order','is_active'],
+        'update' => ['name','sort_order','is_active'],
     ];
     protected $rule = [
         'name' => 'require|chsDash',
@@ -25,4 +25,3 @@ class Category extends Validate
         'is_active.in' => 'is_active 仅支持 0 或 1',
     ];
 }
-

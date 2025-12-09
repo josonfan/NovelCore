@@ -115,7 +115,14 @@ const activePrimary = ref('')
 function logout() {}
 
 function resolveIndex(m: any) {
-  return pathOf(m.path || m.route || '/')
+  const p = m.path || m.route || ''
+  if (p) return pathOf(p)
+  const n = String(m.name || '')
+  if (n === '分类管理') return '/content/categories'
+  if (n === '标签管理') return '/content/tags'
+  if (n === '小说管理') return '/content/novels'
+  if (n === '章节管理') return '/content/chapters'
+  return pathOf('/')
 }
 
 function resolveIcon(name?: string) {

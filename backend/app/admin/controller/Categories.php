@@ -35,7 +35,7 @@ class Categories extends Backend
     }
     public function update()
     {
-        $postField = 'id,name,slug,sort_order,is_active,seo_title,seo_keywords,seo_description';
+        $postField = 'id,name,sort_order,is_active,seo_title,seo_keywords,seo_description';
         $data = $this->request->only(explode(',', $postField), 'post', null);
         $id = (int)($data['id'] ?? 0);
         unset($data['id']);
@@ -58,4 +58,3 @@ class Categories extends Backend
         return $this->ajaxReturn(200, '启停成功', ['id' => $id, 'success' => $ok]);
     }
 }
-

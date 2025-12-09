@@ -7,18 +7,38 @@ use think\exception\ValidateException;
 
 class ChaptersService
 {
+    /**
+     * 章节列表
+     * @param array $where 过滤条件
+     * @param string $field 字段列表
+     * @param string $orderby 排序
+     * @param int $limit 每页数量
+     * @param int $page 页码
+     * @return array
+     */
     public static function list(array $where = [], string $field = '*', string $orderby = 'sort_order asc, id asc', int $limit = 10, int $page = 1): array
     {
         $m = new Chapters();
         return $m->getList($where, $field, $orderby, $limit, $page);
     }
 
+    /**
+     * 章节详情
+     * @param int $id 主键ID
+     * @param string $field 字段列表
+     * @return mixed
+     */
     public static function detail(int $id, string $field = '*')
     {
         $m = new Chapters();
         return $m->infoById($id, $field);
     }
 
+    /**
+     * 创建章节（可选正文）
+     * @param array $data 章节数据（含 content 可选）
+     * @return Chapters
+     */
     public static function create(array $data)
     {
         try {
@@ -51,6 +71,12 @@ class ChaptersService
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($d), 4));
     }
 
+    /**
+     * 更新章节（可同时更新正文）
+     * @param int $id 主键ID
+     * @param array $data 更新数据（content 可选）
+     * @return bool
+     */
     public static function update(int $id, array $data): bool
     {
         try {
@@ -74,6 +100,11 @@ class ChaptersService
         }
     }
 
+    /**
+     * 删除章节（含正文）
+     * @param int $id 主键ID
+     * @return bool
+     */
     public static function delete(int $id): bool
     {
         $m = new Chapters();
