@@ -19,3 +19,8 @@ export async function logoutApi() {
   const res = await http.post('Login/logout')
   return res.data
 }
+
+export async function fetchContext() {
+  const res = await http.get('Login/context')
+  return res.data?.data || {}
+}

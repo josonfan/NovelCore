@@ -61,4 +61,11 @@ class Tags extends Backend
         $ok = TagsService::toggle($id, $isActive);
         return $this->ajaxReturn(200, '启停成功', ['id' => $id, 'success' => $ok]);
     }
+
+    public function options()
+    {
+        $type = (string)($this->request->param('type', '', 'strval'));
+        $res = TagsService::options($type);
+        return $this->ajaxReturn(200, '成功', $res);
+    }
 }

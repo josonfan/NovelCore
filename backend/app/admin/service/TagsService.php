@@ -156,4 +156,50 @@ class TagsService
         $m = new Tags();
         return $m->writeById($id, ['is_active' => $isActive]);
     }
+
+    public static function options(string $type = ''): array
+    {
+        $where = ['is_active' => 1];
+        if ($type !== '') {
+            $where['type'] = $type;
+        }
+        $m = new Tags();
+        $list = $m->getList(formatWhere($where), 'id,name,type', 'id desc', 2000, 1);
+        $map = self::typeMap();
+        $groups = [];
+        foreach ($map as $t => $label) {
+            $groups[$t] = [
+                'type' => $t,
+                'label' => $label,
+                'children' => [],
+            ];
+        }
+        foreach (($list['list'] ?? []) as $row) {
+            $t = (string)$row['type'];
+            if (!isset($groups[$t])) continue;
+            $groups[$t]['children'][] = [
+                'id' => (int)$row['id'],
+                'name' => (string)$row['name'],
+            ];
+        }
+        $out = [];
+        foreach (['theme','plot','role','r18','status','other'] as $t) {
+            if (isset($groups[$t]) && count($groups[$t]['children']) > 0) {
+                $out[] = $groups[$t];
+            }
+        }
+        return $out;
+    }
+
+    protected static function typeMap(): array
+    {
+        return [
+            'theme' => '题材',
+            'plot' => '情节',
+            'role' => '角色',
+            'r18' => '尺度',
+            'status' => '状态',
+            'other' => '其它',
+        ];
+    }
 }

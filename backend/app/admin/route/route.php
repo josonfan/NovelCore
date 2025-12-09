@@ -183,6 +183,7 @@ Route::group('Tags', function () {
     Route::rule('update', 'Tags/update', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('delete', 'Tags/delete', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('toggle', 'Tags/toggle', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('options', 'Tags/options', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
 });
 
 /**
@@ -195,6 +196,7 @@ Route::group('Novels', function () {
     Route::rule('update', 'Novels/update', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('delete', 'Novels/delete', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('bindTags', 'Novels/bindTags', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('audit', 'Novels/audit', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
 });
 
 /**
@@ -203,6 +205,7 @@ Route::group('Novels', function () {
 Route::group('Chapters', function () {
     Route::rule('index', 'Chapters/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('detail', 'Chapters/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('content', 'Chapters/content', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('create', 'Chapters/create', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('update', 'Chapters/update', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('delete', 'Chapters/delete', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');

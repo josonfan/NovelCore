@@ -101,6 +101,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
+const props = defineProps<{ siteId?: number | string }>()
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { fetchSiteDetail } from '../api/sites'
@@ -108,7 +109,7 @@ import { saveStorageConfig, fetchStorageConfigBySite } from '../api/storageConfi
 import { fetchEmailConfigBySite, fetchSearchConfigBySite, fetchAiConfigBySite, fetchRecommendationConfigBySite, fetchCustomerServiceConfigBySite, fetchCommentReviewConfigBySite, fetchTelegramAuditConfigBySite, saveSearchConfig, saveAiConfig, saveRecommendationConfig, saveCustomerServiceConfig, saveCommentReviewConfig, saveTelegramAuditConfig, saveEmailConfig } from '../api/siteConfigs'
 
 const route = useRoute()
-const siteId = Number(route.params.id)
+const siteId = Number((props.siteId ?? route.params.id) as any)
 const active = ref('basic')
 const site = ref<any>(null)
 const saving = ref(false)

@@ -8,7 +8,7 @@ export type Category = {
   is_active?: number
 }
 
-export async function fetchCategoryList(params?: { page?: number; limit?: number }) {
+export async function fetchCategoryList(params?: { page?: number; limit?: number; kw?: string }) {
   const res = await http.get('Categories/index', { params })
   return res.data?.data || { list: [], count: 0 }
 }

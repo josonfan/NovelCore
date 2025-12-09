@@ -4,6 +4,7 @@ namespace app\admin\service;
 use app\admin\model\Novels;
 use app\admin\model\NovelTags;
 use app\admin\model\Tags;
+use think\facade\Db;
 use think\exception\ValidateException;
 
 class NovelsService
@@ -20,7 +21,43 @@ class NovelsService
     public static function list(array $where = [], string $field = '*', string $orderby = 'id desc', int $limit = 10, int $page = 1): array
     {
         $m = new Novels();
-        return $m->getList($where, $field, $orderby, $limit, $page);
+        $res = $m->getList($where, $field, $orderby, $limit, $page);
+        $list = (array)($res['list'] ?? []);
+        if (count($list) > 0) {
+            $ids = [];
+            foreach ($list as $row) { $ids[] = (int)$row['id']; }
+            $links = (new NovelTags())->whereIn('novel_id', $ids)->field('novel_id,tag_id')->select()->toArray();
+            $tagIds = [];
+            foreach ($links as $ln) { $tagIds[] = (int)$ln['tag_id']; }
+            $tagIds = array_values(array_unique($tagIds));
+            $tagMap = [];
+            if (count($tagIds) > 0) {
+                $tm = new Tags();
+                foreach ($tagIds as $tid) {
+                    $info = $tm->infoById((int)$tid, 'id,name,type');
+                    if (!empty($info)) {
+                        $tagMap[(int)$info['id']] = [
+                            'id' => (int)$info['id'],
+                            'name' => (string)$info['name'],
+                            'type' => (string)$info['type'],
+                        ];
+                    }
+                }
+            }
+            $group = [];
+            foreach ($links as $ln) {
+                $nid = (int)$ln['novel_id'];
+                $tid = (int)$ln['tag_id'];
+                if (!isset($group[$nid])) $group[$nid] = [];
+                if (isset($tagMap[$tid])) { $group[$nid][] = $tagMap[$tid]; }
+            }
+            foreach ($list as $i => $row) {
+                $nid = (int)$row['id'];
+                $list[$i]['tags'] = $group[$nid] ?? [];
+            }
+            $res['list'] = $list;
+        }
+        return $res;
     }
 
     /**
@@ -86,6 +123,36 @@ class NovelsService
             validate(\app\admin\validate\Novel::class)->scene('update')->check($data);
             $m = new Novels();
             return $m->writeById($id, $data);
+        } catch (ValidateException $e) {
+            throw new ValidateException($e->getError());
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
+        }
+    }
+
+    public static function audit(int $id, int $status, string $remark, int $adminId): bool
+    {
+        try {
+            validate(\app\admin\validate\NovelAudit::class)->scene('audit')->check(['id' => $id, 'audit_status' => $status, 'audit_remark' => $remark]);
+            $m = new Novels();
+            $ok = $m->writeById($id, [
+                'audit_status' => $status,
+                'audit_remark' => $remark,
+                'audit_admin_id' => $adminId,
+                'audit_at' => date('Y-m-d H:i:s'),
+            ]);
+            if ($ok) {
+                try {
+                    $log = new \app\common\model\NovelAuditLog([
+                        'novel_id' => $id,
+                        'admin_id' => $adminId,
+                        'status' => $status,
+                        'remark' => $remark,
+                    ]);
+                    $log->save();
+                } catch (\Throwable $e) {}
+            }
+            return $ok;
         } catch (ValidateException $e) {
             throw new ValidateException($e->getError());
         } catch (\Exception $e) {

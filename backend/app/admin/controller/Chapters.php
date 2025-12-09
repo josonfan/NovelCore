@@ -27,9 +27,18 @@ class Chapters extends Backend
         }
         return $this->ajaxReturn(200, '成功', $info);
     }
+    public function content()
+    {
+        $id = (int)($this->request->param('id') ?? 0);
+        $content = ChaptersService::content($id);
+        if ($content === null) {
+            return $this->ajaxReturn(404, '章节正文不存在');
+        }
+        return $this->ajaxReturn(200, '成功', ['id' => $id, 'content' => $content]);
+    }
     public function create()
     {
-        $postField = 'chapter_uuid,novel_id,title,content_short,is_free,is_vip,price,word_count,sort_order,audit_status,audit_remark,audit_admin_id,audit_at,content';
+        $postField = 'chapter_uuid,novel_id,title,content_short,is_free,is_vip,price,word_count,sort_order,content';
         $data = $this->request->only(explode(',', $postField), 'post', null);
         $m = ChaptersService::create($data);
         $out = getArrayByFields($m->toArray(), 'id,chapter_uuid,novel_id,title,content_short,is_free,is_vip,price,word_count,sort_order,audit_status,audit_remark,audit_admin_id,audit_at,created_at,updated_at');
@@ -51,4 +60,3 @@ class Chapters extends Backend
         return $this->ajaxReturn(200, '删除成功', ['id' => $id, 'success' => $ok]);
     }
 }
-

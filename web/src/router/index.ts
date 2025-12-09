@@ -25,7 +25,8 @@ const routes: RouteRecordRaw[] = [
       { path: 'content/categories', name: 'content-categories', component: () => import('../pages/ContentCategories.vue'), meta: { title: '分类管理' } },
       { path: 'content/tags', name: 'content-tags', component: () => import('../pages/ContentTags.vue'), meta: { title: '标签管理' } },
       { path: 'content/novels', name: 'content-novels', component: () => import('../pages/ContentNovels.vue'), meta: { title: '小说管理' } },
-      { path: 'content/chapters', name: 'content-chapters', component: () => import('../pages/ContentChapters.vue'), meta: { title: '章节管理' } },
+      { path: 'content/chapters', name: 'content-chapters', component: () => import('../pages/ContentChapters.vue'), meta: { title: '章节管理' }, beforeEnter: () => ({ name: 'content-novels' }) },
+      { path: 'content/novels/:id/chapters', name: 'content-novel-chapters', component: () => import('../pages/ContentChapters.vue'), meta: { title: '章节管理' } },
     ],
   },
 ]
