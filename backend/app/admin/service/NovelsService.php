@@ -43,6 +43,11 @@ class NovelsService
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($d), 4));
     }
 
+    protected static function slug(): string
+    {
+        return 'novel-' . bin2hex(random_bytes(8));
+    }
+
     /**
      * 创建小说
      * @param array $data 小说数据
@@ -54,6 +59,9 @@ class NovelsService
             validate(\app\admin\validate\Novel::class)->scene('create')->check($data);
             if (empty($data['novel_uuid'])) {
                 $data['novel_uuid'] = self::uuid();
+            }
+            if (empty($data['slug'])) {
+                $data['slug'] = self::slug();
             }
             $m = new Novels($data);
             $m->created_at = time();

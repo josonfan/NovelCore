@@ -31,7 +31,7 @@ class Tags extends Backend
     }
     public function create()
     {
-        $postField = 'name,slug,type,description,is_active,seo_title,seo_keywords,seo_description';
+        $postField = 'name,type,description,is_active,seo_title,seo_keywords,seo_description';
         $data = $this->request->only(explode(',', $postField), 'post', null);
         $m = TagsService::create($data);
         $out = getArrayByFields($m->toArray(), 'id,name,slug,type,description,is_active,seo_title,seo_keywords,seo_description,created_at,updated_at');
@@ -39,7 +39,7 @@ class Tags extends Backend
     }
     public function update()
     {
-        $postField = 'id,name,slug,type,description,is_active,seo_title,seo_keywords,seo_description';
+        $postField = 'id,name,type,description,is_active,seo_title,seo_keywords,seo_description';
         $data = $this->request->only(explode(',', $postField), 'post', null);
         $id = (int)($data['id'] ?? 0);
         unset($data['id']);
@@ -62,4 +62,3 @@ class Tags extends Backend
         return $this->ajaxReturn(200, '启停成功', ['id' => $id, 'success' => $ok]);
     }
 }
-

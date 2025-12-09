@@ -35,7 +35,7 @@ class Novels extends Backend
     }
     public function create()
     {
-        $postField = 'novel_uuid,title,slug,author_id,author_name,category_id,cover,intro,status,is_r18,is_vip,seo_title,seo_keywords,seo_description';
+        $postField = 'novel_uuid,title,author_id,author_name,category_id,cover,intro,status,is_r18,is_vip,seo_title,seo_keywords,seo_description';
         $data = $this->request->only(explode(',', $postField), 'post', null);
         $m = NovelsService::create($data);
         $out = getArrayByFields($m->toArray(), 'id,novel_uuid,title,slug,author_id,author_name,category_id,cover,intro,status,is_r18,is_vip,seo_title,seo_keywords,seo_description,created_at,updated_at');
@@ -66,4 +66,3 @@ class Novels extends Backend
         return $this->ajaxReturn(200, '绑定成功', ['success' => $ok]);
     }
 }
-
