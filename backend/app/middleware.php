@@ -7,4 +7,6 @@ return [
     // \think\middleware\LoadLangPack::class,
     // Session初始化
     // \think\middleware\SessionInit::class
+    // 响应时间
+    \app\common\middleware\ResponseTime::class,
 ];

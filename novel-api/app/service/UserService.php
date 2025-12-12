@@ -1,0 +1,79 @@
+<?php
+declare(strict_types=1);
+
+namespace app\service;
+
+use app\model\UserLoginLog;
+use app\model\User as UserModel;
+use think\exception\ValidateException;
+
+class UserService
+{
+    public static function writeLoginLog(int $userId, ?string $ip, string $deviceId = ''): void
+    {
+        try {
+            (new UserLoginLog())->writeById(0, [
+                'user_id' => $userId,
+                'ip' => $ip,
+                'device_id' => $deviceId,
+                'login_time' => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Throwable $e) {
+        }
+    }
+
+    public static function register(string $username, string $password, string $email = ''): array
+    {
+        if ($username === '' || strlen($username) < 4) {
+            throw new ValidateException('用户名长度至少 4 位');
+        }
+        if ($password === '' || strlen($password) < 6) {
+            throw new ValidateException('密码长度至少 6 位');
+        }
+        if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new ValidateException('邮箱格式不正确');
+        }
+        $exists = UserModel::where('username', $username)->value('id');
+        if ($exists) {
+            throw new ValidateException('用户名已存在');
+        }
+        $userData = [
+            'username'   => $username,
+            'nickname'   => $username,
+            'avatar'     => '',
+            'password'   => password_hash($password, PASSWORD_BCRYPT),
+            'status'     => 1,
+            'vip_expire' => 0,
+        ];
+        if ($email !== '') {
+            $userData['email'] = $email;
+        }
+        $user = new UserModel();
+        $user->writeById(0, $userData);
+        return ['uid' => (int)$user->id];
+    }
+
+    public static function authenticate(string $username, string $password): array
+    {
+        if ($username === '' || $password === '') {
+            throw new ValidateException('用户名或密码不能为空');
+        }
+        $userId = UserModel::where('username', $username)->value('id');
+        $userData = $userId ? (new UserModel())->infoById((int)$userId, 'id,username,password,status,vip_expire') : [];
+        if (!$userId || !password_verify($password, (string)($userData['password'] ?? ''))) {
+            throw new ValidateException('用户名或密码错误');
+        }
+        if ((int)($userData['status'] ?? 0) !== 1) {
+            throw new ValidateException('账号已被禁用');
+        }
+        return $userData;
+    }
+
+    public static function ensureUserExists(int $userId): void
+    {
+        $exists = UserModel::where('id', $userId)->value('id');
+        if (!$exists) {
+            throw new ValidateException('用户不存在');
+        }
+    }
+}

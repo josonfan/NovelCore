@@ -189,7 +189,7 @@ onMounted(async () => {
   grid-template-columns: 200px 1fr;
   height: 100vh;
 }
-.layout :deep(.el-menu){ border-right: none; }
+.layout .el-menu{ border-right: none; }
 .layout.collapsed { grid-template-columns: 64px 1fr; }
 .sidebar {
   background: #ffffff;

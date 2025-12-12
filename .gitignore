@@ -13,3 +13,4 @@ Thumbs.db
 .travis.yml
 /.trae
 *_pid
+.trae

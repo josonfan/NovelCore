@@ -7,10 +7,10 @@ class Site extends Validate
 {
     protected $scene = [
         'create' => ['name','code','base_api_url','api_token','is_active'],
-        'update' => ['name','base_api_url','primary_domain','remark','is_active'],
+        'update' => ['name','base_api_url','remark','is_active'],
     ];
     protected $rule = [
-        'name' => 'require|chsDash|unique:sites',
+        'name' => 'require|chsDash',
         'code' => 'require|alphaDash|unique:sites',
         'base_api_url' => 'require',
         'api_token' => 'require',

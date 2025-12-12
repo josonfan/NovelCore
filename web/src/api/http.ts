@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { AxiosHeaders } from 'axios'
 import { useAuthStore } from '../store'
 import router from '../router'
 import { ElMessage } from 'element-plus'
@@ -9,7 +9,10 @@ http.interceptors.request.use((config) => {
   const auth = useAuthStore()
   if (!auth.token) auth.load()
   if (auth.token) {
-    config.headers = { ...(config.headers || {}), Authorization: `Bearer ${auth.token}`, token: auth.token }
+    const headers = new AxiosHeaders(config.headers)
+    headers.set('Authorization', `Bearer ${auth.token}`)
+    headers.set('token', auth.token)
+    config.headers = headers
   }
   return config
 })

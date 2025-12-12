@@ -64,9 +64,9 @@ if (!function_exists('getAsyncQueueKey')) {
      * @param $uuid
      * @return string
      */
-    function getAsyncQueueKey($uuid): string
+    function getAsyncQueueKey($uuid, $type = 'async_exec_method_custom_queue'): string
     {
-        $queues = config('async.async_exec_method_custom_queue');
+        $queues = config('async.'.$type);
         $queue = array_keys($queues);        
         $queueIndex = hexdec(substr($uuid, 0, 8)) % count($queue);
         return $queue[$queueIndex];
