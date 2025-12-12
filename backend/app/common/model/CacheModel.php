@@ -200,10 +200,9 @@ class CacheModel extends Model
             }
             if ($res) {
                 $name = method_exists($m,'getName') ? (string)$m->getName() : '';
-                $type = self::contentTypeFromTable($name);
-                $enabled = (array)(config('sync.enable_types') ?? []);
-                if ($type && in_array($type, $enabled, true)) {
-                    \app\common\service\SyncService::enqueue($type, (int)$id, $op);
+                $enabledTables = (array)(config('sync.enable_types') ?? []);
+                if ($name && in_array($name, $enabledTables, true)) {
+                    \app\common\service\SyncService::enqueue($name, (int)$id, $op);
                 }
             }
             return $res;
@@ -211,16 +210,7 @@ class CacheModel extends Model
             return false;
         }
     }
-    protected static function contentTypeFromTable(string $name): ?string
-    {
-        switch ($name) {
-            case 'categories': return 'category';
-            case 'tags': return 'tag';
-            case 'novels': return 'novel';
-            case 'chapters': return 'chapter';
-            default: return null;
-        }
-    }
+    // contentTypeFromTable removed: now using table name directly as content type
     /**
      * 异步持久化缓存数据
      * @param string $modelClass 模型类名
