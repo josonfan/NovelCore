@@ -117,9 +117,10 @@ class CacheModel extends Model
      * 异步写入缓存数据
      * @param int $id 主键值
      * @param array $data 缓存数据
+     * @param string $type 缓存类型
      * @return bool
      */
-    public function writeById(int $id, array $data): bool
+    public function writeById(int $id, array $data, string $type = 'async_exec_method_custom_queue'): bool
     {
         if (!$this->is_cache) {            
             $ok = self::persistById(static::class, $id, $data);
@@ -139,7 +140,7 @@ class CacheModel extends Model
             $updKey = $this->getCacheKey($id, 'upd');
         }
         $ok = $this->setCacheData($updKey, $info, 0);
-        Async::delayUseCustomQueue(0, \app\common\model\CacheModel::class, 'persistByIdRef', getAsyncQueueKey(md5((string)$id)), static::class, $id, $updKey);
+        Async::delayUseCustomQueue(0, \app\common\model\CacheModel::class, 'persistByIdRef', getAsyncQueueKey(md5((string)$id), $type), static::class, $id, $updKey);
         return $ok;
     }
     /**

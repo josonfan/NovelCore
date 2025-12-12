@@ -5,6 +5,7 @@ export type Chapter = {
   novel_id?: number | string
   title: string
   index?: number
+  content?: string
 }
 
 export async function fetchChapterList(params?: { page?: number; limit?: number; novel_id?: number | string }) {

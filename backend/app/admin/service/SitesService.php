@@ -41,11 +41,22 @@ class SitesService
     public static function create(array $data)
     {
         try {
-            validate(\app\admin\validate\Site::class)->scene('create')->check($data);
-            $m = new Sites($data);
-            $m->created_at = time();
-            $m->writeById((int)$m['id'], $m->toArray());
-            return $m;
+            $exists = (new Sites())->where('base_api_url', $data['base_api_url'] ?? '')->find();
+            if ($exists) {
+                $id = (int)$exists['id'];
+                unset($data['code']);
+                validate(\app\admin\validate\Site::class)->scene('update')->check($data);
+                $m = new Sites();
+                $m->writeById($id, $data);
+                $info = $m->infoById($id, 'id,name,code,base_api_url,primary_domain,is_active,remark,created_at,updated_at');
+                return new Sites($info ?: ['id' => $id]);
+            } else {
+                validate(\app\admin\validate\Site::class)->scene('create')->check($data);
+                $m = new Sites($data);
+                $m->created_at = time();
+                $m->writeById((int)$m['id'], $m->toArray());
+                return $m;
+            }
         } catch (ValidateException $e) {
             throw new ValidateException($e->getError());
         } catch (\Exception $e) {

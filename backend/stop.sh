@@ -17,5 +17,8 @@ do
     stop_process "blad_async${i}_pid"
 done
 
-
-
+# 停止同步异步任务
+for i in $(seq 0 9);
+do
+    stop_process "sync_async${i}_pid"
+done

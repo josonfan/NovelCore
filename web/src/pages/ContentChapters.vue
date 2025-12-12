@@ -254,6 +254,14 @@ function resolveBtnType(btn: any){
   return 'default'
 }
 
+function onAction(btn: any){
+  const code = String(btn?.code || '').toLowerCase()
+  const name = String(btn?.name || '').toLowerCase()
+  const map: Record<string, Function> = { add: onAdd, create: onAdd, new: onAdd, refresh: reload }
+  const fn = map[code] || map[name] || null
+  if (fn) fn()
+}
+
 function onActionRow(btn: any, row: any){
   const code = String(btn?.code || '').toLowerCase()
   const name = String(btn?.name || '').toLowerCase()
