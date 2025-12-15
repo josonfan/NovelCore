@@ -1,12 +1,6 @@
 <?php
 return [
     'enable_types' => [
-        'categories',
-        'tags',
-        'novels',
-        'novel_tags',
-        'chapters',
-        'chapter_contents',
         'domain_list',
         'comment_config',
         'comment_review_config',
@@ -14,7 +8,13 @@ return [
         'search_config',
         'email_config',
         'storage_config',
-        'telegram_audit_config'
+        'telegram_audit_config',
+        'categories',
+        'tags',
+        'novels',
+        'novel_tags',
+        'chapters',
+        'chapter_contents', 
     ],
     'push_path' => '/Sync/receive',
     'timeout' => 5,

@@ -19,6 +19,10 @@ class SyncReceiveService
             if ($type === '' || $op === '' || empty($payload)) {
                 return false;
             }
+            if (str_ends_with($type, '_config')) {
+                $config_type = $type;
+                $type = 'system_config';
+            }
             $modelClass = self::resolveModelClass($type);
             if ($modelClass === null) {
                 return false;
@@ -27,6 +31,14 @@ class SyncReceiveService
             $pk = $model->getPk();
             if (isset($payload[$pk]) && $id === null) {
                 $id = $payload[$pk];
+            }
+            $payload = self::formatPayload($type, $payload);
+            if ($type === 'system_config') {
+                $id = $config_type;
+                $payload=[
+                    'config_key' => $id,
+                    'config_value' => json_encode($payload,JSON_UNESCAPED_UNICODE),
+                ];
             }
             $ok = false;            
             switch ($op) {
@@ -55,7 +67,37 @@ class SyncReceiveService
             return false;
         }
     }
-
+    private static function formatPayload(string $type, array $payload,$config_type=''): array
+    {
+        $unset = [];
+        switch ($type) {
+            case 'categories':
+                break;
+            case 'tags':
+                break;
+            case 'novels':
+                $unset = ['author_name', 'audit_status','audit_remark','audit_admin_id','audit_at'];    
+                if(empty($payload['author_id'])){
+                    $payload['author_id'] = 0;
+                }            
+                break;
+            case 'chapters':
+                $unset = ['audit_status','audit_remark','audit_admin_id','audit_at','updated_at','content'];    
+                break;
+            case 'domain_list':   
+                $unset = ['site_id','updated_at'];
+                break;
+            case 'system_config':
+                $unset = ['site_id','updated_at'];
+                break;
+            default:
+                break;
+        }
+        foreach ($unset as $key) {
+            unset($payload[$key]);
+        }        
+        return $payload;
+    }
     private static function resolveModelClass(string $type): ?string
     {
         return match ($type) {
@@ -63,7 +105,11 @@ class SyncReceiveService
             'tags'       => \app\model\Tag::class,
             'novels'     => \app\model\Novel::class,
             'chapters'   => \app\model\Chapter::class,
+            'chapter_contents' => \app\model\ChapterContent::class,
             'domains'    => \app\model\Domain::class,
+            'novel_tags' => \app\model\NovelTag::class,
+            'domain_list' => \app\model\Domain::class,
+            'system_config' => \app\model\SystemConfig::class,
             default      => null,
         };
     }
