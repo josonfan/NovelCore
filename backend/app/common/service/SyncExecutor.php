@@ -14,7 +14,12 @@ class SyncExecutor
     public static function run(int $limit = 20): int
     {
         $q = new SyncQueue();
-        $list = $q->where('status', 'pending')->order('id asc')->limit($limit)->select()->toArray();
+        $list = $q->where('status', 'pending')
+        // ->where('content_type', 'chapter_contents')
+        ->order('id asc')
+        ->limit($limit)
+        ->select()
+        ->toArray();
         $count = 0;
         foreach ($list as $row) {
             $ok = self::process($row);

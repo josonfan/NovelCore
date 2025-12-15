@@ -192,15 +192,18 @@ class CacheModel extends Model
                 $res =  (bool)$m->save($data);
                 $id = (int)($m->$pk ?? 0);
                 $op = 'create';
-            }else{                
-                
-                $old = $m->where($pk,$id)->value($pk);
-                if(empty($old)){
-                    $res = (bool)$m->insert($data);
-                }else{
-                    unset($data[$pk]);
-                    $res = (bool)$m->where($pk,$id)->save($data);
-                }
+            }else{
+                try{
+                    $old = $m->where($pk,$id)->value($pk);
+                    if(empty($old)){
+                        $res = (bool)$m->insert($data);
+                    }else{
+                        unset($data[$pk]);
+                        $res = (bool)$m->where($pk,$id)->save($data);
+                    }
+                }catch(\Throwable $e){
+                    dd($e->getMessage(),$id,$data);
+                }                
                 
                 $op = 'update';
             }

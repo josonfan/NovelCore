@@ -7,7 +7,7 @@ class Novel extends Validate
 {
     protected $scene = [
         'create' => ['title','category_id','status','is_r18','is_vip'],
-        'update' => ['title','category_id','status','is_r18','is_vip'],
+        'update' => ['title','status','is_r18','is_vip'],
     ];
     protected $rule = [
         'title' => 'require',
