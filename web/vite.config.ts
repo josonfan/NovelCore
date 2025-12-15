@@ -6,6 +6,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [vue()],
     build: {
+      sourcemap: mode === 'development',
       chunkSizeWarningLimit: 1500,
       rollupOptions: {
         output: {

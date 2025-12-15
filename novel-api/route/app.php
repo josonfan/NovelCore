@@ -34,6 +34,7 @@ Route::group('api', function () {
     Route::post('novels/:novelId/progress', 'api.Reading/saveProgress')->middleware(\app\middleware\Auth::class);
     Route::rule('domains', 'api.Domain/index', 'GET|POST');
     Route::get('user/summary', 'api.UserSummary/summary')->middleware(\app\middleware\Auth::class);
+    Route::post('sync/receive', 'api.Sync/receive')->middleware(\app\middleware\AdminPushAuth::class);
 
     // 需要登录的接口
     Route::group(function () {

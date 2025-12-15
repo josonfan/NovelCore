@@ -10,6 +10,10 @@
 // +----------------------------------------------------------------------
 use think\facade\Route;
 
+Route::options('*', function () {
+    return '';
+});
+
 Route::get('think', function () {
     return 'hello,ThinkPHP8!';
 });

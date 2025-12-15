@@ -6,6 +6,7 @@ return [
         'novels',
         'novel_tags',
         'chapters',
+        'chapter_contents',
         'domain_list',
         'comment_config',
         'comment_review_config',
@@ -15,7 +16,7 @@ return [
         'storage_config',
         'telegram_audit_config'
     ],
-    'push_path' => '/api/Sync/receive',
+    'push_path' => '/Sync/receive',
     'timeout' => 5,
     'sync_data' => true,
 ];

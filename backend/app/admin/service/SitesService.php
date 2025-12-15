@@ -108,4 +108,46 @@ class SitesService
         $m = new Sites();
         return $m->writeById($id, ['is_active' => $isActive]);
     }
+
+    /**
+     * 创建站点初始化记录
+     * @param int $siteId 站点ID
+     * @return int 创建数量
+     */
+    public static function initRecords(int $siteId): int
+    {
+        $site = (new Sites())->infoById($siteId, 'id');
+        if (empty($site)) {
+            throw new \Exception('站点不存在');
+        }
+        $enabled = (array)(config('sync.enable_types') ?? []);
+        $normal = [];
+        foreach ($enabled as $k => $v) {
+            if (is_int($k)) {
+                $normal[] = (string)$v;
+            }
+        }
+        $types = $normal;
+        if (!empty($enabled['config'])) {
+            $types[] = 'config';
+        }
+        if (empty($types)) {
+            return 0;
+        }
+        $created = 0;
+        foreach ($types as $t) {
+            $exists = (new \app\common\model\SiteInitRecord())->where('site_id', $siteId)->where('type', $t)->find();
+            if ($exists) {
+                continue;
+            }
+            (new \app\common\model\SiteInitRecord())->writeById(0, [
+                'site_id' => $siteId,
+                'status' => 'queued',
+                'type' => $t,
+                'last_pk' => 0,
+            ]);
+            $created++;
+        }
+        return $created;
+    }
 }

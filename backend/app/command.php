@@ -1,5 +1,5 @@
 <?php
 return [
-    'sync:push' => \app\command\SyncPush::class,
-    'sync:init' => \app\command\SyncInit::class,
+    \app\command\SyncPush::class,
+    \app\command\SyncInit::class,
 ];
