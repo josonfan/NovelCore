@@ -5,5 +5,7 @@
 return [
     // 指令定义
     'commands' => [
+        'sync:push' => 'app\command\SyncPush',
+        'sync:init' => 'app\command\SyncInit',
     ],
 ];

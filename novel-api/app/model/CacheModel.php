@@ -193,8 +193,15 @@ class CacheModel extends Model
                 $id = (int)($m->$pk ?? 0);
                 $op = 'create';
             }else{                
-                unset($data[$pk]);
-                $res = (bool)$m->where($pk,$id)->save($data);
+                
+                $old = $m->where($pk,$id)->value($pk);
+                if(empty($old)){
+                    $res = (bool)$m->insert($data);
+                }else{
+                    unset($data[$pk]);
+                    $res = (bool)$m->where($pk,$id)->save($data);
+                }
+                
                 $op = 'update';
             }
             if ($res) {

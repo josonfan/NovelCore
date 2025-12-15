@@ -9,4 +9,5 @@ return [
     // \think\middleware\SessionInit::class
     // 响应时间
     \app\common\middleware\ResponseTime::class,
+    \think\middleware\AllowCrossDomain::class,
 ];

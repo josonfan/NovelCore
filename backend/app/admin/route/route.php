@@ -84,6 +84,8 @@ Route::group('Sites', function () {
     Route::rule('update', 'Sites/update', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('delete', 'Sites/delete', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('toggle', 'Sites/toggle', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('init', 'Sites/init', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    
 });
 
 /**

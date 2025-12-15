@@ -1,44 +1,28 @@
 <?php
 namespace app\command;
 
-use app\common\model\Sites;
-use app\common\model\SiteInitRecord;
+use app\common\service\SyncExecutor;
 use think\console\Command;
 use think\console\Input;
-use think\console\input\Argument;
 use think\console\Output;
 
 class SyncInit extends Command
 {
+    protected $name = 'sync:init';
+    protected $description = '初始化站点同步任务';
     protected function configure()
     {
-        $this->setName('sync:init')->setDescription('Initialize sync tasks for a site')
-            ->addArgument('site_id', Argument::REQUIRED, 'Target site id');
+        $this->setName('sync:init')->setDescription('初始化站点同步任务');
     }
 
     protected function execute(Input $input, Output $output)
     {
-        $siteId = (int)$input->getArgument('site_id');
-        $site = (new Sites())->cacheInfo($siteId);
-        if (empty($site)) {
-            $output->writeln('site not found');
-            return false;
+        $n = SyncExecutor::runInit(500);
+        if ($n > 0) {
+            $output->writeln('已提交初始化任务：' . $n . ' 条');
+        } else {
+            $output->writeln('暂无可提交的初始化记录');
         }
-        $types = (array)(config('sync.enable_types') ?? []);
-        if (empty($types)) {
-            $output->writeln('no enabled types in config(sync.enable_types), exit');
-            return true;
-        }
-        foreach ($types as $t) {
-            $rec = new SiteInitRecord([
-                'site_id' => $siteId,
-                'status' => 'queued',
-                'type' => $t,
-                'last_pk' => 0,
-            ]);
-            $rec->save();
-        }
-        $output->writeln('queued init records for site ' . $siteId);
         return true;
     }
 }

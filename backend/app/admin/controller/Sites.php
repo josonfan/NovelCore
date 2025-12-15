@@ -2,6 +2,7 @@
 namespace app\admin\controller;
 
 use app\admin\service\SitesService;
+use think\exception\ValidateException;
 
 /**
  * 站点管理控制器
@@ -91,5 +92,22 @@ class Sites extends Backend
         $isActive = (int)($data['is_active'] ?? 1);
         $ok = SitesService::toggle($id, $isActive);
         return $this->ajaxReturn(200, '启停成功', ['id' => $id, 'success' => $ok]);
+    }
+
+    /**
+     * 初始化
+     * @param int $site_id 站点ID（post: site_id）
+     * @return \think\Response
+     */
+    public function init()
+    {
+        $postField = 'site_id';
+        $data = $this->request->only(explode(',', $postField), 'post', null);
+        $siteId = (int)($data['site_id'] ?? 0);
+        if ($siteId <= 0) {
+            throw new ValidateException('参数错误：site_id');
+        }
+        $count = SitesService::initRecords($siteId);
+        return $this->ajaxReturn(200, '初始化记录创建完成', ['site_id' => $siteId, 'created' => $count]);
     }
 }
