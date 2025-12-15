@@ -25,9 +25,9 @@ class Search extends BaseController
      */
     public function index(Request $request)
     {
-        $keyword  = trim((string) $request->get('keyword', ''));
-        $page     = max(1, (int) $request->get('page', 1));
-        $pageSize = min(50, max(1, (int) $request->get('limit', 10)));
+        $keyword  = trim((string) $request->param('keyword', ''));
+        $page     = max(1, (int) $request->param('page', 1));
+        $pageSize = min(50, max(1, (int) $request->param('limit', 10)));
         if ($keyword === '') {
             return api_response(400, 'keyword不能为空', []);
         }

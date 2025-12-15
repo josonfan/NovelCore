@@ -25,11 +25,11 @@ class Novel extends BaseController
      */
     public function index(Request $request)
     {
-        $categoryId = (int) $request->get('category_id', 0);
-        $tagId      = (int) $request->get('tag_id', 0);
-        $page       = max(1, (int) $request->get('page', 1));
-        $pageSize   = min(50, max(1, (int) $request->get('limit', 10)));
-        $order      = $request->get('order', 'newest');
+        $categoryId = (int) $request->param('category_id', 0);
+        $tagId      = (int) $request->param('tag_id', 0);
+        $page       = max(1, (int) $request->param('page', 1));
+        $pageSize   = min(50, max(1, (int) $request->param('limit', 10)));
+        $order      = $request->param('order', 'newest');
         $result = \app\service\ContentService::listNovels([
             'category_id' => $categoryId ?: null,
             'tag_id'      => $tagId ?: null,
