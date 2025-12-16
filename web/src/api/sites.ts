@@ -42,3 +42,7 @@ export async function deleteSite(id: number) {
   return res.data
 }
 
+export async function initSite(site_id: number | string) {
+  const res = await http.post('Sites/init', { site_id })
+  return res.data
+}

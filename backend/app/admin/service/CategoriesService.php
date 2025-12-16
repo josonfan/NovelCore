@@ -136,15 +136,28 @@ class CategoriesService
     public static function delete(int $id): bool
     {
         $m = new Categories();
-        $pk = $m->getPk();
-        $ok = (bool)$m->where($pk, $id)->delete();
-        \think\facade\Cache::delete(env('DATABASE.PREFIX', 'blad_') . 'categories_' . $id);
-        return $ok;
+        return $m->deleteById($id);
     }
 
     public static function toggle(int $id, int $isActive): bool
     {
         $m = new Categories();
         return $m->writeById($id, ['is_active' => $isActive]);
+    }
+    public static function options(bool $onlyActive = true): array
+    {
+        $where = $onlyActive ? ['is_active' => 1] : [];
+        $m = new Categories();
+        $list = $m->getList(formatWhere($where), 'id,name,slug,sort_order', 'sort_order desc, id desc', 2000, 1);
+        $out = [];
+        foreach (($list['list'] ?? []) as $row) {
+            $out[] = [
+                'id' => (int)$row['id'],
+                'name' => (string)$row['name'],
+                'slug' => (string)$row['slug'],
+                'sort_order' => (int)$row['sort_order'],
+            ];
+        }
+        return $out;
     }
 }

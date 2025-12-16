@@ -97,11 +97,17 @@ class RbacService
     public static function deleteRole(int $id): bool
     {
         $m = new Roles();
-        $pk = $m->getPk();
-        $ok = (bool)$m->where($pk, $id)->delete();
-        \think\facade\Cache::delete(env('DATABASE.PREFIX', 'blad_') . 'roles_' . $id);
-        RolePermission::where('role_id', $id)->delete();
-        AdminRole::where('role_id', $id)->delete();
+        $ok = $m->deleteById($id);
+        if ($ok) {
+            $rpRows = RolePermission::where('role_id', $id)->field('id')->select()->toArray();
+            foreach ($rpRows as $r) {
+                (new RolePermission())->deleteById((int)$r['id']);
+            }
+            $arRows = AdminRole::where('role_id', $id)->field('id')->select()->toArray();
+            foreach ($arRows as $r) {
+                (new AdminRole())->deleteById((int)$r['id']);
+            }
+        }
         return $ok;
     }
 
@@ -130,10 +136,13 @@ class RbacService
     public static function deletePermission(int $id): bool
     {
         $m = new Permissions();
-        $pk = $m->getPk();
-        $ok = (bool)$m->where($pk, $id)->delete();
-        \think\facade\Cache::delete(env('DATABASE.PREFIX', 'blad_') . 'permissions_' . $id);
-        RolePermission::where('perm_id', $id)->delete();
+        $ok = $m->deleteById($id);
+        if ($ok) {
+            $rpRows = RolePermission::where('perm_id', $id)->field('id')->select()->toArray();
+            foreach ($rpRows as $r) {
+                (new RolePermission())->deleteById((int)$r['id']);
+            }
+        }
         return $ok;
     }
     /**
@@ -150,11 +159,13 @@ class RbacService
             }
             
             validate(\app\admin\validate\AdminRole::class)->scene('assign')->check(['admin_id' => $adminId, 'role_ids' => $roleIds]);
-            AdminRole::where('admin_id', $adminId)->delete();
+            $rows = AdminRole::where('admin_id', $adminId)->field('id')->select()->toArray();
+            foreach ($rows as $r) {
+                (new AdminRole())->deleteById((int)$r['id']);
+            }
             foreach ($roleIds as $rid) {
                 if (!$rid) continue;
-                $m = new AdminRole(['admin_id' => $adminId, 'role_id' => (int)$rid]);
-                $m->save();
+                (new AdminRole())->writeById(0, ['admin_id' => $adminId, 'role_id' => (int)$rid]);
             }
             return true;
         }catch(ValidateException $e){
@@ -171,11 +182,13 @@ class RbacService
      */
     public static function assignPermissions(int $roleId, array $permIds)
     {
-        RolePermission::where('role_id', $roleId)->delete();
+        $rows = RolePermission::where('role_id', $roleId)->field('id')->select()->toArray();
+        foreach ($rows as $r) {
+            (new RolePermission())->deleteById((int)$r['id']);
+        }
         foreach ($permIds as $pid) {
             if (!$pid) continue;
-            $m = new RolePermission(['role_id' => $roleId, 'perm_id' => (int)$pid]);
-            $m->save();
+            (new RolePermission())->writeById(0, ['role_id' => $roleId, 'perm_id' => (int)$pid]);
         }
         return true;
     }

@@ -81,6 +81,11 @@
           <el-tab-pane label="基本信息" name="basic">
             <el-form-item label="标题"><el-input v-model="form.title" /></el-form-item>
             <el-form-item label="作者"><el-input v-model="form.author" /></el-form-item>
+            <el-form-item label="分类">
+              <el-select v-model="form.category_id" placeholder="选择分类" style="width:180px">
+                <el-option v-for="c in categories" :key="c.id" :label="c.name" :value="c.id" />
+              </el-select>
+            </el-form-item>
             <el-form-item label="连载状态"><el-select v-model="form.status" style="width:180px"><el-option :value="0" label="连载中" /><el-option :value="1" label="已完结" /></el-select></el-form-item>
             <el-form-item label="审核状态"><el-tag :type="auditTagType(form.audit_status)" size="small">{{ auditLabel(form.audit_status) }}</el-tag></el-form-item>
           </el-tab-pane>
@@ -142,6 +147,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../store'
 import { fetchNovelList, createNovel, updateNovel, deleteNovel, fetchNovelDetail, reviewNovels, auditNovel, bindNovelTags } from '../api/novels'
 import { fetchTagOptions } from '../api/tags'
+import { fetchCategoryOptions } from '../api/categories'
 
 const loading = ref(true)
 const rows = ref<any[]>([])
@@ -151,10 +157,11 @@ const limit = ref(10)
 const kw = ref('')
 const showForm = ref(false)
 const formMode = ref<'add'|'edit'>('add')
-const form = ref<any>({ title: '', author: '', status: 0, audit_status: 0, seo_title: '', seo_keywords: '', seo_description: '' })
+const form = ref<any>({ title: '', author: '', category_id: '', status: 0, audit_status: 0, seo_title: '', seo_keywords: '', seo_description: '' })
 const showAudit = ref(false)
 const audit = ref<any>({ ids: [] as Array<number|string>, status: 1, reason: '' })
 const selected = ref<any[]>([])
+const categories = ref<any[]>([])
 const activeTab = ref('basic')
 const showTags = ref(false)
 const currentTagNovelId = ref<number|string>('')
@@ -198,6 +205,10 @@ async function load() {
     const data = await fetchNovelList({ page: page.value, limit: limit.value, kw: kw.value })
     rows.value = data.list || []
     total.value = Number(data.count || 0)
+    try {
+      const cats = await fetchCategoryOptions(1)
+      categories.value = cats || []
+    } catch (_) {}
   } finally {
     loading.value = false
   }
@@ -260,7 +271,7 @@ function reload(){ load() }
 
 function onAdd(){
   formMode.value = 'add'
-  form.value = { title: '', author: '', status: 0, audit_status: 0, seo_title: '', seo_keywords: '', seo_description: '' }
+  form.value = { title: '', author: '', category_id: '', status: 0, audit_status: 0, seo_title: '', seo_keywords: '', seo_description: '' }
   activeTab.value = 'basic'
   showForm.value = true
 }
@@ -269,9 +280,9 @@ async function onEdit(row: any){
   formMode.value = 'edit'
   try {
     const d: any = await fetchNovelDetail(row.id)
-    form.value = { id: d.id, title: d.title, author: d.author || '', status: Number(d.status ?? row.status ?? 0), audit_status: Number(d.audit_status ?? row.audit_status ?? 0), seo_title: d.seo_title || '', seo_keywords: d.seo_keywords || '', seo_description: d.seo_description || '' }
+    form.value = { id: d.id, title: d.title, author: d.author || '', category_id: d.category_id ?? row.category_id ?? '', status: Number(d.status ?? row.status ?? 0), audit_status: Number(d.audit_status ?? row.audit_status ?? 0), seo_title: d.seo_title || '', seo_keywords: d.seo_keywords || '', seo_description: d.seo_description || '' }
   } catch (_) {
-    form.value = { id: row.id, title: row.title, author: row.author, status: Number(row.status ?? 0), audit_status: Number(row.audit_status ?? 0), seo_title: '', seo_keywords: '', seo_description: '' }
+    form.value = { id: row.id, title: row.title, author: row.author, category_id: row.category_id ?? '', status: Number(row.status ?? 0), audit_status: Number(row.audit_status ?? 0), seo_title: '', seo_keywords: '', seo_description: '' }
   }
   activeTab.value = 'basic'
   showForm.value = true
@@ -369,7 +380,7 @@ async function submitTags(){
 async function saveForm(){
   try {
     if (!form.value.title) { ElMessage.error('请填写标题'); return }
-    const payload = { title: form.value.title, author: form.value.author, status: form.value.status, seo_title: form.value.seo_title, seo_keywords: form.value.seo_keywords, seo_description: form.value.seo_description }
+    const payload = { title: form.value.title, author: form.value.author, category_id: form.value.category_id, status: form.value.status, seo_title: form.value.seo_title, seo_keywords: form.value.seo_keywords, seo_description: form.value.seo_description }
     const res = formMode.value==='add' ? await createNovel(payload) : await updateNovel(form.value.id, payload)
     if (res?.code === 200) {
       ElMessage.success('已保存')

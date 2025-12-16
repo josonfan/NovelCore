@@ -85,7 +85,12 @@ class SyncExecutor
         $payload = json_encode(['type' => (string)$row['content_type'], 'id' => (int)$row['content_id'], 'operation' => (string)$row['operation'], 'data' => $data], JSON_UNESCAPED_UNICODE);
         $ok = self::postJson($url, $payload, $headers, (int)config('sync.timeout', 5));
         if ($ok) {
-            $q->writeById((int)$row['id'], ['status' => 'success', 'last_error' => null]);
+            (new SyncQueue())->where('id', (int)$row['id'])->delete();
+            // if ((string)$row['operation'] === 'delete') {
+                
+            // } else {
+            //     $q->writeById((int)$row['id'], ['status' => 'success', 'last_error' => null]);
+            // }
             return true;
         } else {
             $q->writeById((int)$row['id'], ['status' => 'failed', 'last_error' => 'push_failed']);

@@ -32,10 +32,10 @@ class Search extends BaseController
             return api_response(400, 'keyword不能为空', []);
         }
         $options = [
-            'category_id' => $request->get('category_id'),
-            'tag_ids'     => $request->get('tag_ids'),
-            'status'      => $request->get('status'),
-            'order'       => $request->get('order'),
+            'category_id' => $request->param('category_id'),
+            'tag_ids'     => $request->param('tag_ids'),
+            'status'      => $request->param('status'),
+            'order'       => $request->param('order', 'newest'),
         ];
         $configService = app(ConfigService::class);
         $searchService = SearchServiceFactory::make($configService);

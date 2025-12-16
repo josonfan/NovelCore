@@ -96,7 +96,7 @@ class ContentService
         $row['cover'] = $storage->getPublicUrl((string) ($row['cover'] ?? ''));
         $chapterIds = Chapter::where('novel_id', $novelPk)->order('sort_order', 'asc')->limit($previewLimit)->column('id');
         $chapters = [];
-        $chapterFields = 'chapter_uuid as id,title,is_free,is_vip,word_count,sort_order';
+        $chapterFields = 'chapter_uuid,id,title,is_free,is_vip,word_count,sort_order';
         $chapterModel = new Chapter();
         foreach ($chapterIds as $cid) {
             $chapters[] = $chapterModel->infoById((int)$cid, $chapterFields);

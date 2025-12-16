@@ -146,10 +146,7 @@ class TagsService
     public static function delete(int $id): bool
     {
         $m = new Tags();
-        $pk = $m->getPk();
-        $ok = (bool)$m->where($pk, $id)->delete();
-        \think\facade\Cache::delete(env('DATABASE.PREFIX', 'blad_') . 'tags_' . $id);
-        return $ok;
+        return $m->deleteById($id);
     }
 
     public static function toggle(int $id, int $isActive): bool

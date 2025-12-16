@@ -30,9 +30,9 @@ class Comment extends BaseController
     public function index(string $novelId, Request $request)
     {
         $novel = ContentService::getNovelOrFail($novelId);
-        $page     = max(1, (int) $request->get('page', 1));
-        $pageSize = min(50, max(1, (int) $request->get('limit', 10)));
-        $order    = (string) $request->get('order', 'desc');
+        $page     = max(1, (int) $request->param('page', 1));
+        $pageSize = min(50, max(1, (int) $request->param('limit', 10)));
+        $order    = (string) $request->param('order', 'desc');
         $res = CommentService::list((int)$novel->id, $page, $pageSize, $order);
         return api_response(200, '成功', $res['list'], (int)$res['count']);
     }

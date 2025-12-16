@@ -13,26 +13,26 @@ Route::group('api', function () {
     Route::post('register', 'api.User/register');
     Route::post('login', 'api.User/login');
 
-    // 分类与标签
-    Route::rule('categories/:id', 'api.Category/info', 'GET|POST');
-    Route::rule('categories', 'api.Category/index', 'GET|POST');
-    Route::rule('tags/:id', 'api.Tag/info', 'GET|POST');
-    Route::rule('tags', 'api.Tag/index', 'GET|POST');
+    // 分类与标签（带参数统一 POST）
+    Route::rule('categories/:id', 'api.Category/info', 'POST');
+    Route::rule('categories', 'api.Category/index', 'POST');
+    Route::rule('tags/:id', 'api.Tag/info', 'POST');
+    Route::rule('tags', 'api.Tag/index', 'POST');
     Route::rule('health', 'api.Health/index', 'GET');
 
-    // 小说列表与详情
+    // 小说列表与详情（详情支持 GET 兼容外部调用）
     Route::rule('novels/:novelId', 'api.Novel/show', 'GET|POST');
-    Route::rule('novels', 'api.Novel/index', 'GET|POST');
+    Route::rule('novels', 'api.Novel/index', 'POST');
 
-    // 章节列表与内容
+    // 章节列表与内容（详情支持 GET 兼容外部调用）
     Route::rule('novels/:novelId/chapters/:chapterId', 'api.Chapter/show', 'GET|POST');
     Route::rule('novels/:novelId/chapters', 'api.Chapter/index', 'GET|POST');
 
-    // 阅读进度与搜索（部分需登录）
-    Route::rule('search', 'api.Search/index', 'GET|POST');
+    // 阅读进度与搜索（带参数统一 POST）
+    Route::rule('search', 'api.Search/index', 'POST');
     Route::get('novels/:novelId/progress', 'api.Reading/getProgress')->middleware(\app\middleware\Auth::class);
     Route::post('novels/:novelId/progress', 'api.Reading/saveProgress')->middleware(\app\middleware\Auth::class);
-    Route::rule('domains', 'api.Domain/index', 'GET|POST');
+    Route::rule('domains', 'api.Domain/index', 'POST');
     Route::get('user/summary', 'api.UserSummary/summary')->middleware(\app\middleware\Auth::class);
     Route::post('sync/receive', 'api.Sync/receive')->middleware(\app\middleware\AdminPushAuth::class);
 
@@ -41,7 +41,7 @@ Route::group('api', function () {
         // 用户
         Route::post('logout', 'api.User/logout');
         Route::get('user/info', 'api.User/info');
-        Route::get('user/favorites', 'api.Favorite/list');
+        Route::post('user/favorites', 'api.Favorite/list');
         Route::get('user/reading-history', 'api.Reading/listHistory');
         Route::post('user/reading-history', 'api.Reading/saveHistory');
 
@@ -65,8 +65,8 @@ Route::group('api', function () {
         Route::delete('comments/:commentId/like', 'api.Comment/unlike');
     })->middleware(\app\middleware\Auth::class);
 
-    // 评论列表无需登录
-    Route::rule('novels/:novelId/comments', 'api.Comment/index', 'GET|POST');
+    // 评论列表无需登录（带参数统一 POST）
+    Route::rule('novels/:novelId/comments', 'api.Comment/index', 'POST');
 
     // 后台只读接口，受 AdminAuth 保护
     Route::group('admin', function () {

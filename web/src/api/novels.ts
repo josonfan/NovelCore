@@ -6,6 +6,7 @@ export type Novel = {
   author?: string
   status?: number
   audit_status?: number
+  category_id?: number | string
   tags?: Array<{ id: number | string; name: string; type?: string }>
 }
 

@@ -194,8 +194,13 @@ class CacheModel extends Model
                 $id = (int)($m->$pk ?? 0);
                 $op = 'create';
             }else{                
-                unset($data[$pk]);
-                $res = (bool)$m->where($pk,$id)->save($data);
+                $old = $m->where($pk,$id)->value($pk);
+                if(empty($old)){
+                    $res = (bool)$m->insert($data);
+                }else{
+                    unset($data[$pk]);
+                    $res = (bool)$m->where($pk,$id)->save($data);
+                }
                 $op = 'update';
             }
             if ($res) {
@@ -252,5 +257,35 @@ class CacheModel extends Model
         $ttl = env('CACHE.TTL', 600);
         $key = $this->getCacheKey($id);
         return $this->setCacheData($key, $data, $ttl);
+    }
+    public function deleteById(int $id): bool
+    {
+        try {
+            $pk = $this->getPk();
+            $row = $this->cacheInfo($id);
+            $ok = (bool)$this->where($pk, $id)->delete();            
+            if ($ok) {
+                $this->setCacheData($this->getCacheKey($id), null);
+                $name = method_exists($this, 'getName') ? (string)$this->getName() : '';
+                $enabled = (array)(config('sync.enable_types') ?? []);
+                $topLevel = [];
+                foreach ($enabled as $k => $v) {
+                    if (is_int($k)) {
+                        $topLevel[] = (string)$v;
+                    }
+                }
+                $configGroup = (array)($enabled['config'] ?? []);
+                if (!empty($configGroup) && in_array($name, $configGroup, true)) {
+                    $siteId = (int)($row['site_id'] ?? 0);
+                    \app\common\service\SyncService::enqueue('config', $siteId, 'update');
+                } elseif (in_array($name, $topLevel, true)) {
+                    trace($name);
+                    \app\common\service\SyncService::enqueue($name, (int)$id, 'delete');
+                }
+            }
+            return $ok;
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 }

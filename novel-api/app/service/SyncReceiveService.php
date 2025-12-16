@@ -16,7 +16,10 @@ class SyncReceiveService
             $op   = strtolower((string) ($data['operation'] ?? ''));
             $id   = $data['id'] ?? null;
             $payload = (array) ($data['data'] ?? []);
-            if ($type === '' || $op === '' || empty($payload)) {
+            if ($type === '' || $op === '') {
+                return false;
+            }
+            if (empty($payload) && !in_array($op, ['delete', 'remove'], true)) {
                 return false;
             }
             if (str_ends_with($type, '_config')) {
