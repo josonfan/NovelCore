@@ -71,18 +71,26 @@ class NovelsService
         $m = new Novels();
         return $m->infoById($id, $field);
     }
-
+    /**
+     * 生成唯一UUID
+     * @return string
+     */
     protected static function uuid(): string
     {
-        $d = random_bytes(16);
-        $d[6] = chr(ord($d[6]) & 0x0f | 0x40);
-        $d[8] = chr(ord($d[8]) & 0x3f | 0x80);
-        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($d), 4));
+        do {
+            $uuid = bin2hex(random_bytes(8));
+            $exists = Db::name('novels')->where('novel_uuid', $uuid)->value('id');
+        } while ($exists);
+        return $uuid;
     }
-
-    protected static function slug(): string
+    /**
+     * 生成唯一Slug
+     * @return string
+     */
+    protected static function slug($uuid): string
     {
-        return 'novel-' . bin2hex(random_bytes(8));
+        $slug = 'novel-' .$uuid;
+        return $slug;
     }
 
     /**
@@ -98,7 +106,8 @@ class NovelsService
                 $data['novel_uuid'] = self::uuid();
             }
             if (empty($data['slug'])) {
-                $data['slug'] = self::slug();
+                $novel_uuid = $data['novel_uuid']??self::uuid();
+                $data['slug'] = self::slug($novel_uuid);
             }
             $m = new Novels($data);
             $m->created_at = time();
@@ -167,12 +176,24 @@ class NovelsService
      */
     public static function delete(int $id): bool
     {
-        $m = new Novels();
-        $pk = $m->getPk();
-        $ok = (bool)$m->where($pk, $id)->delete();
-        $m->setCacheData($m->getCacheKey($id), null);
-        NovelTags::where('novel_id', $id)->delete();
-        return $ok;
+        try {
+            
+            Db::startTrans();
+            $m = new Novels();
+            $ok = $m->deleteById($id);
+            if ($ok) {                
+                $tagLinks = NovelTags::where('novel_id', $id)->field('id')->select()->toArray();     
+                trace($tagLinks);           
+                foreach ($tagLinks as $ln) {
+                    (new NovelTags())->deleteById((int)$ln['id']);
+                }
+            }
+            Db::commit();
+            return $ok;
+        } catch (\Exception $e) {
+            Db::rollback();
+            throw new \Exception($e->getMessage());
+        }
     }
 
     /**
@@ -183,11 +204,13 @@ class NovelsService
      */
     public static function bindTags(int $novelId, array $tagIds): bool
     {
-        NovelTags::where('novel_id', $novelId)->delete();
+        $rows = NovelTags::where('novel_id', $novelId)->field('id')->select()->toArray();
+        foreach ($rows as $r) {
+            (new NovelTags())->deleteById((int)$r['id']);
+        }
         foreach ($tagIds as $tid) {
             if (!$tid) continue;
-            $nt = new NovelTags(['novel_id' => $novelId, 'tag_id' => (int)$tid]);
-            $nt->save();
+            (new NovelTags())->writeById(0, ['novel_id' => $novelId, 'tag_id' => (int)$tid]);
         }
         return true;
     }

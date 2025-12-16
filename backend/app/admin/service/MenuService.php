@@ -115,10 +115,13 @@ class MenuService
     public static function delete(int $id): bool
     {
         $m = new Menus();
-        $pk = $m->getPk();
-        $ok = (bool)$m->where($pk, $id)->delete();
-        \think\facade\Cache::delete(env('DATABASE.PREFIX', 'blad_') . 'menus_' . $id);
-        MenuPermission::where('menu_id', $id)->delete();
+        $ok = $m->deleteById($id);
+        if ($ok) {
+            $rows = MenuPermission::where('menu_id', $id)->field('id')->select()->toArray();
+            foreach ($rows as $r) {
+                (new MenuPermission())->deleteById((int)$r['id']);
+            }
+        }
         return $ok;
     }
 

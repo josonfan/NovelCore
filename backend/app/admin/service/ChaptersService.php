@@ -66,11 +66,15 @@ class ChaptersService
                 $data['chapter_uuid'] = self::uuid();
             }
             $m = new Chapters($data);
-            $m->save();
-            $m->primeCacheById((int)$m['id'], $m->toArray());
+            $m->created_at = time();
+            $m->writeById((int)$m['id'], $m->toArray());
             if ($content !== '') {
-                $cc = new ChapterContents(['chapter_id' => (int)$m['id'], 'content' => $content]);
-                $cc->save();
+                $chapterId = (int)\think\facade\Db::name('chapters')->where('chapter_uuid', (string)$data['chapter_uuid'])->value('id');
+                if ($chapterId > 0) {
+                    $cc = new ChapterContents();
+                    $cc->where('chapter_id', $chapterId)->delete();
+                    $cc->writeById(0, ['chapter_id' => $chapterId, 'content' => $content]);
+                }
             }
             return $m;
         } catch (ValidateException $e) {
@@ -82,10 +86,11 @@ class ChaptersService
 
     protected static function uuid(): string
     {
-        $d = random_bytes(16);
-        $d[6] = chr(ord($d[6]) & 0x0f | 0x40);
-        $d[8] = chr(ord($d[8]) & 0x3f | 0x80);
-        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($d), 4));
+        do {
+            $uuid = bin2hex(random_bytes(8));
+            $exists = \think\facade\Db::name('chapters')->where('chapter_uuid', $uuid)->value('id');
+        } while ($exists);
+        return $uuid;
     }
 
     /**
@@ -105,9 +110,10 @@ class ChaptersService
             }
             $m = new Chapters();
             $ok = $m->writeById($id, $data);
-            if ($content !== null) {
+            if ($content !== null) {                
                 $cc = new ChapterContents();
-                $cc->writeById($id, ['content' => $content]);
+                $cc->where('chapter_id', $id)->delete();
+                $cc->writeById(0, ['chapter_id' => $id, 'content' => $content]);
             }
             return $ok;
         } catch (ValidateException $e) {
@@ -125,11 +131,10 @@ class ChaptersService
     public static function delete(int $id): bool
     {
         $m = new Chapters();
-        $pk = $m->getPk();
-        $ok = (bool)$m->where($pk, $id)->delete();
-        \think\facade\Cache::delete(env('DATABASE.PREFIX', 'blad_') . 'chapters_' . $id);
-        $cc = new ChapterContents();
-        $cc->where('chapter_id', $id)->delete();
+        $ok = $m->deleteById($id);
+        if ($ok) {
+            (new ChapterContents())->deleteById($id);
+        }
         return $ok;
     }
 }

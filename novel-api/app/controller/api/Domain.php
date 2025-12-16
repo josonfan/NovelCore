@@ -23,7 +23,7 @@ class Domain extends BaseController
      */
     public function index(Request $request, DomainService $domainService)
     {
-        $type = (string) $request->get('type', 'api');
+        $type = (string) $request->param('type', 'api');
         $domains = $domainService->getActiveDomainsByType($type);
         $list = array_map(fn($d) => ['domain' => $d, 'type' => $type], (array)$domains);
         return api_response(200, '成功', $list, count($list));

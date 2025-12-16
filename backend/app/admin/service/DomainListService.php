@@ -81,9 +81,6 @@ class DomainListService
     public static function delete(int $id): bool
     {
         $m = new DomainList();
-        $pk = $m->getPk();
-        $ok = (bool)$m->where($pk, $id)->delete();
-        \think\facade\Cache::delete(env('DATABASE.PREFIX', 'blad_') . 'domain_list_' . $id);
-        return $ok;
+        return $m->deleteById($id);
     }
 }

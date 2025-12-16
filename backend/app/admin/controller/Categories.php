@@ -57,4 +57,10 @@ class Categories extends Backend
         $ok = CategoriesService::toggle($id, $isActive);
         return $this->ajaxReturn(200, '启停成功', ['id' => $id, 'success' => $ok]);
     }
+    public function options()
+    {
+        $onlyActive = (int)$this->request->param('active', 1, 'intval') === 1;
+        $res = \app\admin\service\CategoriesService::options($onlyActive);
+        return $this->ajaxReturn(200, '成功', $res);
+    }   
 }

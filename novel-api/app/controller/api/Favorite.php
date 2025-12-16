@@ -94,8 +94,8 @@ class Favorite extends BaseController
     public function list(Request $request)
     {
         $user = $request->user;
-        $page     = max(1, (int) $request->get('page', 1));
-        $pageSize = min(50, max(1, (int) $request->get('limit', 10)));
+        $page     = max(1, (int) $request->param('page', 1));
+        $pageSize = min(50, max(1, (int) $request->param('limit', 10)));
         $result = \app\service\ContentService::listFavorites($user->id, $page, $pageSize);
         return api_response(200, '成功', $result['list'], (int)$result['total']);
     }

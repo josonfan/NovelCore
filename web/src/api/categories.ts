@@ -32,3 +32,8 @@ export async function deleteCategory(id: number | string) {
   const res = await http.post('Categories/delete', { id })
   return res.data
 }
+
+export async function fetchCategoryOptions(is_active: number | string = 1) {
+  const res = await http.post('Categories/options', { is_active })
+  return res.data?.data || []
+}

@@ -173,6 +173,7 @@ Route::group('Categories', function () {
     Route::rule('update', 'Categories/update', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('delete', 'Categories/delete', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('toggle', 'Categories/toggle', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('options', 'Categories/options', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
 });
 
 /**

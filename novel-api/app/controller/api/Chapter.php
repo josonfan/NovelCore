@@ -33,8 +33,8 @@ class Chapter extends BaseController
         if (!$novel) {
             return api_response(404, '小说不存在', [])->code(404);
         }
-        $page     = max(1, (int) $request->get('page', 1));
-        $pageSize = min(200, max(1, (int) $request->get('limit', 100)));
+        $page     = max(1, (int) $request->param('page', 1));
+        $pageSize = min(200, max(1, (int) $request->param('limit', 100)));
         $result = \app\service\ContentService::listChapters($novel->id, $page, $pageSize);
         return api_response(200, '成功', $result['list'], (int)$result['total']);
     }

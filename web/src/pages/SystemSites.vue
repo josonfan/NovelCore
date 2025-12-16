@@ -24,12 +24,13 @@
         </el-table-column>
         <el-table-column prop="remark" label="备注" min-width="160" />
         <el-table-column prop="created_at" label="创建时间" min-width="160" />
-        <el-table-column label="操作" width="280" fixed="right">
+        <el-table-column label="操作" width="360" fixed="right">
           <template #default="{ row }">
             <el-button link @click="onDetail(row)">详情</el-button>
             <el-button link type="primary" @click="onEdit(row)">编辑</el-button>
             <el-button link type="warning" @click="onToggle(row)">{{ row.is_active===1?'停用':'启用' }}</el-button>
             <el-button link type="success" @click="onConfig(row)">站点配置</el-button>
+            <el-button link type="success" @click="onInit(row)">初始化数据</el-button>
             <el-button link type="danger" @click="onDelete(row)">删除</el-button>
           </template>
         </el-table-column>
@@ -80,7 +81,7 @@ import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import SystemSiteConfig from './SystemSiteConfig.vue'
-import { fetchSiteList, fetchSiteDetail, createSite, updateSite, toggleSite, deleteSite } from '../api/sites'
+import { fetchSiteList, fetchSiteDetail, createSite, updateSite, toggleSite, deleteSite, initSite } from '../api/sites'
 
 const router = useRouter()
 const page = ref(1)
@@ -150,6 +151,20 @@ function onConfig(row:any){
   if (!token) { router.push('/login'); return }
   currentSiteId.value = row.id
   showConfig.value = true
+}
+
+async function onInit(row:any){
+  try{
+    const res = await initSite(row.id)
+    if (res?.code === 200) {
+      ElMessage.success(res?.msg || '初始化成功')
+    } else {
+      ElMessage.error(res?.msg || '初始化失败')
+    }
+  } catch(e:any){
+    const resp = e?.response?.data
+    ElMessage.error(resp?.message || resp?.msg || '初始化失败')
+  }
 }
 
 onMounted(load)
