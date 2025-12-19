@@ -11,16 +11,21 @@ class ReadingHistoryService
 {
     public static function getListByUser(int $userId, int $page = 1, int $limit = 10): array
     {
-        $paginator = UserReadingHistory::where('user_id', $userId)
-            ->order('last_read_at', 'desc')
-            ->paginate(['list_rows' => $limit, 'page' => $page]);
+        $model = new UserReadingHistory();
+        $res = $model->getList(
+            ['user_id' => $userId],
+            'id,novel_id,chapter_id,progress,last_read_at',
+            'last_read_at desc',
+            $limit,
+            $page
+        );
         $storage = new \app\service\StorageService();
         $novelFields = 'novel_uuid as novel_id,title as novel_title,cover,status,is_vip,word_count,updated_at';
         $chapterFields = 'chapter_uuid as chapter_id,title as chapter_title';
         $novelModel = new Novel();
         $chapterModel = new Chapter();
         $items = [];
-        foreach ($paginator->items() as $h) {
+        foreach ($res['list'] as $h) {
             $novel = $novelModel->infoById((int)$h['novel_id'], $novelFields);
             $novel['cover'] = $storage->getPublicUrl((string) ($novel['cover'] ?? ''));
             $chapter = $chapterModel->infoById((int)$h['chapter_id'], $chapterFields);
@@ -38,7 +43,6 @@ class ReadingHistoryService
                 'last_read_at' => $h['last_read_at'],
             ];
         }
-        return ['list' => $items, 'total' => (int) $paginator->total()];
+        return ['list' => $items, 'count' => (int) $res['count']];
     }
 }
-

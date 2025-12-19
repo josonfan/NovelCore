@@ -90,7 +90,7 @@ class Favorite extends Common
         $result = \app\service\FavoriteService::getListByUser($user_id, $page, $pageSize);
         return $this->ajaxReturn(200, '获取成功', [
             'list'  => $result['list'],
-            'count' => (int)$result['total'],
+            'count' => (int)$result['count'],
         ]);
     }
 }

@@ -3,6 +3,9 @@ namespace app\controller;
 
 use think\App;
 use think\Request;
+use think\facade\Lang;
+
+
 
 class Common
 {
@@ -34,7 +37,7 @@ class Common
      * @return json
      */
     protected function ajaxReturn($status,$msg,$data=null,$token=''){
-        $res = ['code'=>$status,'msg'=>$msg];
+        $res = ['code'=>$status,'msg'=>lang($msg)];
         isset($data) && $res['data'] = $data;
         !empty($token) && $res['token'] = $token;
         return json($res);

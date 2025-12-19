@@ -2,6 +2,7 @@
 
 return [ 
     'alias'    => [
+        'lang' => \think\middleware\LoadLangPack::class,
         'site_init' => \app\middleware\SiteInit::class,
         'cors' => \app\middleware\Cors::class,
         'auth' => \app\middleware\Auth::class,
@@ -10,6 +11,7 @@ return [
         'response_time' => \app\middleware\ResponseTime::class,
     ],
     'priority' => [
+        \think\middleware\LoadLangPack::class,
         \app\middleware\SiteInit::class,
         \app\middleware\ResponseTime::class,
         \app\middleware\Cors::class,

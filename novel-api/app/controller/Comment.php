@@ -25,9 +25,17 @@ class Comment extends Common
         $page     = $this->request->param('page', 1, 'intval');
         $pageSize = $this->request->param('limit', 10, 'intval');
         $order    = $this->request->param('order', 'desc', 'trim');
-        $res = CommentService::list((int)$novel->id, $page, $pageSize, $order);
-        return $this->ajaxReturn(200, '成功', [
-            'list'  => $res['list'],
+        $view     = $this->request->param('view', 'flat', 'trim');
+        $rootId   = $this->request->param('rootId', 0, 'intval');
+        $res = CommentService::list((int)$novel['id'], $page, $pageSize, $order);
+        $list = $view === 'tree'
+            ? \app\service\CommentViewService::formatTree($res['list'] ?? [])
+            : \app\service\CommentViewService::formatList($res['list'] ?? []);
+        if ($view === 'thread' && $rootId > 0) {
+            $list = \app\service\CommentViewService::fetchThread((int)$novel['id'], $rootId);
+        }
+        return $this->ajaxReturn(200, '获取成功', [
+            'list'  => $list,
             'count' => (int)$res['count'],
         ]);
     }
@@ -43,7 +51,7 @@ class Comment extends Common
     {
         $novelId = $this->request->param('novelId', '', 'trim');
         $user = $this->request->user;
-        $novel = ContentService::getNovelOrFail($novelId);
+        $novel = \app\service\NovelService::getInfoByUuid($novelId, 'id,novel_uuid');
         $content = (string) $this->request->post('content', '');
         $parentId = (int) $this->request->post('parent_id', 0);
         $isR18 = 0;
@@ -71,7 +79,7 @@ class Comment extends Common
         ]);
         return $this->ajaxReturn(200, '评论已提交，审核中', [
             'id'         => null,
-            'novel_id'   => $novel->id,
+            'novel_id'   => (string)$novel['novel_uuid'],
             'chapter_id' => null,
             'parent_id'  => $parentId ?: null,
             'root_id'    => $rootId,
@@ -99,28 +107,12 @@ class Comment extends Common
     public function like()
     {
         $commentId = $this->request->param('commentId', 0, 'intval');
-        $user = $this->request->user;
-        $commentIdVal = CommentModel::where('id', $commentId)->value('id');
-        if (!$commentIdVal) {
-            return $this->ajaxReturn(404, '评论不存在', []);
+        $userId = (int) ($this->request->user_id ?? 0);
+        if ($userId <= 0) {
+            return $this->ajaxReturn(401, '未登录或令牌无效', [])->code(401);
         }
-        $existsId = CommentLike::where('user_id', $user->id)
-            ->where('comment_id', $commentIdVal)
-            ->value('id');
-        if (!$existsId) {
-            (new CommentLike())->writeById(0, [
-                'user_id'    => $user->id,
-                'comment_id' => $commentIdVal,
-            ]);
-            $commentInfo = (new CommentModel())->infoById($commentIdVal, 'like_count');
-            (new CommentModel())->writeById((int)$commentIdVal, [
-                'like_count' => (int)($commentInfo['like_count'] ?? 0) + 1,
-            ]);
-        }
-        return $this->ajaxReturn(200, '点赞成功', [
-            'comment_id' => $commentIdVal,
-            'liked'      => true,
-        ]);
+        $data = \app\service\CommentLikeService::like($userId, $commentId);
+        return $this->ajaxReturn(200, '点赞成功', $data);
     }
 
     /**
@@ -133,25 +125,11 @@ class Comment extends Common
     public function unlike()
     {
         $commentId = $this->request->param('commentId', 0, 'intval');
-        $user = $this->request->user;
-        $commentIdVal = CommentModel::where('id', $commentId)->value('id');
-        if (!$commentIdVal) {
-            return $this->ajaxReturn(404, '评论不存在', []);
+        $userId = (int) ($this->request->user_id ?? 0);
+        if ($userId <= 0) {
+            return $this->ajaxReturn(401, '未登录或令牌无效', [])->code(401);
         }
-        $likeId = CommentLike::where('user_id', $user->id)
-            ->where('comment_id', $commentIdVal)
-            ->value('id');
-        if ($likeId) {
-            (new CommentLike())->deleteById((int)$likeId);
-            $commentInfo = (new CommentModel())->infoById($commentIdVal, 'like_count');
-            $newCount = max(0, (int)($commentInfo['like_count'] ?? 0) - 1);
-            (new CommentModel())->writeById((int)$commentIdVal, [
-                'like_count' => $newCount,
-            ]);
-        }
-        return $this->ajaxReturn(200, '已取消点赞', [
-            'comment_id' => $commentIdVal,
-            'liked'      => false,
-        ]);
+        $data = \app\service\CommentLikeService::unlike($userId, $commentId);
+        return $this->ajaxReturn(200, '已取消点赞', $data);
     }
 }

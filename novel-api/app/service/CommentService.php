@@ -88,36 +88,11 @@ class CommentService
         $query = Comment::where('novel_id', $novelPk)->where('status', 1)->order('id', $order);
         $count = (int) $query->count('id');
         $ids = $query->page($page, $limit)->column('id');
-        $list = [];
+        $rows = [];
         $commentModel = new Comment();
         foreach ($ids as $id) {
-            $row = $commentModel->infoById((int)$id, 'id,novel_id,chapter_id,parent_id,root_id,content,is_r18,like_count,status,review_source,created_at,user_id');
-            $userView = null;
-            if (!empty($row['user_id'])) {
-                $user = (new UserModel())->infoById((int)$row['user_id'], 'id,nickname,avatar');
-                if (!empty($user)) {
-                    $userView = [
-                        'uid' => $user['id'] ?? null,
-                        'nickname' => $user['nickname'] ?? '',
-                        'avatar' => $user['avatar'] ?? '',
-                    ];
-                }
-            }
-            $list[] = [
-                'id' => $row['id'] ?? null,
-                'novel_id' => $row['novel_id'] ?? null,
-                'chapter_id' => $row['chapter_id'] ?? null,
-                'parent_id' => $row['parent_id'] ?? null,
-                'root_id' => $row['root_id'] ?? null,
-                'content' => $row['content'] ?? '',
-                'is_r18' => (int)($row['is_r18'] ?? 0),
-                'like_count' => (int)($row['like_count'] ?? 0),
-                'status' => (int)($row['status'] ?? 0),
-                'review_source' => (int)($row['review_source'] ?? 0),
-                'created_at' => $row['created_at'] ?? null,
-                'user' => $userView,
-            ];
+            $rows[] = $commentModel->infoById((int)$id, 'id,novel_id,chapter_id,parent_id,root_id,content,is_r18,like_count,status,review_source,created_at,user_id');
         }
-        return ['list' => $list, 'count' => $count];
+        return ['list' => $rows, 'count' => $count];
     }
 }

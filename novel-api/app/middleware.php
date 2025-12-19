@@ -4,4 +4,5 @@ return [
     \app\middleware\Cors::class,
     \app\middleware\SiteInit::class,
     \app\middleware\ResponseTime::class,
+    \think\middleware\LoadLangPack::class,
 ];

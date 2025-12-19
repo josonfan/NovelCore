@@ -87,16 +87,7 @@ class ContentService
     public static function listChaptersByQuery($where, $order, $fields='*', int $page=1, int $limit=20): array
     {
         $chapterModel = new Chapter();
-        $pk = $chapterModel->getPk();
-        $query = $chapterModel->where($where)
-        ->field($pk)
-        ->order($order);
-        $paginator = $query->paginate(['list_rows' => $limit, 'page' => $page]);
-        $chapters = [];
-        foreach ($paginator->items() as $chapter) {
-            $chapters[] = $chapterModel->infoById((int)$chapter[$pk], $fields);
-        }
-        return ['list' => $chapters, 'count' => (int) $paginator->total()];
+        return $chapterModel->getList($where, $fields, $order, $limit, $page);
     }
 
     public static function listChapters(int $novelPk, int $page, int $limit): array

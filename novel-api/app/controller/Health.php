@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace app\controller;
 
-
+use think\facade\Lang;
 class Health extends Common
 {
     /**
@@ -15,6 +15,6 @@ class Health extends Common
      */
     public function index()
     {
-        return $this->ajaxReturn(200, 'OK', ['ts' => time()]);
+        return $this->ajaxReturn(200, 'OK', ['ts' => time(), 'lang' => Lang::getLangSet()]);
     }
 }
