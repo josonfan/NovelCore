@@ -3,14 +3,20 @@
 use Baiy\ThinkAsync\Subscribe\ConfigFileEventGetter;
 use Baiy\ThinkAsync\Subscribe\DemoSubscriber;
 $uniExecMethods = [];
+$syncUniExecMethods = [];
 for ($i = 1; $i <= 5; $i++) {
     $uniExecMethods['bl_exec_method_custom' . $i] = '自定义异步执行队列';
+}
+for ($i = 1; $i <= 9; $i++) {
+    $syncUniExecMethods['bl_sync_exec_method_custom' . $i] = '自定义同步异步执行队列';    
 }
 return [
     // 异步执行默认队列
     'async_exec_method_queue'        => 'async_exec_method',
     // 异步执行自定义队列
     'async_exec_method_custom_queue' => $uniExecMethods,
+    // 同步异步执行自定义队列
+    'sync_async_exec_method_custom_queue' => $syncUniExecMethods,
 
     // 异步订阅默认队列名称
     'subscribe_default_queue'        => 'subscribe_default',

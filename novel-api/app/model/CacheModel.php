@@ -202,7 +202,8 @@ class CacheModel extends Model
                         $res = (bool)$m->where($pk,$id)->save($data);
                     }
                 }catch(\Throwable $e){
-                    dd($e->getMessage(),$id,$data);
+                    trace($e->getMessage(),'error');
+                    return false;
                 }                
                 
                 $op = 'update';
@@ -212,21 +213,20 @@ class CacheModel extends Model
                 $type = self::contentTypeFromTable($name);
                 $enabled = (array)(config('sync.enable_types') ?? []);
                 if ($type && in_array($type, $enabled, true)) {
-                    // \app\common\service\SyncService::enqueue($type, (int)$id, $op);
+                    \app\service\SyncService::enqueue($type, (int)$id, $op);
                 }
             }
             return $res;
         } catch (\Throwable $e) {
+            trace($e->getMessage(),'error');
             return false;
         }
     }
     protected static function contentTypeFromTable(string $name): ?string
     {
         switch ($name) {
-            case 'categories': return 'category';
-            case 'tags': return 'tag';
-            case 'novels': return 'novel';
-            case 'chapters': return 'chapter';
+            case 'users': return 'user';
+            case 'comments': return 'comment';
             default: return null;
         }
     }

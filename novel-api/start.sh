@@ -33,3 +33,8 @@ for i in $(seq 0 5);
 do
     start_async_task "bl_exec_method_custom${i}" "bl_async${i}" "bl_async${i}_pid"
 done
+# 启动同步异步任务
+for i in $(seq 0 9);
+do
+    start_async_task "bl_sync_exec_method_custom${i}" "bl_sync_async${i}" "bl_sync_async${i}_pid"
+done

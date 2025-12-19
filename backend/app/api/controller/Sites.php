@@ -3,7 +3,7 @@ namespace app\api\controller;
 
 use app\admin\service\SitesService;
 
-class Sites
+class Sites extends Common
 {
     public function register()
     {
@@ -14,11 +14,11 @@ class Sites
         try {
             $m = SitesService::create($data);
             $out = getArrayByFields($m->toArray(), 'id,name,code,base_api_url,primary_domain,is_active,remark,created_at,updated_at');
-            return json(['code' => 200, 'msg' => '站点注册成功', 'data' => $out]);
+            return $this->ajaxReturn(200, '站点注册成功', $out);
         } catch (\think\exception\ValidateException $e) {
-            return json(['code' => 422, 'msg' => $e->getError(), 'data' => []]);
+            return $this->ajaxReturn(422, $e->getError(), []);
         } catch (\Throwable $e) {
-            return json(['code' => 500, 'msg' => $e->getMessage(), 'data' => []]);
+            return $this->ajaxReturn(500, $e->getMessage(), []);
         }
     }
 }

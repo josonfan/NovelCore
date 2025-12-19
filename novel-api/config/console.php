@@ -7,5 +7,6 @@ return [
         'sync:user-order' => \app\command\SyncUserOrder::class,
         'user:stats-sync' => \app\command\UserStatsSync::class,
         'user:week-rebuild' => \app\command\UserWeekStatsRebuild::class,
+        'sync:push' => \app\command\SyncPush::class,
     ],
 ];

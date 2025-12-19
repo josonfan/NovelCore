@@ -17,6 +17,7 @@ class FollowService
             (new UserFollowAuthor())->writeById(0, [
                 'user_id'   => $userId,
                 'author_id' => $authorId,
+                'created_at' => date('Y-m-d H:i:s'),
             ]);
         }
         return ['author_id' => $authorId, 'followed' => true];
