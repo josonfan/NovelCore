@@ -14,7 +14,7 @@ class StorageConfig extends Backend
         if ($siteId !== null && $siteId !== '') {
             $where['site_id'] = (int)$siteId;
         }
-        $field = 'id,site_id,provider,access_key_id,secret_key,bucket_name,bucket_region,base_url,is_active,created_at,updated_at';
+        $field = 'id,site_id,provider,access_key_id,secret_key,bucket_name,bucket_region,endpoint,base_url,allowed_suffix,is_active,created_at,updated_at';
         $orderby = 'id desc';
         $res = StorageConfigService::list(formatWhere($where), $field, $orderby, $limit, $page);
         return $this->ajaxReturn(200, '成功', $res);
@@ -22,7 +22,7 @@ class StorageConfig extends Backend
     public function detail()
     {
         $id = (int)($this->request->param('id') ?? 0);
-        $field = 'id,site_id,provider,access_key_id,secret_key,bucket_name,bucket_region,base_url,is_active,created_at,updated_at';
+        $field = 'id,site_id,provider,access_key_id,secret_key,bucket_name,bucket_region,endpoint,base_url,allowed_suffix,is_active,created_at,updated_at';
         $info = StorageConfigService::detail($id, $field);
         if (empty($info)) {
             return $this->ajaxReturn(404, '不存在');
@@ -41,7 +41,7 @@ class StorageConfig extends Backend
 
     public function save()
     {
-        $postField = 'site_id,provider,access_key_id,secret_key,bucket_name,bucket_region,base_url,is_active';
+        $postField = 'site_id,provider,access_key_id,secret_key,bucket_name,bucket_region,endpoint,base_url,allowed_suffix,is_active';
         $data = $this->request->only(explode(',', $postField), 'post', null);
         $res = StorageConfigService::save($data);
         return $this->ajaxReturn(200, '保存成功', $res);

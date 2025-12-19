@@ -5,6 +5,7 @@ namespace app\middleware;
 
 use Closure;
 use think\Request;
+use app\exception\BusinessException;
 
 class Auth
 {
@@ -12,41 +13,35 @@ class Auth
     {
         $token = $this->extractToken($request);
         if (!$token) {
-            return $this->unauthorized();
+            throw new BusinessException('未登录或令牌无效', 401);
         }
 
         try {
             $jwt = app(\app\service\JwtService::class);
             $payload = $jwt->parseToken($token);
         } catch (\app\exception\BusinessException $e) {
-            return $this->unauthorized($e->getMessage());
+            throw new BusinessException($e->getMessage(), 401);
         }
-
         $userId = (int) ($payload['uid'] ?? 0);
         if ($userId <= 0) {
-            return $this->unauthorized();
+            throw new BusinessException('未登录或令牌无效', 401);
         }
-
-        $user = \app\model\User::find($userId);
-        if (!$user || (int) $user->status !== 1) {
-            return $this->unauthorized();
-        }
-
-        $request->user = $user;
+        $request->user_id = $userId;
         return $next($request);
     }
 
     protected function extractToken(Request $request): ?string
     {
-        $authorization = $request->header('Authorization', '');
+        $authorization = trim((string) $request->header('Authorization', ''));
+        if ($authorization === '') {
+            return null;
+        }
         if (str_starts_with($authorization, 'Bearer ')) {
             return trim(substr($authorization, 7));
         }
-        return null;
+        return $authorization;
     }
 
-    protected function unauthorized(string $message = '未登录或令牌无效')
-    {
-        return api_response(401, $message, [])->code(401);
-    }
+    // 统一由全局异常处理器拦截，无需在中间件内构造响应
+    
 }

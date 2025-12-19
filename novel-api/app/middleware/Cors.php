@@ -21,7 +21,7 @@ class Cors
         $headers = [
             'Access-Control-Allow-Origin'      => $request->header('Origin', '*'),
             'Access-Control-Allow-Methods'     => 'GET, POST, PUT, DELETE, OPTIONS',
-            'Access-Control-Allow-Headers'     => 'Origin, Authorization, Content-Type, X-Requested-With',
+            'Access-Control-Allow-Headers'     => 'Origin, Authorization, Content-Type, X-Requested-With, Client-Version, Device',
             'Access-Control-Allow-Credentials' => 'true',
             'Access-Control-Max-Age'           => '86400',
         ];

@@ -7,7 +7,9 @@ export type StorageConfigPayload = {
   secret_key: string
   bucket_name: string
   bucket_region?: string
+  endpoint?: string
   base_url: string
+  allowed_suffix?: string
   is_active: number | string
 }
 

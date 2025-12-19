@@ -122,6 +122,7 @@ function resolveIndex(m: any) {
   if (n === '标签管理') return '/content/tags'
   if (n === '小说管理') return '/content/novels'
   if (n === '章节管理') return '/content/chapters'
+  if (n === '系统配置') return '/system/config'
   return pathOf('/')
 }
 

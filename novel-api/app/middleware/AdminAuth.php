@@ -5,6 +5,7 @@ namespace app\middleware;
 
 use Closure;
 use think\Request;
+use app\exception\BusinessException;
 
 class AdminAuth
 {
@@ -13,16 +14,19 @@ class AdminAuth
         $token = $this->extractToken($request);
         $expected = (string) config('admin.admin_token', '');
         if ($expected === '' || $token !== $expected) {
-            return api_response(401, '未授权的后台访问', [])->code(401);
+            throw new BusinessException('未授权的后台访问', 401);
         }
         return $next($request);
     }
 
     protected function extractToken(Request $request): string
     {
-        $auth = $request->header('Authorization', '');
-        if (str_starts_with($auth, 'Bearer ')) {
-            return trim(substr($auth, 7));
+        $auth = trim((string) $request->header('Authorization', ''));
+        if ($auth !== '') {
+            if (str_starts_with($auth, 'Bearer ')) {
+                return trim(substr($auth, 7));
+            }
+            return $auth;
         }
         return (string) $request->header('X-Admin-Token', '');
     }

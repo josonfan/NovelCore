@@ -1,60 +1,73 @@
 <?php
 namespace app;
 
-use app\exception\BusinessException;
+use think\db\exception\DataNotFoundException;
+use think\db\exception\ModelNotFoundException;
 use think\exception\Handle;
 use think\exception\HttpException;
 use think\exception\HttpResponseException;
 use think\exception\ValidateException;
+use app\exception\BusinessException;
+
 use think\Response;
 use Throwable;
 
+/**
+ * 应用异常处理类
+ */
 class ExceptionHandle extends Handle
 {
+    /**
+     * 不需要记录信息（日志）的异常类列表
+     * @var array
+     */
     protected $ignoreReport = [
         HttpException::class,
         HttpResponseException::class,
+        ModelNotFoundException::class,
+        DataNotFoundException::class,
         ValidateException::class,
         BusinessException::class,
     ];
 
-    public function render($request, Throwable $e): Response
+    /**
+     * 记录异常信息（包括日志或者其它方式记录）
+     *
+     * @access public
+     * @param  Throwable $exception
+     * @return void
+     */
+    public function report(Throwable $exception): void
     {
-        if ($e instanceof HttpResponseException) {
-            return $e->getResponse();
-        }
-
-        if ($e instanceof BusinessException) {
-            return $this->buildJsonResponse($e->getMessage(), $e->getCode() ?: 1, $e->getData(), $e->getHttpStatus());
-        }
-
-        if ($e instanceof ValidateException) {
-            $errors  = $e->getError();
-            $message = is_array($errors) ? reset($errors) : $errors;
-
-            return $this->buildJsonResponse($message ?: '参数校验失败', 422, is_array($errors) ? $errors : [], 200);
-        }
-
-        if ($e instanceof HttpException) {
-            $status  = $e->getStatusCode();
-            $message = $e->getMessage() ?: '请求错误';
-
-            return $this->buildJsonResponse($message, $status, [], $status);
-        }
-
-        if ($this->app->isDebug()) {
-            $debugData = $this->convertExceptionToArray($e);
-
-            return $this->buildJsonResponse($e->getMessage(), $e->getCode() ?: 500, $debugData, 500);
-        }
-
-        return $this->buildJsonResponse('服务器开小差，请稍后再试', 500, [], 500);
+        // 使用内置的方式记录异常日志
+        parent::report($exception);
     }
 
-    protected function buildJsonResponse(string $message, int $code, $data = [], int $httpStatus = 200): Response
+    /**
+     * Render an exception into an HTTP response.
+     *
+     * @access public
+     * @param \think\Request   $request
+     * @param Throwable $e
+     * @return Response
+     */
+    public function render($request, Throwable $e): Response
     {
-        $response = api_response($code, $message, $data);
+        // 添加自定义异常处理机制
+        //验证器异常
+        if ($e instanceof ValidateException) {
+            return json(['code'=>411,'msg'=>$e->getError()]);
+        }
+        // 模型不存在异常
+        if ($e instanceof ModelNotFoundException) {
+            return json(['code'=>404,'msg'=>$e->getMessage()]);
+        }
+        // 数据不存在异常
+        if ($e instanceof DataNotFoundException) {
+            return json(['code'=>404,'msg'=>$e->getMessage()]);
+        }
 
-        return $response->code($httpStatus);
+        // 其他错误交给系统处理
+        return parent::render($request, $e);
     }
 }

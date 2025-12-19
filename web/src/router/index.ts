@@ -18,6 +18,7 @@ const routes: RouteRecordRaw[] = [
       { path: ROUTES['system-sites'].path.slice(1), name: ROUTES['system-sites'].name, component: () => import('../pages/SystemSites.vue'), meta: { title: ROUTES['system-sites'].title } },
       { path: ROUTES['system-domain'].path.slice(1), name: ROUTES['system-domain'].name, component: () => import('../pages/SystemDomainList.vue'), meta: { title: ROUTES['system-domain'].title } },
       { path: ROUTES['system-admins'].path.slice(1), name: ROUTES['system-admins'].name, component: () => import('../pages/SystemAdmins.vue'), meta: { title: ROUTES['system-admins'].title } },
+      { path: 'system/config', name: 'system-config', component: () => import('../pages/SystemConfig.vue'), meta: { title: '系统配置' } },
       { path: 'content/categories', name: 'content-categories', component: () => import('../pages/ContentCategories.vue'), meta: { title: '分类管理' } },
       { path: 'content/tags', name: 'content-tags', component: () => import('../pages/ContentTags.vue'), meta: { title: '标签管理' } },
       { path: 'content/novels', name: 'content-novels', component: () => import('../pages/ContentNovels.vue'), meta: { title: '小说管理' } },

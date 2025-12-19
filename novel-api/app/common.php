@@ -107,26 +107,3 @@ if (!function_exists('formatWhere')) {
         return $where;
     }
 }
-
-if (!function_exists('api_response')) {
-    function api_response(int $code = 200, string $msg = '成功', $data = [], ?int $count = null): Response
-    {
-        $body = ['code' => $code];
-        if ($code >= 400) {
-            $body['message'] = $msg;
-        } else {
-            $body['msg'] = $msg;
-        }
-
-        if ($count !== null) {
-            $body['data'] = [
-                'list'  => is_array($data) ? $data : [],
-                'count' => $count,
-            ];
-        } else {
-            $body['data'] = $data;
-        }
-
-        return json($body);
-    }
-}

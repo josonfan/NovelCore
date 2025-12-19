@@ -9,6 +9,17 @@ use think\exception\ValidateException;
 
 class UserService
 {
+    public static function list(array $where = [], string $field = '*', string $orderby = 'id desc', int $limit = 10, int $page = 1): array
+    {
+        $m = new UserModel();
+        return $m->getList($where, $field, $orderby, $limit, $page);
+    }
+
+    public static function info($id, string $field = '*'): array
+    {
+        $m = new UserModel();
+        return $m->infoById($id, $field);
+    }
     public static function writeLoginLog(int $userId, ?string $ip, string $deviceId = ''): void
     {
         try {

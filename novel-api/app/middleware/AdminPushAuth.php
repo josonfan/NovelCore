@@ -5,6 +5,7 @@ namespace app\middleware;
 
 use Closure;
 use think\Request;
+use app\exception\BusinessException;
 
 class AdminPushAuth
 {
@@ -13,7 +14,7 @@ class AdminPushAuth
         $token = (string) $request->header('X-Api-Token', '');
         $expected = (string) config('site.api_token', '');
         if ($token === '' || $expected === '' || !hash_equals($expected, $token)) {
-            return api_response(401, '未授权的后台推送', [])->code(401);
+            throw new BusinessException('未授权的后台推送', 401);
         }
         return $next($request);
     }

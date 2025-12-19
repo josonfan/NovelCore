@@ -17,7 +17,7 @@ class CacheModel extends Model
     {
         parent::__construct($data);
         $this->is_cache = env('CACHE.IS_CACHE', true);
-        $this->db_prefix = env('DATABASE.PREFIX', 'blad_');
+        $this->db_prefix = env('DATABASE.PREFIX', 'bl_');
     }
     /**
      * 获取缓存键名
@@ -70,7 +70,7 @@ class CacheModel extends Model
      * @param int $ttl 缓存过期时间
      * @return array|false
      */
-    public function infoById($id, $field = '*')
+    public function infoById($id, $field = '*'): array
     {
         $ttl = env('CACHE.TTL', 600);
         if (!$this->is_cache) {
@@ -121,7 +121,7 @@ class CacheModel extends Model
      */
     public function writeById($id, array $data): bool
     {
-        if (!$this->is_cache) {            
+        if (!$this->is_cache) {      
             $ok = self::persistById(static::class, $id, $data);
             return $ok;
         } 
@@ -187,9 +187,9 @@ class CacheModel extends Model
             $pk = $m->getPk();
             if (empty($id)) {
                 $id = $data[$pk]??0;
-            }
+            }   
             if(empty($id)){
-                $res =  (bool)$m->save($data);
+                $res =  (bool)$m->save($data);  
                 $id = (int)($m->$pk ?? 0);
                 $op = 'create';
             }else{

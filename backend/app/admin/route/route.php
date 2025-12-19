@@ -146,6 +146,9 @@ Route::group('CustomerServiceConfig', function () {
     Route::rule('save', 'CustomerServiceConfig/save', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
     
 });
+Route::group('Upload', function () {
+    Route::rule('file', 'Upload/file', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+});
 
 Route::group('CommentReviewConfig', function () {
     Route::rule('index', 'CommentReviewConfig/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
