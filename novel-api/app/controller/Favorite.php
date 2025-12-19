@@ -19,10 +19,7 @@ class Favorite extends Common
     public function favorite()
     {
         $novelId = $this->request->param('novelId', '', 'trim');
-        $userId = (int) ($this->request->user_id ?? 0);
-        if ($userId <= 0) {
-            return $this->ajaxReturn(401, '未登录或令牌无效', [])->code(401);
-        }
+        $userId = (int) ($this->request->user_id ?? 0);        
         $novel = \app\service\NovelService::getInfoByUuid($novelId, 'id,novel_uuid,fav_count');
         $existsId = UserNovelFavorite::where('user_id', $userId)
             ->where('novel_id', (int)$novel['id'])

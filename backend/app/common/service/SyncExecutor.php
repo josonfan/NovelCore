@@ -44,7 +44,7 @@ class SyncExecutor
             (new \app\common\model\SiteInitRecord())->writeById((int)$rec['id'], ['status' => 'pushing']);
             $rows = $model->where($model->getPk(), '>', $lastPk)->order($model->getPk() . ' asc')->limit($batch)->field($model->getPk())->select()->toArray();
             if (empty($rows)) {
-                (new \app\common\model\SiteInitRecord())->writeById((int)$rec['id'], ['status' => 'completed']);
+                (new \app\common\model\SiteInitRecord())->deleteById((int)$rec['id']);
                 $processed++;
                 continue;
             }
@@ -71,8 +71,7 @@ class SyncExecutor
 
     protected static function process(array $row): bool
     {
-        $q = new SyncQueue();
-        // $q->writeById((int)$row['id'], ['status' => 'processing', 'attempts' => (int)$row['attempts'] + 1, 'last_error' => null]);
+        $q = new SyncQueue();        
         $site = (new Sites())->cacheInfo((int)$row['site_id']);
         if (empty($site)) {
             $q->writeById((int)$row['id'], ['status' => 'failed', 'last_error' => 'site_not_found']);
@@ -85,12 +84,7 @@ class SyncExecutor
         $payload = json_encode(['type' => (string)$row['content_type'], 'id' => (int)$row['content_id'], 'operation' => (string)$row['operation'], 'data' => $data], JSON_UNESCAPED_UNICODE);
         $ok = self::postJson($url, $payload, $headers, (int)config('sync.timeout', 5));
         if ($ok) {
-            (new SyncQueue())->where('id', (int)$row['id'])->delete();
-            // if ((string)$row['operation'] === 'delete') {
-                
-            // } else {
-            //     $q->writeById((int)$row['id'], ['status' => 'success', 'last_error' => null]);
-            // }
+            (new SyncQueue())->deleteById((int)$row['id']);           
             return true;
         } else {
             $q->writeById((int)$row['id'], ['status' => 'failed', 'last_error' => 'push_failed']);

@@ -34,11 +34,9 @@ class Follow extends Common
     {
         $authorId = $this->request->param('authorId', 0, 'intval');
         $userId = (int) ($this->request->user_id ?? 0);
-        if ($userId <= 0) {
-            return $this->ajaxReturn(401, '未登录或令牌无效', [])->code(401);
-        }
+        
         $data = \app\service\FollowService::unfollowAuthor($userId, $authorId);
-        return $this->ajaxReturn(200, '已取消关注', $data);
+        return $this->ajaxReturn(200, '取消关注成功', $data);
     }
     /**
      * 关注小说
@@ -72,6 +70,6 @@ class Follow extends Common
             return $this->ajaxReturn(401, '未登录或令牌无效', [])->code(401);
         }
         $data = \app\service\FollowService::unfollowNovel($userId, $novelId);
-        return $this->ajaxReturn(200, '已取消关注', $data);
+        return $this->ajaxReturn(200, '取消关注成功', $data);
     }
 }

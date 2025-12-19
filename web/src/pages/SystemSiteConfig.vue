@@ -70,9 +70,26 @@
         </el-tab-pane>
         <el-tab-pane label="评论审核" name="commentReview">
           <el-form v-if="commentReview" :model="commentReview" label-width="140px" class="form">
-            <el-form-item v-for="k in keys(commentReview)" :key="k" :label="labelOf(k)">
-              <el-switch v-if="k==='is_active'" v-model="commentReview[k]" :active-value="1" :inactive-value="0" />
-              <el-input v-else v-model="commentReview[k]" />
+            <el-form-item label="启用">
+              <el-switch v-model="commentReview.enabled" :active-value="1" :inactive-value="0" />
+            </el-form-item>
+            <el-form-item label="需要人工审核">
+              <el-switch v-model="commentReview.require_approval" :active-value="1" :inactive-value="0" />
+            </el-form-item>
+            <el-form-item label="最大长度">
+              <el-input-number v-model="commentReview.max_length" :min="1" />
+            </el-form-item>
+            <el-form-item label="每分钟限制">
+              <el-input-number v-model="commentReview.max_per_minute" :min="1" />
+            </el-form-item>
+            <el-form-item label="违禁词列表">
+              <el-input 
+                v-model="commentReview.forbidden_words_str" 
+                type="textarea" 
+                :rows="4" 
+                placeholder="请输入违禁词，支持汉字、字母、数字、下划线及破折号。多个词可用逗号、换行或空格分隔。"
+                @input="onForbiddenWordsInput"
+              />
             </el-form-item>
             <div class="actions"><el-button type="primary" :loading="savingCommentReview" @click="onSaveCommentReview">保存</el-button></div>
           </el-form>
@@ -137,7 +154,7 @@ function defaultCustomerServiceConfig(){
   return { provider: '', base_url: '', api_key: '', webhook_url: '', is_active: 1 }
 }
 function defaultCommentReviewConfig(){
-  return { provider: '', base_url: '', api_key: '', is_active: 1 }
+  return { enabled: 1, require_approval: 1, max_length: 500, max_per_minute: 5, forbidden_words_json: [], forbidden_words_str: '' }
 }
 function defaultTelegramAuditConfig(){
   return { bot_token: '', chat_id: '', is_active: 1 }
@@ -248,7 +265,18 @@ watch(active, async (n) => {
     customerService.value = cfg || defaultCustomerServiceConfig()
   } else if (n === 'commentReview') {
     const cfg = await fetchCommentReviewConfigBySite(siteId)
-    commentReview.value = cfg || defaultCommentReviewConfig()
+    if (cfg) {
+      commentReview.value = {
+        enabled: cfg.enabled ?? 1,
+        require_approval: cfg.require_approval ?? 1,
+        max_length: cfg.max_length ?? 500,
+        max_per_minute: cfg.max_per_minute ?? 5,
+        forbidden_words_json: cfg.forbidden_words_json || [],
+        forbidden_words_str: (cfg.forbidden_words_json || []).join(',')
+      }
+    } else {
+      commentReview.value = defaultCommentReviewConfig()
+    }
   } else if (n === 'telegramAudit') {
     const cfg = await fetchTelegramAuditConfigBySite(siteId)
     telegramAudit.value = cfg || defaultTelegramAuditConfig()
@@ -268,7 +296,23 @@ async function onSaveCustomerService() {
   try { savingCustomerService.value = true; const res = await saveCustomerServiceConfig({ site_id: siteId, ...customerService.value }); if (res?.code===200) ElMessage.success('保存成功'); else ElMessage.error(res?.msg||'保存失败') } finally { savingCustomerService.value = false }
 }
 async function onSaveCommentReview() {
-  try { savingCommentReview.value = true; const res = await saveCommentReviewConfig({ site_id: siteId, ...commentReview.value }); if (res?.code===200) ElMessage.success('保存成功'); else ElMessage.error(res?.msg||'保存失败') } finally { savingCommentReview.value = false }
+  try { 
+    savingCommentReview.value = true; 
+    const payload = { ...commentReview.value }
+    delete payload.forbidden_words_str
+    const res = await saveCommentReviewConfig({ site_id: siteId, ...payload }); 
+    if (res?.code===200) ElMessage.success('保存成功'); 
+    else ElMessage.error(res?.msg||'保存失败') 
+  } finally { 
+    savingCommentReview.value = false 
+  }
+}
+
+function onForbiddenWordsInput(val: string) {
+  if (!commentReview.value) return
+  // Split by comma, newline, or space, and filter out empty strings
+  const arr = val.split(/[,，\n\s]+/).map(s => s.trim()).filter(s => s)
+  commentReview.value.forbidden_words_json = arr
 }
 async function onSaveTelegramAudit() {
   try { savingTelegramAudit.value = true; const res = await saveTelegramAuditConfig({ site_id: siteId, ...telegramAudit.value }); if (res?.code===200) ElMessage.success('保存成功'); else ElMessage.error(res?.msg||'保存失败') } finally { savingTelegramAudit.value = false }

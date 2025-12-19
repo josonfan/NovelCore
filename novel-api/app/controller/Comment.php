@@ -8,6 +8,9 @@ use app\model\CommentLike;
 use app\service\ContentService;
 use app\service\CommentService;
 use app\service\UserStatsService;
+use app\service\UserService;
+
+
 
 class Comment extends Common
 {
@@ -16,6 +19,8 @@ class Comment extends Common
      * 路由：POST /api/Comment/index
      * 鉴权：无需登录
      * 入参：novelId（外部 novel_uuid）, page, limit, order
+     * 筛选：`order`（默认desc）
+     * view（默认flat）flat 扁平列表 thread 对话/楼中楼模式（需指定rootId） tree 树形结构
      * 返回：data { list, count }
      */
     public function index()
@@ -50,34 +55,37 @@ class Comment extends Common
     public function store()
     {
         $novelId = $this->request->param('novelId', '', 'trim');
-        $user = $this->request->user;
+        $userId = (int) ($this->request->user_id ?? 0);
+        $user = (new UserService())->info($userId);
         $novel = \app\service\NovelService::getInfoByUuid($novelId, 'id,novel_uuid');
         $content = (string) $this->request->post('content', '');
         $parentId = (int) $this->request->post('parent_id', 0);
         $isR18 = 0;
-        $validated = CommentService::validateStore((int)$novel['id'], (int)$user->id, $content, $parentId);
+        $validated = CommentService::validateStore((int)$novel['id'], $userId, $content, $parentId);
         $rootId = $validated['root_id'];
+        $status = (int)($validated['status'] ?? 0);
         (new CommentModel())->writeById(0, [
             'novel_id'      => (int)$novel['id'],
             'chapter_id'    => null,
-            'user_id'       => $user->id,
+            'user_id'       => $userId,
             'parent_id'     => $parentId ?: null,
             'root_id'       => $rootId,
             'content'       => $validated['content'],
             'is_r18'        => $isR18,
-            'status'        => 0,
+            'status'        => $status,
             'review_source' => 0,
         ]);
-        UserStatsService::incCommentCount($user->id, 1);
+        UserStatsService::incCommentCount($userId, 1);
         CommentService::report([
             'id' => null,
             'content' => $validated['content'],
             'novel_id' => (int)$novel['id'],
             'chapter_id' => null,
-            'user_id' => $user->id,
+            'user_id' => $userId,
             'is_r18' => $isR18,
         ]);
-        return $this->ajaxReturn(200, '评论已提交，审核中', [
+        $msg = $status === 1 ? lang('评论成功') : lang('评论已提交，审核中');
+        return $this->ajaxReturn(200, $msg, [
             'id'         => null,
             'novel_id'   => (string)$novel['novel_uuid'],
             'chapter_id' => null,
@@ -86,13 +94,13 @@ class Comment extends Common
             'content'    => $content,
             'is_r18'     => (int)$isR18,
             'like_count' => 0,
-            'status'     => 0,
+            'status'     => $status,
             'review_source' => 0,
             'created_at' => date('Y-m-d H:i:s'),
             'user'       => [
-                'uid'      => $user->id,
-                'nickname' => $user->nickname,
-                'avatar'   => $user->avatar,
+                'uid'      => $userId,
+                'nickname' => $user['nickname'],
+                'avatar'   => $user['avatar'],
             ],
         ]);
     }
@@ -107,10 +115,7 @@ class Comment extends Common
     public function like()
     {
         $commentId = $this->request->param('commentId', 0, 'intval');
-        $userId = (int) ($this->request->user_id ?? 0);
-        if ($userId <= 0) {
-            return $this->ajaxReturn(401, '未登录或令牌无效', [])->code(401);
-        }
+        $userId = (int) ($this->request->user_id ?? 0);        
         $data = \app\service\CommentLikeService::like($userId, $commentId);
         return $this->ajaxReturn(200, '点赞成功', $data);
     }
@@ -126,9 +131,7 @@ class Comment extends Common
     {
         $commentId = $this->request->param('commentId', 0, 'intval');
         $userId = (int) ($this->request->user_id ?? 0);
-        if ($userId <= 0) {
-            return $this->ajaxReturn(401, '未登录或令牌无效', [])->code(401);
-        }
+        
         $data = \app\service\CommentLikeService::unlike($userId, $commentId);
         return $this->ajaxReturn(200, '已取消点赞', $data);
     }

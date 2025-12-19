@@ -16,7 +16,7 @@ class CommentReviewConfig extends Validate
         'require_approval' => 'in:0,1',
         'max_length' => 'number',
         'max_per_minute' => 'number',
-        'forbidden_words_json' => 'chsDash',
+        // 'forbidden_words_json' => 'chsDash',
     ];
 }
 

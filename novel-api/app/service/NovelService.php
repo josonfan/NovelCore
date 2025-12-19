@@ -29,6 +29,8 @@ class NovelService
         if (empty($novel)) {
             throw new DataNotFoundException('小说不存在');
         }
+        $storage = new StorageService();
+        $novel['cover'] = $storage->getPublicUrl((string) ($novel['cover'] ?? ''));
         return $novel;
     }
 
@@ -47,7 +49,14 @@ class NovelService
     public static function getList(array $where, string $fields = '*', string $order = '', int $page = 1, int $limit = 20): array
     {
         $m = new Novel();
-        return $m->getList($where, $fields, $order, $limit, $page);
+        $storage = new StorageService();
+        $row = $m->getList($where, $fields, $order, $limit, $page);
+        $list = [];
+        foreach ($row['list'] as $fav) {
+            $fav['cover'] = $storage->getPublicUrl((string) ($fav['cover'] ?? ''));
+            $list[] = $fav;
+        }
+        return ['list' => $list, 'count' => $row['count']];
     }
 
     /**

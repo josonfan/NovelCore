@@ -16,19 +16,12 @@ class ConfigService
      */
     public static function get(string $module, mixed $default = null): mixed
     {
-        $key = self::buildKey($module);
-
-        if (Cache::has($key)) {
-            return self::decode(Cache::get($key), $default);
-        }
-
-        $record = SystemConfig::find($key);
+        $m = new SystemConfig();
+        $record = $m->infoById($module);
         if (!$record) {
             return $default;
-        }
-
-        Cache::set($key, $record->config_value);
-        return self::decode($record->config_value, $default);
+        }        
+        return self::decode($record['config_value'], $default);
     }
 
     /**

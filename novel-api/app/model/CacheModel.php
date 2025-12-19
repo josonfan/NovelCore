@@ -168,7 +168,7 @@ class CacheModel extends Model
         if (!$id) {
             return false;
         }
-        $data = $this->find((int)$id);
+        $data = $this->find($id);
         // 获取对象原始数据,如果不存在指定字段返回false
         $data = !empty($data) ? $data->toArray() : [];
         return $data;

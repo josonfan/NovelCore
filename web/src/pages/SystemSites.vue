@@ -29,7 +29,7 @@
             <el-button link @click="onDetail(row)">详情</el-button>
             <el-button link type="primary" @click="onEdit(row)">编辑</el-button>
             <el-button link type="warning" @click="onToggle(row)">{{ row.is_active===1?'停用':'启用' }}</el-button>
-            <el-button link type="success" @click="onConfig(row)">站点配置</el-button>
+            <!-- <el-button link type="success" @click="onConfig(row)">站点配置</el-button> -->
             <el-button link type="success" @click="onInit(row)">初始化数据</el-button>
             <el-button link type="danger" @click="onDelete(row)">删除</el-button>
           </template>

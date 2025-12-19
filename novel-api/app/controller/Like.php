@@ -17,9 +17,7 @@ class Like extends Common
     {
         $novelId = $this->request->param('novelId', '', 'trim');
         $userId = (int) ($this->request->user_id ?? 0);
-        if ($userId <= 0) {
-            return $this->ajaxReturn(401, '未登录或令牌无效', [])->code(401);
-        }
+       
         $data = \app\service\LikeService::likeNovel($userId, $novelId);
         return $this->ajaxReturn(200, '点赞成功', $data);
     }

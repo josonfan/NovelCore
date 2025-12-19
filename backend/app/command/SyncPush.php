@@ -17,8 +17,11 @@ class SyncPush extends Command
 
     protected function execute(Input $input, Output $output)
     {
-        $n = SyncExecutor::run(50);
+        $start = microtime(true);
+        $n = SyncExecutor::run(500);
+        $elapsedMs = (int)round((microtime(true) - $start) * 1000);
         $output->writeln('pushed ' . $n . ' tasks');
+        $output->writeln('elapsed ' . $elapsedMs . ' ms');
         return true;
     }
 }

@@ -25,6 +25,7 @@ class Novel extends Common
         $limit = $this->request->param('limit', 20, 'intval');       
         $where = [];
         $where['category_id'] = $this->request->param('category_id', 0, 'intval');
+        if(empty($where['category_id']))unset($where['category_id']);
         $orderby  = 'created_at desc, id desc';
         $fields = 'novel_uuid as id,title,category_id,cover,intro,status,is_vip,word_count,updated_at';
         $result = NovelService::getList(formatWhere($where), $fields, $orderby, $page, $limit);       

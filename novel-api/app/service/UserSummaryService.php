@@ -15,7 +15,7 @@ class UserSummaryService
      */
     public static function summary(int $userId): array
     {
-        UserService::ensureUserExists($userId);
+        // UserService::ensureUserExists($userId);
         $user = UserService::info($userId, 'id,username,nickname,avatar,vip_expire,created_at');
         $statsModel = new UserProfileStats();
         $stored = $statsModel->infoById($userId, 'favorite_novel_count,read_novel_count,comment_count,total_read_minutes');

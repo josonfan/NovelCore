@@ -3,16 +3,33 @@ declare(strict_types=1);
 
 namespace app\service;
 
-use think\facade\Cache;
+use app\model\UserProfileStats;
 
 /**
  * 用户统计增量服务：将行为计数增量写入 Redis，后续定时任务合并入 user_profile_stats。
  */
 class UserStatsService
 {
-    protected static function key(int $userId): string
+    protected static function incField(int $userId, string $field, int $delta): void
     {
-        return 'user:stats:delta:' . $userId;
+        if ($delta === 0) {
+            return;
+        }
+        try {
+            $model = new UserProfileStats();
+            $current = $model->infoById($userId, $field);
+            $exists = !empty($current);
+            $newVal = (int)($current[$field] ?? 0) + (int)$delta;
+            if ($exists) {
+                $model->writeById($userId, [$field => $newVal]);
+            } else {
+                $model->writeById(0, [
+                    'user_id' => $userId,
+                    $field    => $newVal,
+                ]);
+            }
+        } catch (\Throwable $e) {
+        }
     }
 
     /**
@@ -20,7 +37,7 @@ class UserStatsService
      */
     public static function incFavoriteCount(int $userId, int $delta = 1): void
     {
-        Cache::store('redis')->handler()->hIncrBy(self::key($userId), 'favorite_novel_count', $delta);
+        self::incField($userId, 'favorite_novel_count', $delta);
     }
 
     /**
@@ -28,7 +45,7 @@ class UserStatsService
      */
     public static function incReadNovelCount(int $userId, int $delta = 1): void
     {
-        Cache::store('redis')->handler()->hIncrBy(self::key($userId), 'read_novel_count', $delta);
+        self::incField($userId, 'read_novel_count', $delta);
     }
 
     /**
@@ -36,7 +53,7 @@ class UserStatsService
      */
     public static function incCommentCount(int $userId, int $delta = 1): void
     {
-        Cache::store('redis')->handler()->hIncrBy(self::key($userId), 'comment_count', $delta);
+        self::incField($userId, 'comment_count', $delta);
     }
 
     /**
@@ -48,6 +65,6 @@ class UserStatsService
         if ($minutes <= 0) {
             return;
         }
-        Cache::store('redis')->handler()->hIncrBy(self::key($userId), 'total_read_minutes', $minutes);
+        self::incField($userId, 'total_read_minutes', $minutes);
     }
 }

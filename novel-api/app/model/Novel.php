@@ -20,7 +20,7 @@ class Novel extends BaseModel
      * @var array
      */
     protected $json = ['tags_json'];
-
+    
     /**
      * 作者关联。
      */

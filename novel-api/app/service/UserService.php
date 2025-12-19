@@ -17,8 +17,11 @@ class UserService
 
     public static function info($id, string $field = '*'): array
     {
+        $storage = new StorageService();
         $m = new UserModel();
-        return $m->infoById($id, $field);
+        $user = $m->infoById($id, $field);
+        $user['avatar'] = $storage->getPublicUrl($user['avatar'] ?? '');
+        return $user;
     }
     public static function writeLoginLog(int $userId, ?string $ip, string $deviceId = ''): void
     {
@@ -82,7 +85,7 @@ class UserService
 
     public static function ensureUserExists(int $userId): void
     {
-        $exists = UserModel::where('id', $userId)->value('id');
+        $exists = self::info($userId);
         if (!$exists) {
             throw new ValidateException('用户不存在');
         }

@@ -5,6 +5,7 @@ namespace app\controller;
 
 use app\model\UserReadLog;
 use app\model\UserReadingHistory;
+use app\service\ChapterService;
 use app\service\UserStatsService;
 use app\service\ContentService;
 
@@ -20,9 +21,9 @@ class Reading extends Common
     public function getProgress()
     {
         $novelId = $this->request->param('novelId', '', 'trim');
-        $user = $this->request->user;
+        $userId = (int) ($this->request->user_id ?? 0);
         $novel = \app\service\NovelService::getInfoByUuid($novelId, 'id,novel_uuid');
-        $historyId = UserReadingHistory::where('user_id', $user->id)
+        $historyId = UserReadingHistory::where('user_id', $userId)
             ->where('novel_id', (int)$novel['id'])
             ->value('id');
         if (!$historyId) {
@@ -33,14 +34,14 @@ class Reading extends Common
                 'progress'   => 0.0,
             ]);
         }
-        $chapterInfo = (new \app\model\Chapter())->infoById((int)UserReadingHistory::where('user_id', $user->id)
+        $chapterInfo = (new \app\model\Chapter())->infoById((int)UserReadingHistory::where('user_id', $userId)
             ->where('novel_id', (int)$novel['id'])
             ->value('chapter_id'), 'chapter_uuid as chapter_id,title');
         return $this->ajaxReturn(200, '获取成功', [
             'novel_id'   => (string)$novel['novel_uuid'],
             'chapter_id' => $chapterInfo['chapter_id'] ?? null,
             'title'      => $chapterInfo['title'] ?? null,
-            'progress'   => (float) UserReadingHistory::where('user_id', $user->id)
+            'progress'   => (float) UserReadingHistory::where('user_id', $userId)
                 ->where('novel_id', (int)$novel['id'])
                 ->value('progress'),
         ]);
@@ -56,27 +57,23 @@ class Reading extends Common
     public function saveProgress()
     {
         $novelId = $this->request->param('novelId', '', 'trim');
-        $user = $this->request->user;
+        $userId = (int) ($this->request->user_id ?? 0);
         $novel = \app\service\NovelService::getInfoByUuid($novelId, 'id,novel_uuid');
-        $chapterUuid = (string) $this->request->post('chapter_id', '');
+        $chapterUuid = (string) $this->request->post('chapterId', '');
         $progress    = (int) $this->request->post('progress', 100);
         // 查找章节（基于小说主键与外部章节UUID）
-        $chapter = \app\model\Chapter::where('novel_id', (int)$novel['id'])
-            ->where('chapter_uuid', $chapterUuid)
-            ->find();
-        if (!$chapter && ctype_digit($chapterUuid)) {
-            $chapter = \app\model\Chapter::where('novel_id', (int)$novel['id'])->find((int)$chapterUuid);
-        }
+        $chapter = ChapterService::getInfoByUuid($chapterUuid, 'id,chapter_uuid,title');
+        
         if (!$chapter) {
             throw new \think\exception\ValidateException('章节不存在');
         }
-        $historyId = UserReadingHistory::where('user_id', $user->id)
+        $historyId = UserReadingHistory::where('user_id', $userId)
             ->where('novel_id', (int)$novel['id'])
             ->value('id');
         $data = [
-            'user_id'     => $user->id,
+            'user_id'     => $userId,
             'novel_id'    => (int)$novel['id'],
-            'chapter_id'  => $chapter->id,
+            'chapter_id'  => $chapter['id'],
             'progress'    => max(0, min(100, $progress)),
             'last_read_at'=> date('Y-m-d H:i:s'),
         ];
@@ -84,12 +81,12 @@ class Reading extends Common
             (new UserReadingHistory())->writeById((int)$historyId, $data);
         } else {
             (new UserReadingHistory())->writeById(0, $data);
-            UserStatsService::incReadNovelCount($user->id, 1);
+            UserStatsService::incReadNovelCount($userId, 1);
         }
         return $this->ajaxReturn(200, '保存成功', [
             'novel_id'   => (string)$novel['novel_uuid'],
-            'chapter_id' => $chapter->chapter_uuid,
-            'title'      => $chapter->title,
+            'chapter_id' => $chapter['chapter_uuid'],
+            'title'      => $chapter['title'],
             'progress'   => $data['progress'],
         ]);
     }

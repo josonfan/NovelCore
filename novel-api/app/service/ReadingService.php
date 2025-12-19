@@ -39,12 +39,8 @@ class ReadingService
     public static function saveProgress(int $userId, string $novelUuid, string $chapterUuid, int $progress): array
     {
         $novel = NovelService::getInfoByUuid($novelUuid, 'id,novel_uuid');
-        $chapter = \app\model\Chapter::where('novel_id', (int)$novel['id'])
-            ->where('chapter_uuid', $chapterUuid)
-            ->find();
-        if (!$chapter && ctype_digit($chapterUuid)) {
-            $chapter = \app\model\Chapter::where('novel_id', (int)$novel['id'])->find((int)$chapterUuid);
-        }
+        $chapter = ChapterService::getInfoByUuid($chapterUuid, 'id,chapter_uuid,title');
+        
         if (!$chapter) {
             throw new ValidateException('章节不存在');
         }
@@ -54,7 +50,7 @@ class ReadingService
         $data = [
             'user_id'     => $userId,
             'novel_id'    => (int)$novel['id'],
-            'chapter_id'  => (int)$chapter->id,
+            'chapter_id'  => (int)$chapter['id'],
             'progress'    => max(0, min(100, $progress)),
             'last_read_at'=> date('Y-m-d H:i:s'),
         ];
@@ -66,8 +62,8 @@ class ReadingService
         }
         return [
             'novel_id'   => (string)$novel['novel_uuid'],
-            'chapter_id' => (string)$chapter->chapter_uuid,
-            'title'      => (string)$chapter->title,
+            'chapter_id' => (string)$chapter['chapter_uuid'],
+            'title'      => (string)$chapter['title'],
             'progress'   => $data['progress'],
         ];
     }
@@ -75,12 +71,8 @@ class ReadingService
     public static function writeHistory(int $userId, string $novelUuid, string $chapterUuid, bool $finished, int $durationSec): array
     {
         $novel = NovelService::getInfoByUuid($novelUuid, 'id,novel_uuid');
-        $chapter = \app\model\Chapter::where('novel_id', (int)$novel['id'])
-            ->where('chapter_uuid', $chapterUuid)
-            ->find();
-        if (!$chapter && ctype_digit($chapterUuid)) {
-            $chapter = \app\model\Chapter::where('novel_id', (int)$novel['id'])->find((int)$chapterUuid);
-        }
+        $chapter = ChapterService::getInfoByUuid($chapterUuid, 'id,chapter_uuid,title');
+        
         if (!$chapter) {
             throw new ValidateException('章节不存在');
         }
@@ -88,7 +80,7 @@ class ReadingService
         (new UserReadLog())->writeById(0, [
             'user_id'      => $userId,
             'novel_id'     => (int)$novel['id'],
-            'chapter_id'   => (int)$chapter->id,
+            'chapter_id'   => (int)$chapter['id'],  
             'start_time'   => date('Y-m-d H:i:s'),
             'end_time'     => null,
             'duration_sec' => $durationSec,
@@ -105,7 +97,7 @@ class ReadingService
         $data = [
             'user_id'     => $userId,
             'novel_id'    => (int)$novel['id'],
-            'chapter_id'  => (int)$chapter->id,
+            'chapter_id'  => (int)$chapter['id'],  
             'progress'    => $finished ? 100 : 0,
             'last_read_at'=> date('Y-m-d H:i:s'),
         ];
@@ -117,7 +109,7 @@ class ReadingService
         }
         return [
             'novel_id'    => (string)$novel['novel_uuid'],
-            'chapter_id'  => (string)$chapter->chapter_uuid,
+            'chapter_id'  => (string)$chapter['chapter_uuid'],
             'progress'    => $data['progress'],
             'last_read_at'=> $data['last_read_at'],
         ];

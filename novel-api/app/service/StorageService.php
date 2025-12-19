@@ -14,12 +14,13 @@ class StorageService
      */
     public function getPublicUrl(string $path): string
     {
+        $config = (new ConfigService())->get('storage_config');
         $path = ltrim($path, '/');
         if ($path === '' || str_starts_with($path, 'http')) {
             return $path;
         }
 
-        $cdn = rtrim((string) config('storage.cdn_domain', ''), '/');
+        $cdn = rtrim((string) $config['base_url'], '/');
         if ($cdn !== '') {
             return $cdn . '/' . $path;
         }
