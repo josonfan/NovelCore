@@ -22,20 +22,20 @@ function start_async_task {
     if is_process_running "$pid_file"; then
         echo "${queue_name} is already running"
     else
-        nohup php84 think queue:work --queue "$queue_name" --timeout 3600 >> "runtime/${log_prefix}_$(date +%Y-%m-%d).log" 2>&1 &
+        nohup php84 think queue:work --queue "$queue_name" --sleep 10 --timeout 3600 >> "runtime/${log_prefix}_$(date +%Y-%m-%d).log" 2>&1 &
         echo "$!" > "$pid_file"
         echo "${queue_name} start success"
     fi
 }
 
 # 启动异步任务
-for i in $(seq 0 5);
+for i in $(seq 1 3);
 do
     start_async_task "blad_exec_method_custom${i}" "blad_async${i}" "blad_async${i}_pid"
 done
 
 # 启动同步异步任务
-for i in $(seq 0 9);
+for i in $(seq 1 2);
 do
     start_async_task "sync_exec_method_custom${i}" "sync_async${i}" "sync_async${i}_pid"
 done

@@ -4,10 +4,10 @@ use Baiy\ThinkAsync\Subscribe\ConfigFileEventGetter;
 use Baiy\ThinkAsync\Subscribe\DemoSubscriber;
 $uniExecMethods = [];
 $syncUniExecMethods = [];
-for ($i = 1; $i <= 5; $i++) {
+for ($i = 1; $i <= 3; $i++) {
     $uniExecMethods['blad_exec_method_custom' . $i] = '自定义异步执行队列';
 }
-for ($i = 1; $i <= 9; $i++) {
+for ($i = 1; $i <= 2; $i++) {
     $syncUniExecMethods['sync_exec_method_custom' . $i] = '自定义同步异步执行队列';    
 }
 return [

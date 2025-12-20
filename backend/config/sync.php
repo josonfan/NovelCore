@@ -15,6 +15,8 @@ return [
         'novel_tags',
         'chapters',
         'chapter_contents', 
+        'site_comments',
+        'site_users',
     ],
     'push_path' => '/Sync/receive',
     'timeout' => 5,

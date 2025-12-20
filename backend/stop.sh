@@ -12,13 +12,13 @@ function stop_process {
     fi
 }
 
-for i in $(seq 0 5);
+for i in $(seq 1 5);
 do
     stop_process "blad_async${i}_pid"
 done
 
 # 停止同步异步任务
-for i in $(seq 0 9);
+for i in $(seq 1 9);
 do
     stop_process "sync_async${i}_pid"
 done

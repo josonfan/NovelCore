@@ -165,6 +165,22 @@ Route::group('TelegramAuditConfig', function () {
     Route::rule('save', 'TelegramAuditConfig/save', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
     
 });
+/**
+ * SiteUsers 接口（用户管理）
+ */
+Route::group('SiteUsers', function () {
+    Route::rule('index', 'SiteUsers/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'SiteUsers/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('setStatus', 'SiteUsers/setStatus', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+});
+/**
+ * SiteComments 接口（评论管理）
+ */
+Route::group('SiteComments', function () {
+    Route::rule('index', 'SiteComments/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'SiteComments/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('audit', 'SiteComments/audit', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+});
 
 /**
  * Categories 接口（分类管理）

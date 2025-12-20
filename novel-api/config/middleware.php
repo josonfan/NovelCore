@@ -4,6 +4,7 @@ return [
     'alias'    => [
         'lang' => \think\middleware\LoadLangPack::class,
         'site_init' => \app\middleware\SiteInit::class,
+        'bot_block' => \app\middleware\BotBlock::class,
         'cors' => \app\middleware\Cors::class,
         'auth' => \app\middleware\Auth::class,
         'admin_auth' => \app\middleware\AdminAuth::class,
@@ -13,6 +14,7 @@ return [
     'priority' => [
         \think\middleware\LoadLangPack::class,
         \app\middleware\SiteInit::class,
+        \app\middleware\BotBlock::class,
         \app\middleware\ResponseTime::class,
         \app\middleware\Cors::class,
         \app\middleware\Auth::class,

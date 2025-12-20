@@ -4,6 +4,7 @@ namespace app\common\model;
 use think\Model;
 use think\facade\Cache;
 use Baiy\ThinkAsync\Facade\Async;
+use think\facade\Db;
 /**
  * 缓存模型
  * @package app\common\model
@@ -189,6 +190,9 @@ class CacheModel extends Model
             if (empty($id)) {
                 $id = $data[$pk]??0;
             }
+            if (method_exists($m, 'filterAllowedFields')) {
+                $data = $m->filterAllowedFields($data);
+            }
             if(empty($id)){
                 $res =  (bool)$m->save($data);
                 $id = (int)($m->$pk ?? 0);
@@ -207,7 +211,15 @@ class CacheModel extends Model
                 $name = method_exists($m,'getName') ? (string)$m->getName() : '';
                 $enabledTables = (array)(config('sync.enable_types') ?? []);
                 if ($name && in_array($name, $enabledTables, true)) {
-                    \app\common\service\SyncService::enqueue($name, (int)$id, $op);
+                    if(in_array($name, ['site_comments', 'site_users'])){
+                        $site_id = $m->where($pk, $id)->value('site_id');
+                        if(!empty($site_id)){
+                           \app\common\service\SyncService::enqueueForSite((int)$site_id, $name, (int)$id, $op);
+                        }
+                    }else{
+                        \app\common\service\SyncService::enqueue($name, (int)$id, $op);
+                    }
+                    
                 }
             }
             return $res;
@@ -287,5 +299,29 @@ class CacheModel extends Model
         } catch (\Throwable $e) {
             return false;
         }
+    }
+    protected function filterAllowedFields(array $data, array $fallback = []): array
+    {
+        $table = $this->getTable();
+        $fields = [];
+        try {
+            $fields = Db::getTableFields($table);
+        } catch (\Throwable $e) {
+            try {
+                $cols = Db::query('SHOW COLUMNS FROM ' . $table);
+                foreach ((array)$cols as $col) {
+                    if (isset($col['Field'])) {
+                        $fields[] = $col['Field'];
+                    }
+                }
+            } catch (\Throwable $e2) {
+                $fields = $fallback;
+            }
+        }
+        if (!$fields) {
+            return [];
+        }
+        $allowed = array_fill_keys($fields, true);
+        return array_intersect_key($data, $allowed);
     }
 }

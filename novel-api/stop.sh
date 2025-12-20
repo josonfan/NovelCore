@@ -12,10 +12,16 @@ function stop_process {
     fi
 }
 
-for i in $(seq 0 5);
+for i in $(seq 1 5);
 do
     stop_process "bl_async${i}_pid"
 done
+
+for i in $(seq 1 9);
+do
+    stop_process "bl_sync_async${i}_pid"
+done
+
 
 
 

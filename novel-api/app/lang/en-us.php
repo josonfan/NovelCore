@@ -33,4 +33,5 @@ return [
     '评论太频繁' => 'Comment too frequent',
     '请勿重复发表评论' => 'Duplicate comment not allowed',
     '父评论不存在' => 'Parent comment not found',
+    '禁止爬虫访问' => 'Bot access is not allowed',
 ];

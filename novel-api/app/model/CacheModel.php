@@ -3,6 +3,7 @@ namespace app\model;
 
 use think\Model;
 use think\facade\Cache;
+use think\facade\Db;
 use Baiy\ThinkAsync\Facade\Async;
 /**
  * 缓存模型
@@ -181,13 +182,16 @@ class CacheModel extends Model
      * @return bool
      */
     public static function persistById(string $modelClass, $id, array $data): bool
-    {        
+    {  
         try {
             $m = new $modelClass();
             $pk = $m->getPk();
             if (empty($id)) {
                 $id = $data[$pk]??0;
-            }   
+            }
+            if (method_exists($m, 'filterAllowedFields')) {
+                $data = $m->filterAllowedFields($data);
+            }
             if(empty($id)){
                 $res =  (bool)$m->save($data);  
                 $id = (int)($m->$pk ?? 0);
@@ -311,6 +315,31 @@ class CacheModel extends Model
         } catch (\Throwable $e) {
             return false;
         }
+    }
+
+    protected function filterAllowedFields(array $data, array $fallback = []): array
+    {
+        $table = $this->getTable();
+        $fields = [];
+        try {
+            $fields = Db::getTableFields($table);
+        } catch (\Throwable $e) {
+            try {
+                $cols = Db::query('SHOW COLUMNS FROM ' . $table);
+                foreach ((array)$cols as $col) {
+                    if (isset($col['Field'])) {
+                        $fields[] = $col['Field'];
+                    }
+                }
+            } catch (\Throwable $e2) {
+                $fields = $fallback;
+            }
+        }
+        if (!$fields) {
+            return [];
+        }
+        $allowed = array_fill_keys($fields, true);
+        return array_intersect_key($data, $allowed);
     }
 
 }

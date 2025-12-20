@@ -22,6 +22,7 @@ class SyncReceiveService
             if (empty($payload) && !in_array($op, ['delete', 'remove'], true)) {
                 return false;
             }
+            $config_type = '';
             if (str_ends_with($type, '_config')) {
                 $config_type = $type;
                 $type = 'system_config';
@@ -35,7 +36,7 @@ class SyncReceiveService
             if (isset($payload[$pk]) && $id === null) {
                 $id = $payload[$pk];
             }
-            $payload = self::formatPayload($type, $payload);
+            $payload = self::formatPayload($type, $payload,$config_type);
             if ($type === 'system_config') {
                 $id = $config_type;
                 $payload=[
@@ -49,7 +50,7 @@ class SyncReceiveService
                 case 'upsert':
                 case 'save':
                 case 'create':
-                case 'insert':
+                case 'insert':                    
                     $ok = $model->writeById($id ?? 0, $payload);
                     break;
                 case 'delete':
@@ -67,10 +68,11 @@ class SyncReceiveService
             // self::save($raw);
             return (bool)$ok;
         } catch (\Throwable $e) {
+            trace($e->getMessage());
             return false;
         }
     }
-    private static function formatPayload(string $type, array $payload,$config_type=''): array
+    private static function formatPayload(string $type, array $payload,string $config_type=''): array
     {
         $unset = [];
         switch ($type) {
@@ -93,6 +95,14 @@ class SyncReceiveService
             case 'system_config':
                 $unset = ['site_id','updated_at'];
                 break;
+            case 'site_users':
+                $payload['id'] =$payload['user_id'];
+                $unset = ['user_id','site_id','last_synced_at'];
+                break;
+            case 'site_comments':
+                $payload['id'] =$payload['comment_id'];
+                $unset = ['comment_id','site_id','last_synced_at'];
+                break;
             default:
                 break;
         }
@@ -113,6 +123,8 @@ class SyncReceiveService
             'novel_tags' => \app\model\NovelTag::class,
             'domain_list' => \app\model\Domain::class,
             'system_config' => \app\model\SystemConfig::class,
+            'site_users' => \app\model\User::class,
+            'site_comments' => \app\model\Comment::class,
             default      => null,
         };
     }
