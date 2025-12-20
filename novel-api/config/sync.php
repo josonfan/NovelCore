@@ -1,8 +1,8 @@
 <?php
 return [
     'enable_types' => [
-        'users',
-        'comments',
+        'user',
+        'comment',
     ],
     'push_path' => '/Sync/receive',
     'timeout' => 5,

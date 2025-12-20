@@ -5,5 +5,5 @@ return [
     \app\middleware\SiteInit::class,
     \app\middleware\ResponseTime::class,
     \think\middleware\LoadLangPack::class,
-    \app\middleware\BotBlock::class,
+    // \app\middleware\BotBlock::class,
 ];

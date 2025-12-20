@@ -41,6 +41,7 @@ Route::group('api', function () {
         // 用户
         Route::rule('User/logout', 'User/logout', 'POST');
         Route::rule('User/info', 'User/info', 'GET');
+        Route::rule('User/update', 'User/update', 'POST');
         Route::rule('Favorite/list', 'Favorite/list', 'POST');
         Route::rule('Reading/listHistory', 'Reading/listHistory', 'POST');
         Route::rule('Reading/saveHistory', 'Reading/saveHistory', 'POST');

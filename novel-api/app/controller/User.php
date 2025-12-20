@@ -65,4 +65,20 @@ class User extends Common
         $user = UserService::info($userId,$field);
         return $this->ajaxReturn(200, '用户信息', $user);
     }
+
+    /**
+     * 编辑用户信息
+     * 路由：POST /api/User/update
+     * 鉴权：需登录
+     * 入参：nickname?, email?, avatar?
+     * 返回：data 用户主表/视图字段
+     */
+    public function update()
+    {
+        $userId = (int)($this->request->user_id ?? 0);
+        $postField = 'nickname,email,avatar';
+        $data = $this->request->only(explode(',', $postField), 'post', null);
+        $res = UserService::update($userId, $data);
+        return $this->ajaxReturn(200, '保存成功', $res);
+    }
 }

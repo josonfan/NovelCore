@@ -90,4 +90,33 @@ class UserService
             throw new ValidateException('用户不存在');
         }
     }
+
+    public static function update(int $userId, array $data): array
+    {
+        self::ensureUserExists($userId);
+        $nickname = isset($data['nickname']) ? trim((string)$data['nickname']) : null;
+        $email = isset($data['email']) ? trim((string)$data['email']) : null;
+        $avatar = isset($data['avatar']) ? trim((string)$data['avatar']) : null;
+        $update = [];
+        if ($nickname !== null) {
+            if ($nickname === '' || mb_strlen($nickname) > 32) {
+                throw new ValidateException('昵称长度不合法');
+            }
+            $update['nickname'] = $nickname;
+        }
+        if ($email !== null) {
+            if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                throw new ValidateException('邮箱格式不正确');
+            }
+            $update['email'] = $email;
+        }
+        if ($avatar !== null) {
+            $update['avatar'] = $avatar;
+        }
+        if (!$update) {
+            throw new ValidateException('参数错误');
+        }
+        (new UserModel())->writeById($userId, $update);
+        return self::info($userId, 'id,username,email,nickname,avatar,status');
+    }
 }

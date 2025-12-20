@@ -18,6 +18,9 @@ class CacheModel extends Model
     {
         parent::__construct($data);
         $this->is_cache = env('CACHE.IS_CACHE', true);
+        if(env('QUEUE.DRIVER', 'sync')==='sync'){
+            $this->is_cache = false;
+        }
         $this->db_prefix = env('DATABASE.PREFIX', 'blad_');
     }
     /**
@@ -141,7 +144,7 @@ class CacheModel extends Model
             $updKey = $this->getCacheKey($id, 'upd');
         }
         $ok = $this->setCacheData($updKey, $info, 0);
-        Async::delayUseCustomQueue(0, \app\common\model\CacheModel::class, 'persistByIdRef', getAsyncQueueKey(md5((string)$id), $type), static::class, $id, $updKey);
+        Async::delayUseCustomQueue(0, \app\common\model\CacheModel::class, 'persistByIdRef', getAsyncQueueKey(md5((string)$id), $type), static::class, $id, $updKey);       
         return $ok;
     }
     /**
@@ -206,7 +209,8 @@ class CacheModel extends Model
                     $res = (bool)$m->where($pk,$id)->save($data);
                 }
                 $op = 'update';
-            }
+            } 
+            
             if ($res) {
                 $name = method_exists($m,'getName') ? (string)$m->getName() : '';
                 $enabledTables = (array)(config('sync.enable_types') ?? []);
@@ -222,6 +226,7 @@ class CacheModel extends Model
                     
                 }
             }
+           
             return $res;
         } catch (\Throwable $e) {
             return false;

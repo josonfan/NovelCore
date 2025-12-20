@@ -42,7 +42,9 @@ class SyncReceiveService
                 $id = $payload[$pk];
             }
             $payload = self::formatPayload($model,$type, $payload, $siteId);
-            
+            if(!empty($payload[$pk])&&(int)$id!==(int)$payload[$pk]){
+                $id = $payload[$pk];
+            }
             $ok = false;            
             switch ($op) {
                 case 'update':

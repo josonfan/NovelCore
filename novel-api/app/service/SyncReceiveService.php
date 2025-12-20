@@ -37,6 +37,9 @@ class SyncReceiveService
                 $id = $payload[$pk];
             }
             $payload = self::formatPayload($type, $payload,$config_type);
+            if(!empty($payload[$pk])&&(int)$id!==(int)$payload[$pk]){
+                $id = $payload[$pk];
+            }
             if ($type === 'system_config') {
                 $id = $config_type;
                 $payload=[

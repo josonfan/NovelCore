@@ -18,6 +18,9 @@ class CacheModel extends Model
     {
         parent::__construct($data);
         $this->is_cache = env('CACHE.IS_CACHE', true);
+        if(env('QUEUE.DRIVER', 'sync')==='sync'){
+            $this->is_cache = false;
+        }
         $this->db_prefix = env('DATABASE.PREFIX', 'bl_');
     }
     /**
@@ -218,7 +221,7 @@ class CacheModel extends Model
                 $enabled = (array)(config('sync.enable_types') ?? []);
                 if ($type && in_array($type, $enabled, true)) {
                     \app\service\SyncService::enqueue($type, (int)$id, $op);
-                }
+                }                
             }
             return $res;
         } catch (\Throwable $e) {
