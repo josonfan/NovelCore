@@ -45,6 +45,7 @@ class SyncReceiveService
                 $payload=[
                     'config_key' => $id,
                     'config_value' => json_encode($payload,JSON_UNESCAPED_UNICODE),
+                    'updated_at' => date('Y-m-d H:i:s'),
                 ];
             }
             $ok = false;            

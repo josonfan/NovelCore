@@ -38,6 +38,9 @@ Route::group('api', function () {
 
     // 需要登录的接口
     Route::group(function () {
+        // 文件上传
+        Route::rule('Upload/file', 'Upload/file', 'POST');
+
         // 用户
         Route::rule('User/logout', 'User/logout', 'POST');
         Route::rule('User/info', 'User/info', 'GET');
