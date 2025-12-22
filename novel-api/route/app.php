@@ -18,11 +18,14 @@ Route::group('api', function () {
     Route::rule('Category/info', 'Category/info', 'POST');
     Route::rule('Tag/index', 'Tag/index', 'POST');
     Route::rule('Tag/info', 'Tag/info', 'POST');
-    Route::rule('Health/index', 'Health/index', 'GET');
+    
 
     // 小说列表与详情（统一 Controller/Action，参数走 Body）
     Route::rule('Novel/index', 'Novel/index', 'POST');
     Route::rule('Novel/show', 'Novel/show', 'POST');
+    // VIP 套餐列表与详情
+    Route::rule('Vip/index', 'Vip/index', 'POST');
+    Route::rule('Vip/info', 'Vip/info', 'POST');
 
     // 章节列表与内容（统一 Controller/Action，参数走 Body）
     Route::rule('Chapter/index', 'Chapter/index', 'POST');
@@ -35,7 +38,7 @@ Route::group('api', function () {
     Route::rule('Domain/index', 'Domain/index', 'POST');
     Route::rule('UserSummary/summary', 'UserSummary/summary', 'GET')->middleware(\app\middleware\Auth::class);
     Route::rule('Sync/receive', 'Sync/receive', 'POST')->middleware(\app\middleware\AdminPushAuth::class);
-
+    Route::rule('Health/index', 'Health/index', 'GET')->middleware(\app\middleware\AdminPushAuth::class);
     // 需要登录的接口
     Route::group(function () {
         // 文件上传
@@ -45,9 +48,15 @@ Route::group('api', function () {
         Route::rule('User/logout', 'User/logout', 'POST');
         Route::rule('User/info', 'User/info', 'GET');
         Route::rule('User/update', 'User/update', 'POST');
+        // 小说用户状态
+        Route::rule('Novel/userStatus', 'Novel/userStatus', 'POST');
+        // 订单
+        Route::rule('Order/add', 'Order/add', 'POST');
+        Route::rule('Order/affirmBuy', 'Order/affirmBuy', 'POST');
         Route::rule('Favorite/list', 'Favorite/list', 'POST');
         Route::rule('Reading/listHistory', 'Reading/listHistory', 'POST');
         Route::rule('Reading/saveHistory', 'Reading/saveHistory', 'POST');
+        Route::rule('Novel/userStatus', 'Novel/userStatus', 'POST');
 
         // 点赞小说
         Route::rule('Like/like', 'Like/like', 'POST');
@@ -71,6 +80,8 @@ Route::group('api', function () {
 
     // 评论列表无需登录（统一 Controller/Action）
     Route::rule('Comment/index', 'Comment/index', 'POST');
+    // 支付回调无需登录
+    Route::rule('Order/notify', 'Order/notify', 'POST');
 
     // 后台只读接口，受 AdminAuth 保护
     Route::group('admin', function () {
@@ -92,6 +103,7 @@ Route::group('api', function () {
         Route::post('config/recommendation', 'admin.Config/saveRecommendation');
         Route::post('config/domains', 'admin.Config/saveDomains');
         Route::get('stats/daily', 'admin.Stats/getDailyStats');
+        
     })->middleware(\app\middleware\AdminAuth::class);
 });
 

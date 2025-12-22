@@ -17,6 +17,8 @@ return [
         'chapter_contents', 
         'site_comments',
         'site_users',
+        'payment_channel',
+        'vip',
     ],
     'push_path' => '/Sync/receive',
     'timeout' => 5,

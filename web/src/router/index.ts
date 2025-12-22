@@ -24,6 +24,10 @@ const routes: RouteRecordRaw[] = [
       { path: 'content/novels', name: 'content-novels', component: () => import('../pages/ContentNovels.vue'), meta: { title: '小说管理' } },
       { path: 'content/chapters', name: 'content-chapters', component: () => import('../pages/ContentChapters.vue'), meta: { title: '章节管理' }, beforeEnter: () => ({ name: 'content-novels' }) },
       { path: 'content/novels/:id/chapters', name: 'content-novel-chapters', component: () => import('../pages/ContentChapters.vue'), meta: { title: '章节管理' } },
+      { path: 'system/payments', name: 'system-payments', component: () => import('../pages/SystemPayments.vue'), meta: { title: '支付渠道' } },
+      { path: 'financial/payment_channel', name: 'financial-payment-channel', component: () => import('../pages/SystemPayments.vue'), meta: { title: '支付渠道' } },
+      { path: 'system/vip', name: 'system-vip', component: () => import('../pages/Vip.vue'), meta: { title: 'VIP套餐' } },
+      { path: 'financial/vip', name: 'financial-vip', component: () => import('../pages/Vip.vue'), meta: { title: 'VIP套餐' } },
     ],
   },
 ]

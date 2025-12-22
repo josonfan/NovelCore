@@ -34,4 +34,7 @@ return [
     '请勿重复发表评论' => 'Duplicate comment not allowed',
     '父评论不存在' => 'Parent comment not found',
     '禁止爬虫访问' => 'Bot access is not allowed',
+    '支付渠道不存在' => 'Payment channel not found',
+    '支付渠道不存在或已下线' => 'Payment channel not found or disabled',
+    '签名错误' => 'Signature error',
 ];

@@ -22,6 +22,10 @@ class LikeService
             (new NovelModel())->writeById((int)$novel['id'], [
                 'like_count' => (int)($novel['like_count'] ?? 0) + 1,
             ]);
+        }else{
+            $model = new UserNovelLike();
+            $cacheLikeKey = $model->getCacheKey($existsId,'del');
+            cache()->delete($cacheLikeKey);
         }
         return [
             'novel_id' => (string)$novel['novel_uuid'],
@@ -36,7 +40,11 @@ class LikeService
             ->where('novel_id', (int)$novel['id'])
             ->value('id');
         if ($likeId) {
-            (new UserNovelLike())->deleteById((int)$likeId);
+            $model = new UserNovelLike();
+            $data=['user_id' => (int)$userId,'novel_id' => (int)$novel['id']];
+            $cacheLikeKey = $model->getCacheKey(md5(json_encode($data, JSON_UNESCAPED_UNICODE)),'upd');
+            cache()->delete($cacheLikeKey);
+            $model->deleteById($likeId);
             $newCount = max(0, (int)($novel['like_count'] ?? 0) - 1);
             (new NovelModel())->writeById((int)$novel['id'], [
                 'like_count' => $newCount,

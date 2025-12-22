@@ -107,3 +107,18 @@ if (!function_exists('formatWhere')) {
         return $where;
     }
 }
+
+if (!function_exists('getUidByID')) {
+
+    function getUidByID($id): int
+    {
+        return $id+env('SITE.ID_OFFSET');
+    }
+}
+if (!function_exists('getIDByUid')) {
+
+    function getIDByUid($uid): int
+    {
+        return $uid-env('SITE.ID_OFFSET');
+    }
+}

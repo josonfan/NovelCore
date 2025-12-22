@@ -107,6 +107,10 @@ class SyncReceiveService
                 $payload['id'] =$payload['comment_id'];
                 $unset = ['comment_id','site_id','last_synced_at'];
                 break;
+            case 'payment_channel':
+                break;
+            case 'vip':
+                break;        
             default:
                 break;
         }
@@ -129,6 +133,8 @@ class SyncReceiveService
             'system_config' => \app\model\SystemConfig::class,
             'site_users' => \app\model\User::class,
             'site_comments' => \app\model\Comment::class,
+            'payment_channel' => \app\model\PaymentChannel::class,
+            'vip' => \app\model\Vip::class,
             default      => null,
         };
     }

@@ -310,7 +310,6 @@ async function onSaveCommentReview() {
 
 function onForbiddenWordsInput(val: string) {
   if (!commentReview.value) return
-  // Split by comma, newline, or space, and filter out empty strings
   const arr = val.split(/[,，\n\s]+/).map(s => s.trim()).filter(s => s)
   commentReview.value.forbidden_words_json = arr
 }

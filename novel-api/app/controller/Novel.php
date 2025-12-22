@@ -52,4 +52,24 @@ class Novel extends Common
         $row = \app\service\NovelService::getInfoByUuid($novelId, $fields);        
         return $this->ajaxReturn(200, '获取成功', $row);
     }
+    /**
+     * 小说用户状态（点赞、收藏）
+     *
+     * 路由：POST /api/Novel/userStatus
+     * 鉴权：登录用户
+     * 参数：novelId 使用 `novel_uuid`（兼容内部数值ID）
+     * 返回：data { is_liked: 0/1, is_favorited: 0/1 }
+     *
+     * @return \think\Response
+     */
+    public function userStatus()
+    {
+        $novelId = (string)$this->request->param('novelId', '');      
+        if (empty($novelId)) {
+            throw new ValidateException('小说ID不能为空');
+        }
+        $userId = (int)($this->request->user_id ?? 0);
+        $status = \app\service\NovelService::getUserStatus($novelId, $userId);
+        return $this->ajaxReturn(200, '获取成功', $status);
+    }
 }

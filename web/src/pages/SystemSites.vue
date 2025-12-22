@@ -39,7 +39,6 @@
         <el-pagination background layout="prev, pager, next, jumper, sizes, total" :page-size="limit" :current-page="page" :total="total" @current-change="onPage" @size-change="onSize" :page-sizes="[10,20,50]" />
       </div>
     </el-card>
-
     <el-dialog v-model="showForm" :title="formMode==='add'?'新建站点':'编辑站点'" width="560px">
       <el-form :model="form" label-width="100px">
         <el-form-item label="名称"><el-input v-model="form.name" /></el-form-item>
@@ -56,7 +55,22 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="showDetail" title="站点详情" width="560px">
+    <el-dialog v-model="showDetail" title="站点详情" width="800px">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px">
+        <el-button :loading="healthLoading" @click="checkHealth">检测状态</el-button>
+        <template v-if="health">
+          <el-tag :type="health.db ? 'success' : 'danger'">DB：{{ health.db ? '正常' : '异常' }}</el-tag>
+          <el-tag :type="health.cache ? 'success' : 'danger'">Cache：{{ health.cache ? '正常' : '异常' }}</el-tag>
+          <span style="color: var(--nc-muted); font-size: 12px">语言：{{ health.lang }}，时间：{{ formatTime(health.ts) }}</span>
+        </template>
+        <el-tag v-if="healthFailed" type="danger">检测失败</el-tag>
+      </div>
+      <div v-if="health && health.queue" style="display:grid; gap:8px; margin-bottom:8px">
+        <div style="font-weight:600">队列状态</div>
+        <div style="display:flex; flex-wrap:wrap; gap:8px">
+          <el-tag v-for="(val, key) in health.queue" :key="key" :type="Number(val)===0 ? 'success' : 'warning'">{{ key }}：{{ val }}</el-tag>
+        </div>
+      </div>
       <el-descriptions :column="2" border>
         <el-descriptions-item label="ID">{{ detail?.id }}</el-descriptions-item>
         <el-descriptions-item label="名称">{{ detail?.name }}</el-descriptions-item>
@@ -68,6 +82,7 @@
         <el-descriptions-item label="创建时间">{{ detail?.created_at }}</el-descriptions-item>
         <el-descriptions-item label="更新时间">{{ detail?.updated_at }}</el-descriptions-item>
       </el-descriptions>
+      
     </el-dialog>
 
     <el-dialog v-model="showConfig" title="站点配置" width="860px">
@@ -77,11 +92,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import SystemSiteConfig from './SystemSiteConfig.vue'
 import { fetchSiteList, fetchSiteDetail, createSite, updateSite, toggleSite, deleteSite, initSite } from '../api/sites'
+import { http } from '../api/http'
 
 const router = useRouter()
 const page = ref(1)
@@ -97,6 +113,26 @@ const showDetail = ref(false)
 const detail = ref<any>(null)
 const showConfig = ref(false)
 const currentSiteId = ref<number|string>('')
+const health = ref<any>(null)
+const healthLoading = ref(false)
+const healthFailed = ref(false)
+let healthTimer: any = null
+function formatTime(ts: any){
+  const n = Number(ts || 0)
+  if (!n) return ''
+  const d = new Date(n * 1000)
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  const hh = String(d.getHours()).padStart(2, '0')
+  const mm = String(d.getMinutes()).padStart(2, '0')
+  const ss = String(d.getSeconds()).padStart(2, '0')
+  return `${y}-${m}-${day} ${hh}:${mm}:${ss}`
+}
+
+function stopHealthTimer(){
+  if (healthTimer) { clearInterval(healthTimer); healthTimer = null }
+}
 
 const filtered = computed(() => {
   if (!kw.value) return rows.value
@@ -144,7 +180,7 @@ async function onDelete(row:any){
   try{ await ElMessageBox.confirm('确认删除该站点？','提示',{ type:'warning' }); const res=await deleteSite(row.id); if(res?.code===200){ ElMessage.success('已删除'); load() } else { ElMessage.error(res?.msg||'删除失败') } }catch(_){}
 }
 
-async function onDetail(row:any){ const d=await fetchSiteDetail(row.id); detail.value=d; showDetail.value=true }
+async function onDetail(row:any){ const d=await fetchSiteDetail(row.id); detail.value=d; health.value=null; healthFailed.value=false; showDetail.value=true }
 
 function onConfig(row:any){
   const token = localStorage.getItem('token') || ''
@@ -166,6 +202,45 @@ async function onInit(row:any){
     ElMessage.error(resp?.message || resp?.msg || '初始化失败')
   }
 }
+
+async function checkHealth(silent: boolean = false){
+  try{
+    if (!detail.value) return
+    const base = String(detail.value.base_api_url || '').replace(/\/$/, '')
+    const token = String(detail.value.api_token || '')
+    if (!base) { if (!silent) ElMessage.error('未配置基础API地址'); healthFailed.value = true; stopHealthTimer(); return }
+    if (!token) { if (!silent) ElMessage.error('未配置API令牌'); healthFailed.value = true; stopHealthTimer(); return }
+    healthLoading.value = !silent
+    const res = await http.get(`${base}/Health/index`, { headers: { 'X-Api-Token': token } })
+    const data = res?.data?.data || null
+    health.value = data
+    healthFailed.value = false
+    if (!silent) ElMessage.success('检测完成')
+  } catch(e:any){
+    healthFailed.value = true
+    stopHealthTimer()
+    if (!silent) {
+      const resp = e?.response?.data
+      ElMessage.error(resp?.message || resp?.msg || '检测失败')
+    }
+  } finally {
+    healthLoading.value = false
+  }
+}
+
+watch(showDetail, (v) => {
+  if (v) {
+    checkHealth(true)
+    if (healthTimer) clearInterval(healthTimer)
+    healthTimer = setInterval(() => checkHealth(true), 5000)
+  } else {
+    if (healthTimer) { clearInterval(healthTimer); healthTimer = null }
+  }
+})
+
+onUnmounted(() => {
+  if (healthTimer) { clearInterval(healthTimer); healthTimer = null }
+})
 
 onMounted(load)
 </script>

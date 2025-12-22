@@ -166,6 +166,18 @@ Route::group('TelegramAuditConfig', function () {
     
 });
 /**
+ * PaymentChannel 接口（支付通道管理）
+ */
+Route::group('PaymentChannel', function () {
+    Route::rule('index', 'PaymentChannel/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'PaymentChannel/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('create', 'PaymentChannel/create', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('update', 'PaymentChannel/update', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('delete', 'PaymentChannel/delete', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('toggle', 'PaymentChannel/toggle', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+});
+
+/**
  * SiteUsers 接口（用户管理）
  */
 Route::group('SiteUsers', function () {
@@ -182,7 +194,24 @@ Route::group('SiteComments', function () {
     Route::rule('audit', 'SiteComments/audit', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
 });
 
+Route::group('SiteOrders', function () {
+    Route::rule('index', 'SiteOrders/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'SiteOrders/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('update', 'SiteOrders/update', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+});
 /**
+ * Vip 接口（会员管理）
+ */
+Route::group('Vip', function () {
+    Route::rule('index', 'Vip/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'Vip/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('create', 'Vip/create', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('update', 'Vip/update', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('delete', 'Vip/delete', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('toggle', 'Vip/toggle', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+});
+
+/** 
  * Categories 接口（分类管理）
  */
 Route::group('Categories', function () {

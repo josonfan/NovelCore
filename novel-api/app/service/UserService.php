@@ -21,6 +21,8 @@ class UserService
         $m = new UserModel();
         $user = $m->infoById($id, $field);
         $user['avatar'] = $storage->getPublicUrl($user['avatar'] ?? '');
+        $user['uid'] = getUidByID((int)$user['id']);
+        unset($user['id']);
         return $user;
     }
     public static function writeLoginLog(int $userId, ?string $ip, string $deviceId = ''): void
@@ -64,7 +66,7 @@ class UserService
         }
         $user = new UserModel();
         $user->writeById(0, $userData);
-        return ['uid' => (int)$user->id];
+        return ['uid' => getUidByID((int)$user->id)];
     }
 
     public static function authenticate(string $username, string $password): array

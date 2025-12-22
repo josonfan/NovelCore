@@ -27,7 +27,7 @@ class CacheModel extends Model
      * 获取缓存键名
      * @return string
      */
-    private function getCacheKey()
+    public function getCacheKey()
     {
         $arg_list = func_get_args();
         if ($this->name) {
@@ -145,6 +145,16 @@ class CacheModel extends Model
         $ok = $this->setCacheData($updKey, $info, 0);
         Async::delayUseCustomQueue(0, \app\model\CacheModel::class, 'persistByIdRef', getAsyncQueueKey(md5((string)$id)), static::class, $id, $updKey);
         return $ok;
+    }
+    
+    /**
+     * 获取缓存状态
+     * @param string $cache_key 缓存键名
+     * @return bool
+     */
+    public  function getCacheStatus($cache_key)
+    {
+        return Cache::has($cache_key);
     }
     /**
      * 获取缓存数据
@@ -286,7 +296,14 @@ class CacheModel extends Model
         }
         $updKey = $this->getCacheKey($id, 'del');
         $ok = $this->setCacheData($updKey, ['id' => $id], 0);
-        Async::delayUseCustomQueue(0, \app\model\CacheModel::class, 'persistDeleteRef', getAsyncQueueKey(md5((string)$id)), static::class, $id, $updKey);
+        Async::delayUseCustomQueue(0, 
+            \app\model\CacheModel::class, 
+            'persistDeleteRef', 
+            getAsyncQueueKey(md5((string)$id)), 
+            static::class, 
+            $id, 
+            $updKey
+        );
         return (bool)$ok;
     }
     public static function persistDelete(string $modelClass, $id): bool

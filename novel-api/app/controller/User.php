@@ -63,6 +63,8 @@ class User extends Common
         $userId = $this->request->user_id;
         $field = 'id,username,email,nickname,avatar,status';
         $user = UserService::info($userId,$field);
+        $user['uid'] = getUidByID((int)($user['id'] ?? $userId));
+        unset($user['id']);
         return $this->ajaxReturn(200, '用户信息', $user);
     }
 

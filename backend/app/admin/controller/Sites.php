@@ -21,7 +21,7 @@ class Sites extends Backend
         $page = $this->request->param('page', 1, 'intval');
         $limit = $this->request->param('limit', 10, 'intval');
         $where = [];
-        $field = 'id,name,code,base_api_url,primary_domain,is_active,remark,created_at,updated_at';
+        $field = 'id,name,code,base_api_url,primary_domain,api_token,is_active,remark,created_at,updated_at';
         $orderby = 'id desc';
         $res = SitesService::list(formatWhere($where), $field, $orderby, $limit, $page);
         return $this->ajaxReturn(200, '成功', $res);
@@ -34,7 +34,7 @@ class Sites extends Backend
     public function detail()
     {
         $id = (int)($this->request->param('id') ?? 0);
-        $field = 'id,name,code,base_api_url,primary_domain,is_active,remark,created_at,updated_at';
+        $field = 'id,name,code,base_api_url,primary_domain,api_token,is_active,remark,created_at,updated_at';
         $info = SitesService::detail($id, $field);
         if (empty($info)) {
             return $this->ajaxReturn(404, '站点不存在');

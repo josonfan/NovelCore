@@ -99,11 +99,12 @@ import LogoIcon from '../components/LogoIcon.vue'
 import UserDropdown from '../components/UserDropdown.vue'
 import Breadcrumbs from '../components/Breadcrumbs.vue'
 import { pathOf } from '../router/routes'
+import type { MenuNode } from '../api/menus'
 
 const router = useRouter()
 const auth = useAuthStore()
 const active = computed(() => router.currentRoute.value.path || '/')
-const menus = ref([])
+const menus = ref<MenuNode[]>([])
 const loading = ref(true)
 const collapsed = ref(false)
 function goHome(){
@@ -111,8 +112,6 @@ function goHome(){
 }
 const palettes = ref([ { p: '#3B82F6', s: '#2563EB' }, { p: '#409EFF', s: '#337ecc' }, { p: '#22C55E', s: '#16A34A' }, { p: '#F59E0B', s: '#D97706' }, { p: '#EF4444', s: '#DC2626' }, { p: '#8B5CF6', s: '#7C3AED' } ])
 const activePrimary = ref('')
-
-function logout() {}
 
 function resolveIndex(m: any) {
   const p = m.path || m.route || ''
@@ -123,6 +122,8 @@ function resolveIndex(m: any) {
   if (n === '小说管理') return '/content/novels'
   if (n === '章节管理') return '/content/chapters'
   if (n === '系统配置') return '/system/config'
+  if (n === '支付渠道') return '/financial/payment_channel'
+  if (n === 'VIP套餐') return '/financial/vip'
   return pathOf('/')
 }
 
@@ -168,14 +169,14 @@ onMounted(async () => {
     } catch (_) {}
     const ctx = await fetchContext()
     auth.setContext(ctx)
-    function norm(list: any[]): any[] {
+    function norm(list: MenuNode[]): MenuNode[] {
       const arr = Array.isArray(list) ? list : []
       return arr
-        .map((m: any) => ({
+        .map((m: MenuNode) => ({
           ...m,
           children: norm(m?.children || []),
         }))
-        .filter((m: any) => String(m?.type || 'menu').toLowerCase() === 'menu' && Number(m?.visible ?? 1) !== 0 && Number(m?.is_active ?? 1) !== 0)
+        .filter((m: MenuNode) => String(m?.type || 'menu').toLowerCase() === 'menu' && Number(m?.visible ?? 1) !== 0 && Number(m?.is_active ?? 1) !== 0)
     }
     menus.value = norm(ctx?.menus || [])
   } finally {
