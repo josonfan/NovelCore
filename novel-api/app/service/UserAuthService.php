@@ -17,7 +17,7 @@ class UserAuthService
             $data['password'] = password_hash($plain, PASSWORD_BCRYPT);
             unset($data['confirm_password']);
             $data['client_version'] = request()->header('Client-Version', '');
-            $data['device'] = request()->header('Device', '');
+            $data['device'] = request()->header('Client-Type', '');
             $data['nickname'] = $data['username'];
             $data['created_at'] = date('Y-m-d H:i:s');
             $data['updated_at'] = date('Y-m-d H:i:s');
@@ -53,6 +53,33 @@ class UserAuthService
         $ttl = (int) config('jwt.ttl', 3600);
         try {
             \app\service\UserService::writeLoginLog((int)$user->id, request()->ip(), (string)request()->header('X-Device-Id', ''));
+        } catch (\Throwable $e) {
+        }
+        try {
+            $deviceId = (string)request()->header('X-Device-Id', '');
+            if ($deviceId !== '') {
+                $brand = (string)request()->header('Device-Brand', '');
+                $model = (string)request()->header('Device-Model', '');
+                $os = (string)request()->header('OS', '');
+                $clientVersion = (string)request()->header('Client-Version', '');
+                $ip = (string)request()->ip();
+                $mdl = new \app\model\UserDeviceLog();
+                $existingId = $mdl->where('user_id', (int)$user->id)->where('device_id', $deviceId)->value('id');
+                $payload = [
+                    'user_id'       => (int)$user->id,
+                    'device_id'     => $deviceId,
+                    'device_brand'  => $brand,
+                    'device_model'  => $model,
+                    'os'            => $os,
+                    'client_version'=> $clientVersion,
+                    'ip'            => $ip,
+                ];
+                if ($existingId) {
+                    $mdl->writeById((int)$existingId, $payload);
+                } else {
+                    $mdl->writeById(0, $payload);
+                }
+            }
         } catch (\Throwable $e) {
         }
         return [

@@ -22,9 +22,9 @@ class Search extends Common
         $keyword  = $this->request->param('keyword', '', 'trim');
         $page     = $this->request->param('page', 1, 'intval');
         $pageSize = $this->request->param('limit', 10, 'intval');
-        if ($keyword === '') {
-            throw new ValidateException('keyword不能为空');
-        }
+        // if ($keyword === '') {
+        //     throw new ValidateException('keyword不能为空');
+        // }
         $options = [
             'category_id' => $this->request->param('category_id', 0, 'intval'),
             'tag_ids'     => $this->request->param('tag_ids'),
@@ -34,10 +34,9 @@ class Search extends Common
         $configService = app(ConfigService::class);
         $searchService = SearchServiceFactory::make($configService);
         $result = $searchService->searchNovels($keyword, $page, $pageSize, $options);
-        SearchLogService::write(($this->request->user->id ?? null) ?? null, $keyword, [
-            'page'  => $page,
-            'limit' => $pageSize,
-        ]);
+        if (!empty($keyword)) {
+            SearchLogService::write(($this->request->user->id ?? null) ?? null, $keyword, $options);
+        }
         return $this->ajaxReturn(200, '获取成功', [
             'list'  => $result['list'] ?? [],
             'count' => (int)($result['total'] ?? 0),

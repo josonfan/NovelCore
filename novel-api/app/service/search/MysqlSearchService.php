@@ -20,7 +20,7 @@ class MysqlSearchService implements SearchServiceInterface
     {
         $page     = max(1, $page);
         $pageSize = min(50, max(1, $pageSize));
-
+        
         $query = Novel::with(['author'])
             ->whereLike('title', "%{$keyword}%")
             ->whereOr('intro', 'like', "%{$keyword}%");
@@ -28,7 +28,9 @@ class MysqlSearchService implements SearchServiceInterface
         if (!empty($options['category_id'])) {
             $query->where('category_id', (int) $options['category_id']);
         }
-
+        if (!empty($options['status'])) {
+            $query->where('status', (int) $options['status']);
+        }
         $order = $options['order'] ?? 'id';
         $allowedOrder = ['id', 'created_at', 'view_count', 'like_count', 'fav_count'];
         if (!in_array($order, $allowedOrder, true)) {
@@ -40,6 +42,7 @@ class MysqlSearchService implements SearchServiceInterface
             'list_rows' => $pageSize,
             'page'      => $page,
         ]);
+        
 
         $storage = app(StorageService::class);
         $list = [];
