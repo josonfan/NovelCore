@@ -31,6 +31,9 @@ class Vip extends Backend
     public function detail()
     {
         $id = (int)($this->request->param('id') ?? 0);
+        if ($id <= 0) {
+            return $this->ajaxReturn(400, '参数错误');
+        }
         $field = 'id,name,descript,days,price,old_price,sort,sold_num,status,is_hot,sold_total,return_total,return_num,created_at,updated_at';
         $info = VipService::detail($id, $field);
         if (empty($info)) {
@@ -61,6 +64,9 @@ class Vip extends Backend
     public function delete()
     {
         $id = (int)($this->request->param('id') ?? 0);
+        if ($id <= 0) {
+            return $this->ajaxReturn(400, '参数错误');
+        }
         $ok = VipService::delete($id);
         return $this->ajaxReturn(200, '删除成功', ['id' => $id, 'success' => $ok]);
     }

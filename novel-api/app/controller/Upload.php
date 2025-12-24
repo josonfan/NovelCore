@@ -30,4 +30,5 @@ class Upload extends Common
         $res = $cli->uploadFile($key, $path);
         return $this->ajaxReturn(200, '上传成功', $res);
     }
+    
 }

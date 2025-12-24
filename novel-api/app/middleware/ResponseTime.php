@@ -4,6 +4,7 @@ namespace app\middleware;
 use think\Request;
 use think\Response;
 use Closure;
+use think\facade\Log;
 
 class ResponseTime
 {
@@ -48,10 +49,10 @@ class ResponseTime
             $params,
             $responseTime
         );
-
+        
         // 将响应时间记录到日志
         trace($logMessage, $logType);
-
+        // Log::log($logType,$logMessage);
         return $response;
     }
 }

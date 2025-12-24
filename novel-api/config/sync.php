@@ -3,6 +3,7 @@ return [
     'enable_types' => [
         'user',
         'comment',
+        'order',
     ],
     'push_path' => '/Sync/receive',
     'timeout' => 5,

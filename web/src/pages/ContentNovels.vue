@@ -22,6 +22,13 @@
       <el-table :data="filtered" v-loading="loading" border size="small" stripe highlight-current-row @selection-change="onSelect">
         <el-table-column type="selection" width="48" />
         <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column label="封面" width="72">
+          <template #default="{ row }">
+            <div class="cover-thumb">
+              <img :src="coverUrlOf(row) || placeholderUrl" alt="" @error="onImgError" />
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column prop="title" label="标题" min-width="220" />
         <el-table-column prop="author" label="作者" min-width="160" />
         <el-table-column label="标签" min-width="220">
@@ -75,7 +82,7 @@
       </div>
     </el-card>
 
-    <el-dialog v-model="showForm" :title="formMode==='add'?'新建小说':'编辑小说'" width="560px">
+    <el-dialog v-model="showForm" :title="formMode==='add'?'新建小说':'编辑小说'" width="680px" draggable>
       <el-form :model="form" label-width="100px">
         <el-tabs v-model="activeTab">
           <el-tab-pane label="基本信息" name="basic">
@@ -88,6 +95,27 @@
             </el-form-item>
             <el-form-item label="连载状态"><el-select v-model="form.status" style="width:180px"><el-option :value="0" label="连载中" /><el-option :value="1" label="已完结" /></el-select></el-form-item>
             <el-form-item label="审核状态"><el-tag :type="auditTagType(form.audit_status)" size="small">{{ auditLabel(form.audit_status) }}</el-tag></el-form-item>
+            <el-form-item label="封面图片">
+              <div class="cover-field">
+                <div class="cover-card">
+                  <div v-if="previewUrl" class="cover-img"><img :src="previewUrl || placeholderUrl" alt="" @error="onImgError" /></div>
+                  <div v-else class="cover-placeholder">
+                    <el-icon :size="28"><component :is="(Icons as any).PictureFilled || (Icons as any).Picture" /></el-icon>
+                  </div>
+                  <div class="cover-actions">
+                    <el-upload :show-file-list="false" :http-request="onUpload" :before-upload="beforeUpload" accept="image/*">
+                      <el-button size="small" type="primary">更换</el-button>
+                    </el-upload>
+                    <el-button size="small" @click="clearCover" :disabled="!form.cover && !previewUrl">清除</el-button>
+                  </div>
+                  <el-progress v-if="uploadPct>0 && uploadPct<100" :percentage="uploadPct" :stroke-width="4" :show-text="false" class="cover-progress" />
+                </div>
+                <div class="cover-right">
+                  <el-input v-model="form.cover" placeholder="相对路径，如 uploads/20251217/xxx.jpg" />
+                  <div class="cover-tip">建议尺寸 240×320，大小 ≤ 2MB，仅保存相对路径</div>
+                </div>
+              </div>
+            </el-form-item>
           </el-tab-pane>
           <el-tab-pane label="SEO" name="seo">
             <el-form-item label="SEO标题"><el-input v-model="form.seo_title" /></el-form-item>
@@ -146,6 +174,7 @@ import * as Icons from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../store'
 import { fetchNovelList, createNovel, updateNovel, deleteNovel, fetchNovelDetail, reviewNovels, auditNovel, bindNovelTags } from '../api/novels'
+import { uploadFile } from '../api/upload'
 import { fetchTagOptions } from '../api/tags'
 import { fetchCategoryOptions } from '../api/categories'
 
@@ -157,7 +186,9 @@ const limit = ref(10)
 const kw = ref('')
 const showForm = ref(false)
 const formMode = ref<'add'|'edit'>('add')
-const form = ref<any>({ title: '', author: '', category_id: '', status: 0, audit_status: 0, seo_title: '', seo_keywords: '', seo_description: '' })
+const form = ref<any>({ title: '', author: '', category_id: '', status: 0, audit_status: 0, cover: '', seo_title: '', seo_keywords: '', seo_description: '' })
+const previewUrl = computed(() => form.value._cover_url || '')
+const uploadPct = ref(0)
 const showAudit = ref(false)
 const audit = ref<any>({ ids: [] as Array<number|string>, status: 1, reason: '' })
 const selected = ref<any[]>([])
@@ -271,7 +302,7 @@ function reload(){ load() }
 
 function onAdd(){
   formMode.value = 'add'
-  form.value = { title: '', author: '', category_id: '', status: 0, audit_status: 0, seo_title: '', seo_keywords: '', seo_description: '' }
+  form.value = { title: '', author: '', category_id: '', status: 0, audit_status: 0, cover: '', _cover_url: '', seo_title: '', seo_keywords: '', seo_description: '' }
   activeTab.value = 'basic'
   showForm.value = true
 }
@@ -280,9 +311,9 @@ async function onEdit(row: any){
   formMode.value = 'edit'
   try {
     const d: any = await fetchNovelDetail(row.id)
-    form.value = { id: d.id, title: d.title, author: d.author || '', category_id: d.category_id ?? row.category_id ?? '', status: Number(d.status ?? row.status ?? 0), audit_status: Number(d.audit_status ?? row.audit_status ?? 0), seo_title: d.seo_title || '', seo_keywords: d.seo_keywords || '', seo_description: d.seo_description || '' }
+    form.value = { id: d.id, title: d.title, author: d.author || '', category_id: d.category_id ?? row.category_id ?? '', status: Number(d.status ?? row.status ?? 0), audit_status: Number(d.audit_status ?? row.audit_status ?? 0), cover: d.cover || '', _cover_url: d.cover_url || '', seo_title: d.seo_title || '', seo_keywords: d.seo_keywords || '', seo_description: d.seo_description || '' }
   } catch (_) {
-    form.value = { id: row.id, title: row.title, author: row.author, category_id: row.category_id ?? '', status: Number(row.status ?? 0), audit_status: Number(row.audit_status ?? 0), seo_title: '', seo_keywords: '', seo_description: '' }
+    form.value = { id: row.id, title: row.title, author: row.author, category_id: row.category_id ?? '', status: Number(row.status ?? 0), audit_status: Number(row.audit_status ?? 0), cover: row.cover || '', _cover_url: row.cover_url || '', seo_title: '', seo_keywords: '', seo_description: '' }
   }
   activeTab.value = 'basic'
   showForm.value = true
@@ -380,7 +411,7 @@ async function submitTags(){
 async function saveForm(){
   try {
     if (!form.value.title) { ElMessage.error('请填写标题'); return }
-    const payload = { title: form.value.title, author: form.value.author, category_id: form.value.category_id, status: form.value.status, seo_title: form.value.seo_title, seo_keywords: form.value.seo_keywords, seo_description: form.value.seo_description }
+    const payload = { title: form.value.title, author: form.value.author, category_id: form.value.category_id, status: form.value.status, cover: form.value.cover, seo_title: form.value.seo_title, seo_keywords: form.value.seo_keywords, seo_description: form.value.seo_description }
     const res = formMode.value==='add' ? await createNovel(payload) : await updateNovel(form.value.id, payload)
     if (res?.code === 200) {
       ElMessage.success('已保存')
@@ -393,6 +424,31 @@ async function saveForm(){
     const resp = e?.response?.data
     ElMessage.error(resp?.message || resp?.msg || '保存失败')
   }
+}
+
+async function onUpload(opt: any){
+  try{
+    const file: File = opt?.file
+    if (!file) return opt?.onError?.(new Error('未选择文件'))
+    const r = await uploadFile(file, { onProgress: (p) => { uploadPct.value = p } })
+    form.value.cover = r?.key || ''
+    form.value._cover_url = r?.url || ''
+    ElMessage.success('上传成功')
+    opt?.onSuccess?.(r)
+  }catch(e:any){
+    const resp=e?.response?.data
+    ElMessage.error(resp?.message||resp?.msg||'上传失败')
+    opt?.onError?.(e)
+  } finally { setTimeout(() => { uploadPct.value = 0 }, 300) }
+}
+
+function clearCover(){ form.value.cover=''; form.value._cover_url='' }
+function beforeUpload(file: File){
+  const isImg = /^image\//.test(file.type || '')
+  const okSize = file.size <= 2 * 1024 * 1024
+  if (!isImg) ElMessage.error('仅支持图片文件')
+  if (!okSize) ElMessage.error('图片大小需 ≤ 2MB')
+  return isImg && okSize
 }
 
   async function onDelete(row: any){
@@ -408,6 +464,17 @@ async function saveForm(){
     if (!id) return
     router.push({ name: 'content-novel-chapters', params: { id } })
   }
+  function coverUrlOf(row: any){
+    const key = String(row?.cover || '')
+    const full = String(row?.cover_url || '')
+    if (full && /^https?:\/\//i.test(full)) return full
+    if (key && /^https?:\/\//i.test(key)) return key
+    const base = String((auth.context || {}).image_base_url || '')
+    if (key && base) return `${base.replace(/\/$/, '')}/${key.replace(/^\//, '')}`
+    return ''
+  }
+  const placeholderUrl = `data:image/svg+xml;utf8,` + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="120" height="160"><rect width="100%" height="100%" fill="#f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="12">No Image</text></svg>`)
+  function onImgError(e: Event){ const img = e?.target as HTMLImageElement; if (img && img.src !== placeholderUrl) img.src = placeholderUrl }
 </script>
 
 <style scoped>
@@ -415,6 +482,16 @@ async function saveForm(){
  .toolbar { display: grid; gap: 8px }
  .toolbar-grid { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center }
  .toolbar-grid .actions { justify-self: end; display: inline-flex; gap: 8px }
- .subline { color: var(--nc-muted); font-size: 12px }
- .pager { display: flex; justify-content: flex-end; padding-top: 12px }
+.subline { color: var(--nc-muted); font-size: 12px }
+.pager { display: flex; justify-content: flex-end; padding-top: 12px }
+.cover-field{ display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start }
+.cover-card{ position: relative; width: 120px; height: 160px; border: 1px dashed var(--nc-border); border-radius: 8px; background: #fafafa; display:flex; align-items:center; justify-content:center; overflow: hidden }
+.cover-img, .cover-placeholder{ position: absolute; inset: 0; display:flex; align-items:center; justify-content:center }
+.cover-img img{ width: 100%; height: 100%; object-fit: cover }
+.cover-actions{ position: absolute; bottom: 6px; left: 6px; right: 6px; display:flex; gap:6px; justify-content: space-between; }
+.cover-progress{ position: absolute; bottom: 0; left: 0; right: 0 }
+.cover-right{ display: grid; gap: 6px; align-items: center }
+.cover-tip{ color: var(--nc-muted); font-size: 12px }
+.cover-thumb{ width: 48px; height: 64px; border: 1px solid var(--nc-border); border-radius: 4px; overflow: hidden; background: #fafafa }
+.cover-thumb img{ width: 100%; height: 100%; object-fit: cover }
 </style>

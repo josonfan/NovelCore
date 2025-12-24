@@ -212,6 +212,10 @@ class CacheModel extends Model
             } 
             
             if ($res) {
+                if($id > 0){
+                    $key = $m->getCacheKey($id);
+                    Cache::delete($key);
+                }
                 $name = method_exists($m,'getName') ? (string)$m->getName() : '';
                 $enabledTables = (array)(config('sync.enable_types') ?? []);
                 if ($name && in_array($name, $enabledTables, true)) {
@@ -222,8 +226,7 @@ class CacheModel extends Model
                         }
                     }else{
                         \app\common\service\SyncService::enqueue($name, (int)$id, $op);
-                    }
-                    
+                    }                    
                 }
             }
            

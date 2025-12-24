@@ -41,13 +41,18 @@ class SyncExecutor
     protected static function process(array $row): bool
     {
         $q = new SyncQueue();        
-        $site = (new Sites())->cacheInfo((int)$row['site_id']);
+        $site = (new Sites())->infoById((int)$row['site_id']);
         if (empty($site)) {
             $q->writeById((int)$row['id'], ['status' => 'failed', 'last_error' => 'site_not_found']);
             return false;
         }
         $includeData = (bool)config('sync.sync_data', true);
         $data = $includeData ? self::payload((string)$row['content_type'], (int)$row['content_id']) : [];
+        if (empty($data)) {
+            $q->deleteById((int)$row['id']);
+            trace('sync_queue delete id: ' . json_encode($row) . ' data_empty');
+            return false;
+        }
         $url = rtrim((string)$site['base_api_url'], '/') . config('sync.push_path', '/Sync/receive');
         $headers = ['Content-Type: application/json', 'X-Api-Token: ' . (string)$site['api_token']];
         $payload = json_encode(['type' => (string)$row['content_type'], 'id' => (int)$row['content_id'], 'operation' => (string)$row['operation'], 'data' => $data], JSON_UNESCAPED_UNICODE);
@@ -57,6 +62,7 @@ class SyncExecutor
             return true;
         } else {
             $q->writeById((int)$row['id'], ['status' => 'failed', 'last_error' => 'push_failed']);
+            trace('sync_queue delete id: ' . json_encode($row) . ' push_failed');
             return false;
         }
     }
@@ -64,9 +70,9 @@ class SyncExecutor
     protected static function payload(string $type, int $id): array
     {
         if ($type === 'chapters') {
-            $ch = (new Chapters())->cacheInfo($id) ?: [];
+            $ch = (new Chapters())->infoById($id) ?: [];
             if (!empty($ch)) {
-                $content = (new ChapterContents())->cacheInfo($id);
+                $content = (new ChapterContents())->infoById($id);
                 if (!empty($content) && isset($content['content'])) {
                     $ch['content'] = $content['content'];
                 }
@@ -75,7 +81,7 @@ class SyncExecutor
         }
         $m = self::modelByType($type);
         if ($m) {
-            return $m->cacheInfo($id) ?: [];
+            return $m->infoById($id) ?: [];
         }
         return [];
     }

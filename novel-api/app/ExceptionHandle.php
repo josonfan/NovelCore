@@ -67,6 +67,10 @@ class ExceptionHandle extends Handle
         if ($e instanceof DataNotFoundException) {
             return json(['code'=>404,'msg'=>lang($e->getMessage())])->code(404);
         }
+        // 添加自定义异常处理机制
+        if ($e instanceof HttpException ) {
+            return json(['code'=>$e->getStatusCode(),'msg'=>lang($e->getMessage())])->code($e->getStatusCode());
+        }
         // 业务异常
         if ($e instanceof BusinessException) {
             $status = method_exists($e, 'getHttpStatus') ? $e->getHttpStatus() : 400;

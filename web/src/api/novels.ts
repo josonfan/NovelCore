@@ -8,6 +8,7 @@ export type Novel = {
   audit_status?: number
   category_id?: number | string
   tags?: Array<{ id: number | string; name: string; type?: string }>
+  cover?: string
 }
 
 export async function fetchNovelList(params?: { page?: number; limit?: number; kw?: string }) {

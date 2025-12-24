@@ -17,7 +17,7 @@ class VipService
         $m = new Vip();
         $info = $m->infoById($id, $field);
         if (empty($info)) {
-            throw new \Exception('会员套餐不存在');
+            throw new ValidateException('会员套餐不存在');
         }
         return $info;
     }

@@ -3,7 +3,7 @@ import { useAuthStore } from '../store'
 import router from '../router'
 import { ElMessage } from 'element-plus'
 
-export const http = axios.create({ baseURL: import.meta.env.VITE_API_PROXY_TARGET || '/' })
+export const http = axios.create({ baseURL: import.meta.env.DEV ? '/' : (import.meta.env.VITE_API_PROXY_TARGET || '/') })
 
 http.interceptors.request.use((config) => {
   const auth = useAuthStore()

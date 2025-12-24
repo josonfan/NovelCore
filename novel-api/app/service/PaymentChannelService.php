@@ -17,7 +17,11 @@ class PaymentChannelService
     public static function info(int $id, string $field = '*'): array
     {
         $m = new PaymentChannelModel();
-        return $m->infoById($id, $field);
+        $data = $m->infoById($id, $field);
+        if (!$data) {
+            throw new ValidateException('支付渠道不存在');
+        }
+        return $data;
     }
 
     public static function store(array $data): array

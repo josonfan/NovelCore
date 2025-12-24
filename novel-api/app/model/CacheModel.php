@@ -123,9 +123,9 @@ class CacheModel extends Model
      * @param array $data 缓存数据
      * @return bool
      */
-    public function writeById($id, array $data): bool
+    public function writeById($id, array $data,$upDb=false): bool
     {
-        if (!$this->is_cache) {      
+        if (!$this->is_cache || $upDb) {     
             $ok = self::persistById(static::class, $id, $data);
             return $ok;
         } 
@@ -196,8 +196,8 @@ class CacheModel extends Model
      */
     public static function persistById(string $modelClass, $id, array $data): bool
     {  
-        try {
-            $m = new $modelClass();
+        try {            
+            $m = new $modelClass();            
             $pk = $m->getPk();
             if (empty($id)) {
                 $id = $data[$pk]??0;
@@ -205,7 +205,7 @@ class CacheModel extends Model
             if (method_exists($m, 'filterAllowedFields')) {
                 $data = $m->filterAllowedFields($data);
             }
-            if(empty($id)){
+            if(empty($id)){ 
                 $res =  (bool)$m->save($data);  
                 $id = (int)($m->$pk ?? 0);
                 $op = 'create';
@@ -226,6 +226,10 @@ class CacheModel extends Model
                 $op = 'update';
             }
             if ($res) {
+                if($id > 0){
+                    $key = $m->getCacheKey($id);
+                    Cache::delete($key);
+                }
                 $name = method_exists($m,'getName') ? (string)$m->getName() : '';
                 $type = self::contentTypeFromTable($name);
                 $enabled = (array)(config('sync.enable_types') ?? []);
@@ -235,7 +239,7 @@ class CacheModel extends Model
             }
             return $res;
         } catch (\Throwable $e) {
-            trace($e->getMessage(),'error');
+            trace($e->getMessage(),'error');            
             return false;
         }
     }
@@ -244,6 +248,7 @@ class CacheModel extends Model
         switch ($name) {
             case 'users': return 'user';
             case 'comments': return 'comment';
+            case 'orders': return 'order';
             default: return null;
         }
     }

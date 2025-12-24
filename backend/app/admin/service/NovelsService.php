@@ -6,6 +6,8 @@ use app\admin\model\NovelTags;
 use app\admin\model\Tags;
 use think\facade\Db;
 use think\exception\ValidateException;
+use storage\StorageClient;
+
 
 class NovelsService
 {
@@ -54,6 +56,8 @@ class NovelsService
             foreach ($list as $i => $row) {
                 $nid = (int)$row['id'];
                 $list[$i]['tags'] = $group[$nid] ?? [];
+                $cli = StorageClient::forSite();
+                $list[$i]['cover'] = $cli->getPublicUrl((string) ($list[$i]['cover'] ?? ''));
             }
             $res['list'] = $list;
         }
@@ -64,12 +68,37 @@ class NovelsService
      * 小说详情
      * @param int $id 主键ID
      * @param string $field 字段列表
-     * @return mixed
+     * @return array
      */
-    public static function detail(int $id, string $field = '*')
+    public static function detail(int $id, string $field = '*'): array
     {
         $m = new Novels();
-        return $m->infoById($id, $field);
+        $info = $m->infoById($id, $field);
+        if (!empty($info)) {
+            $cli = StorageClient::forSite();
+            $info['cover'] = $cli->getPublicUrl((string) ($info['cover'] ?? ''));
+            $links = (new NovelTags())->where('novel_id', $id)->field('tag_id')->select()->toArray();
+            $tagIds = [];
+            foreach ($links as $ln) { $tagIds[] = (int)$ln['tag_id']; }
+            $tagIds = array_values(array_unique($tagIds));
+            $tagMap = [];
+            if (count($tagIds) > 0) {
+                $tm = new Tags();
+                foreach ($tagIds as $tid) {
+                    $tm_info = $tm->infoById((int)$tid, 'id,name,type');
+                    if (!empty($tm_info)) {
+                        $tagMap[(int)$tm_info['id']] = [
+                            'id' => (int)$tm_info['id'],
+                            'name' => (string)$tm_info['name'],
+                            'type' => (string)$tm_info['type'],
+                        ];
+                    }
+                }
+            }
+            $result = array_values($tagMap);
+            $info['tags'] = $result ?? [];
+        }
+        return $info;
     }
     /**
      * 生成唯一UUID

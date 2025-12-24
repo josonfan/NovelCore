@@ -39,17 +39,23 @@ class SyncExecutor
         $site = config('site');        
         $includeData = (bool)config('sync.sync_data', true);
         $data = $includeData ? self::payload((string)$row['content_type'], (int)$row['content_id']) : [];
+        if (empty($data)) {
+            $q->deleteById((int)$row['id']);
+            trace('sync_queue delete id: ' . json_encode($row) . ' data_empty');
+            return false;
+        }
         $adminApiUrl = (string) config('server.admin_api_url', '');
         $url = rtrim($adminApiUrl, '/') . config('sync.push_path', '/Sync/receive');
         $headers = ['Content-Type: application/json', 'X-Api-Token: ' . (string)$site['api_token']];
-        $payload = json_encode(['base_api_url' => (string)$site['base_api_url'], 'type' => (string)$row['content_type'], 'id' => (int)$row['content_id'], 'operation' => (string)$row['operation'], 'data' => $data], JSON_UNESCAPED_UNICODE);
+        $payload = json_encode(['code' => (string)$site['code'], 'type' => (string)$row['content_type'], 'id' => (int)$row['content_id'], 'operation' => (string)$row['operation'], 'data' => $data], JSON_UNESCAPED_UNICODE);
         
         $ok = self::postJson($url, $payload, $headers, (int)config('sync.timeout', 5));
         if ($ok) {
-            (new SyncQueue())->deleteById((int)$row['id']);           
+            $q->deleteById((int)$row['id']);           
             return true;
         } else {
             $q->writeById((int)$row['id'], ['status' => 'failed', 'last_error' => 'push_failed']);
+            trace('sync_queue delete id: ' . json_encode($row) . ' push_failed');
             return false;
         }
     }
@@ -59,7 +65,7 @@ class SyncExecutor
         
         $m = self::modelByType($type);
         if ($m) {
-            return $m->cacheInfo($id) ?: [];
+            return $m->infoById($id) ?: [];
         }
         return [];
     }

@@ -12,29 +12,37 @@ class SiteOrders extends Backend
         $where = [];
         $siteId = $this->request->param('site_id');
         if ($siteId !== null && $siteId !== '') {
-            $where[] = ['site_id', '=', (int)$siteId];
+            $where['site_id'] = (int)$siteId;
         }
         $userId = $this->request->param('user_id');
         if ($userId !== null && $userId !== '') {
-            $where[] = ['user_id', '=', (int)$userId];
+            $where['user_id'] = (int)$userId;
         }
         $orderNo = $this->request->param('order_no');
         if (!empty($orderNo)) {
-            $where[] = ['order_no', 'like', "%{$orderNo}%"];
+            $where['order_no'] = $orderNo;
         }
         $status = $this->request->param('status');
         if ($status !== null && $status !== '') {
-            $where[] = ['status', '=', (string)$status];
+            $where['status'] = (string)$status;
         }
         $orderType = $this->request->param('order_type');
         if ($orderType !== null && $orderType !== '') {
-            $where[] = ['order_type', '=', (string)$orderType];
+            $where['order_type'] = (string)$orderType;
         }
-        $payChannel = $this->request->param('pay_channel');
-        if ($payChannel !== null && $payChannel !== '') {
-            $where[] = ['pay_channel', '=', (string)$payChannel];
+        $orderId = $this->request->param('order_id');
+        if ($orderId !== null && $orderId !== '') {
+            $where['order_id'] = (int)$orderId;
         }
-        $field = 'id,site_id,order_no,user_id,order_type,novel_id,chapter_id,vip_plan,amount,pay_channel,status,extra,site_created_at,site_paid_at,last_synced_at';
+        $goodId = $this->request->param('good_id');
+        if ($goodId !== null && $goodId !== '') {
+            $where['good_id'] = (int)$goodId;
+        }
+        $payChannelId = $this->request->param('pay_channel_id');
+        if ($payChannelId !== null && $payChannelId !== '') {
+            $where['pay_channel_id'] = (int)$payChannelId;
+        }
+        $field = 'id,site_id,order_id,order_no,user_id,order_type,good_id,good_info,amount,pay_channel_id,status,extra,created_at,updated_at,paid_at,last_synced_at';
         $orderby = 'id desc';
         $res = SiteOrdersService::list(formatWhere($where), $field, $orderby, $limit, $page);
         return $this->ajaxReturn(200, '成功', $res);
@@ -43,7 +51,7 @@ class SiteOrders extends Backend
     public function detail()
     {
         $id = (int)($this->request->param('id') ?? 0);
-        $field = 'id,site_id,order_no,user_id,order_type,novel_id,chapter_id,vip_plan,amount,pay_channel,status,extra,site_created_at,site_paid_at,last_synced_at';
+        $field = 'id,site_id,order_id,order_no,user_id,order_type,good_id,good_info,amount,pay_channel_id,status,extra,created_at,updated_at,paid_at,last_synced_at';
         $info = SiteOrdersService::detail($id, $field);
         if (empty($info)) {
             return $this->ajaxReturn(404, '订单不存在');
@@ -53,12 +61,14 @@ class SiteOrders extends Backend
 
     public function update()
     {
-        $postField = 'id,order_type,vip_plan,amount,pay_channel,status,extra,site_paid_at';
+        $postField = 'id,order_type,amount,pay_channel_id,status,extra,paid_at,good_id,good_info';
         $data = $this->request->only(explode(',', $postField), 'post', null);
         $id = (int)($data['id'] ?? 0);
         unset($data['id']);
+        if ($id <= 0) {
+            return $this->ajaxReturn(400, '参数错误');
+        }
         $ok = SiteOrdersService::update($id, $data);
         return $this->ajaxReturn(200, '更新成功', ['id' => $id, 'success' => $ok]);
     }
 }
-

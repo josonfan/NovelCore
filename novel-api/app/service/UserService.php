@@ -22,7 +22,6 @@ class UserService
         $user = $m->infoById($id, $field);
         $user['avatar'] = $storage->getPublicUrl($user['avatar'] ?? '');
         $user['uid'] = getUidByID((int)$user['id']);
-        unset($user['id']);
         return $user;
     }
     public static function writeLoginLog(int $userId, ?string $ip, string $deviceId = ''): void

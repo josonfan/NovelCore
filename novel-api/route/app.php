@@ -26,6 +26,13 @@ Route::group('api', function () {
     // VIP 套餐列表与详情
     Route::rule('Vip/index', 'Vip/index', 'POST');
     Route::rule('Vip/info', 'Vip/info', 'POST');
+    // 支付渠道列表与详情
+    Route::rule('PaymentChannel/index', 'PaymentChannel/index', 'POST');
+    Route::rule('PaymentChannel/info', 'PaymentChannel/info', 'POST');
+    // 订单
+    Route::rule('Order/notify/:icon_iden/:channel_id', 'Order/notify', 'POST');
+
+
 
     // 章节列表与内容（统一 Controller/Action，参数走 Body）
     Route::rule('Chapter/index', 'Chapter/index', 'POST');
@@ -53,6 +60,7 @@ Route::group('api', function () {
         // 订单
         Route::rule('Order/add', 'Order/add', 'POST');
         Route::rule('Order/affirmBuy', 'Order/affirmBuy', 'POST');
+        Route::rule('Order/info', 'Order/info', 'POST');
         Route::rule('Favorite/list', 'Favorite/list', 'POST');
         Route::rule('Reading/listHistory', 'Reading/listHistory', 'POST');
         Route::rule('Reading/saveHistory', 'Reading/saveHistory', 'POST');

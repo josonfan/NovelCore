@@ -28,6 +28,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'financial/payment_channel', name: 'financial-payment-channel', component: () => import('../pages/SystemPayments.vue'), meta: { title: '支付渠道' } },
       { path: 'system/vip', name: 'system-vip', component: () => import('../pages/Vip.vue'), meta: { title: 'VIP套餐' } },
       { path: 'financial/vip', name: 'financial-vip', component: () => import('../pages/Vip.vue'), meta: { title: 'VIP套餐' } },
+      { path: 'financial/orders', name: 'financial-orders', component: () => import('../pages/FinancialOrders.vue'), meta: { title: '订单列表' } },
     ],
   },
 ]

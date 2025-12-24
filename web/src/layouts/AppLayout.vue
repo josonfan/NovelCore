@@ -124,6 +124,7 @@ function resolveIndex(m: any) {
   if (n === '系统配置') return '/system/config'
   if (n === '支付渠道') return '/financial/payment_channel'
   if (n === 'VIP套餐') return '/financial/vip'
+  if (n === '订单列表') return '/financial/orders'
   return pathOf('/')
 }
 

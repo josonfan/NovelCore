@@ -80,4 +80,23 @@ class StorageClient
         $parts = array_filter(array_map(function($s){ return strtolower(trim($s)); }, explode(',', $raw)));
         return array_values(array_unique($parts));
     }
+    /**
+     * 根据存储路径构建公共可访问 URL。
+     * 优先使用配置/环境中的 CDN 域名（IMAGE_DOMAIN），否则返回原始路径。
+     */
+    public function getPublicUrl(string $path): string
+    {
+        $config = $this->cfg;
+        $path = ltrim($path, '/');
+        if ($path === '' || str_starts_with($path, 'http')) {
+            return $path;
+        }
+
+        $cdn = rtrim((string) $config['base_url'], '/');
+        if ($cdn !== '') {
+            return $cdn . '/' . $path;
+        }
+
+        return $path;
+    }
 }

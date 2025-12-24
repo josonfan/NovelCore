@@ -30,7 +30,7 @@ class Vip extends Validate
         'price.float' => '金额格式不正确',
         'old_price.float' => '原价格式不正确',
         'sort.number' => '排序必须为数字',
-        'status.in' => '状态仅支持 1 或 2',
+        'status.in' => '状态仅支持 1 或 0',
         'is_hot.in' => '推荐仅支持 1 或 2',
     ];
 }

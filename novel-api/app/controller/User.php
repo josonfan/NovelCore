@@ -61,7 +61,7 @@ class User extends Common
     public function info()
     {
         $userId = $this->request->user_id;
-        $field = 'id,username,email,nickname,avatar,status';
+        $field = 'id,username,email,nickname,avatar,vip_expire,status';
         $user = UserService::info($userId,$field);
         $user['uid'] = getUidByID((int)($user['id'] ?? $userId));
         unset($user['id']);

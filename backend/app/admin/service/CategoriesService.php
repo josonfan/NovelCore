@@ -124,12 +124,16 @@ class CategoriesService
         try {
             validate(\app\admin\validate\Category::class)->scene('update')->check($data);
             $m = new Categories();
+            $exists = $m->where($m->getPk(), $id)->value($m->getPk());
+            if (empty($exists)) {
+                throw new ValidateException('分类不存在');
+            }
             $ok = $m->writeById($id, $data);
             return $ok;
         } catch (ValidateException $e) {
             throw new ValidateException($e->getError());
         } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
+            throw new ValidateException($e->getMessage());
         }
     }
 

@@ -17,7 +17,7 @@ class SiteOrdersService
         $m = new SiteOrders();
         $info = $m->infoById($id, $field);
         if (empty($info)) {
-            throw new \Exception('订单不存在');
+            throw new ValidateException('订单不存在');
         }
         return $info;
     }
@@ -35,7 +35,7 @@ class SiteOrdersService
         } catch (ValidateException $e) {
             throw new ValidateException($e->getError());
         } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
+            throw new ValidateException($e->getMessage());
         }
     }
 }

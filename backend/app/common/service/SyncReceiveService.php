@@ -19,11 +19,11 @@ class SyncReceiveService
             if ($type === '' || $op === '') {
                 return false;
             }
-            $base_api_url = $data['base_api_url'] ?? '';
-            if (empty($base_api_url)) {
+            $code = $data['code'] ?? '';
+            if (empty($code)) {
                 return false;
             }
-            $siteId = (new \app\common\model\Sites())->where('base_api_url',$base_api_url)->value('id');
+            $siteId = (new \app\common\model\Sites())->where('code',$code)->value('id');
             if(empty($siteId)){
                 return false;
             }      
@@ -99,7 +99,17 @@ class SyncReceiveService
                 }
                 
                 break;
-            
+            case 'order':
+                $payload['order_id'] = $payload['id'];
+                $payload[$pk] = $model->where('site_id',$siteId)->where('order_id',$payload['order_id'])->value('id');
+                
+                if(empty($payload[$pk])){
+                    $payload[$pk] = 0;
+                }else{
+                    $payload[$pk] = (int)$payload[$pk];
+                }
+                
+                break;
             default:
                 break;
         }
@@ -112,7 +122,8 @@ class SyncReceiveService
     {
         return match ($type) {
             'user' => \app\common\model\SiteUsers::class,
-            'comment' => \app\common\model\SiteComments::class,            
+            'comment' => \app\common\model\SiteComments::class,
+            'order' => \app\common\model\SiteOrders::class,
             default      => null,
         };
     }

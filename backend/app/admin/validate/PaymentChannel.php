@@ -8,6 +8,7 @@ class PaymentChannel extends Validate
     protected $scene = [
         'create' => ['name','is_usdt','status','pay_url','limit_price','sort','is_default'],
         'update' => ['name','is_usdt','status','pay_url','limit_price','sort','is_default','remarks','lang','pay_id','skey','md5_key','pay_bankcode','is_web','not_pc','sup_order_url','order_quantity','payment_quantity','place_order','payment','cycle_price','icon_iden'],
+        'status' => ['id','status'],
         'toggle' => ['id','status'],
     ];
     protected $rule = [

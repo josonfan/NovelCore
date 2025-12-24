@@ -51,6 +51,10 @@ class UserAuthService
         $jwt = new JwtService();
         $token = $jwt->generateToken($user);
         $ttl = (int) config('jwt.ttl', 3600);
+        try {
+            \app\service\UserService::writeLoginLog((int)$user->id, request()->ip(), (string)request()->header('X-Device-Id', ''));
+        } catch (\Throwable $e) {
+        }
         return [
             'token'        => $token,
             'token_expire' => time() + $ttl,

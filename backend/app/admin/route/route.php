@@ -193,7 +193,9 @@ Route::group('SiteComments', function () {
     Route::rule('detail', 'SiteComments/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('audit', 'SiteComments/audit', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
 });
-
+/**
+ * SiteOrders 接口（订单管理）
+ */
 Route::group('SiteOrders', function () {
     Route::rule('index', 'SiteOrders/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('detail', 'SiteOrders/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
