@@ -3,11 +3,15 @@ import { http } from './http'
 export type Novel = {
   id: number | string
   title: string
-  author?: string
+  author_id?: number | string
+  author_name?: string
   cover?: string
+  intro?: string
   status?: number
   audit_status?: number
   category_id?: number | string
+  is_r18?: number
+  is_vip?: number
   tags?: Array<{ id: number | string; name: string; type?: string }>
   seo_title?: string
   seo_keywords?: string

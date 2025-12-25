@@ -22,10 +22,13 @@
             />
           </el-form-item>
           <el-form-item label="标题">
-            <el-input v-model="formData.title" />
+            <el-input v-model="formData.title" placeholder="请输入小说标题" />
           </el-form-item>
-          <el-form-item label="作者">
-            <el-input v-model="formData.author" />
+          <el-form-item label="作者ID">
+            <el-input v-model="formData.author_id" placeholder="关联前台用户或作者表ID" />
+          </el-form-item>
+          <el-form-item label="作者名称">
+            <el-input v-model="formData.author_name" placeholder="作者名称" />
           </el-form-item>
           <el-form-item label="分类">
             <el-select
@@ -41,6 +44,14 @@
               />
             </el-select>
           </el-form-item>
+          <el-form-item label="小说简介">
+            <el-input
+              v-model="formData.intro"
+              type="textarea"
+              :rows="4"
+              placeholder="请输入小说简介"
+            />
+          </el-form-item>
           <el-form-item label="连载状态">
             <el-select
               v-model="formData.status"
@@ -55,6 +66,24 @@
                 label="已完结"
               />
             </el-select>
+          </el-form-item>
+          <el-form-item label="R18作品">
+            <el-switch
+              v-model="formData.is_r18"
+              :active-value="1"
+              :inactive-value="0"
+              active-text="是"
+              inactive-text="否"
+            />
+          </el-form-item>
+          <el-form-item label="VIP收费">
+            <el-switch
+              v-model="formData.is_vip"
+              :active-value="1"
+              :inactive-value="0"
+              active-text="是"
+              inactive-text="否"
+            />
           </el-form-item>
           <el-form-item label="审核状态">
             <el-tag
