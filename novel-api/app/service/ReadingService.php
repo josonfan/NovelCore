@@ -67,7 +67,9 @@ class ReadingService
             'progress'   => $data['progress'],
         ];
     }
-
+    /**
+     * 写入阅读记录
+     */
     public static function writeHistory(int $userId, string $novelUuid, string $chapterUuid, bool $finished, int $durationSec): array
     {
         $novel = NovelService::getInfoByUuid($novelUuid, 'id,novel_uuid');
@@ -76,16 +78,19 @@ class ReadingService
         if (!$chapter) {
             throw new ValidateException('章节不存在');
         }
-
-        (new UserReadLog())->writeById(0, [
+        $historyId = UserReadLog::where('user_id', $userId)
+            ->where('novel_id', (int)$novel['id'])
+            ->where('chapter_id', (int)$chapter['id'])
+            ->value('id');
+        (new UserReadLog())->writeById($historyId ?? 0, [
             'user_id'      => $userId,
             'novel_id'     => (int)$novel['id'],
             'chapter_id'   => (int)$chapter['id'],  
-            'start_time'   => date('Y-m-d H:i:s'),
-            'end_time'     => null,
+            'start_time'   => $historyId ?? null ?: date('Y-m-d H:i:s'),
+            'end_time'     => $historyId ? date('Y-m-d H:i:s') : null,
             'duration_sec' => $durationSec,
             'device_id'    => request()->header('X-Device-Id', ''),
-            'client_type'  => request()->header('User-Agent', ''),
+            'client_type'  => request()->header('Client-Type', ''),
             'ip'           => request()->ip(),
         ]);
         if ($durationSec > 0) {

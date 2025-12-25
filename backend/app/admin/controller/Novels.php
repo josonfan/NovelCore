@@ -17,7 +17,7 @@ class Novels extends Backend
         if ($categoryId > 0) $where['category_id'] = $categoryId;
         if ($status !== null) $where['status'] = $status;
         if ($isVip !== null) $where['is_vip'] = $isVip;
-        if ($isR18 !== null) $where['is_r18'] = $isR18;
+        if ($isR18 !== null) $where['is_r18'] = $isR18;        
         $field = 'id,novel_uuid,title,slug,author_id,author_name,category_id,cover,intro,status,is_r18,is_vip,word_count,like_count,fav_count,view_count,audit_status,audit_remark,audit_admin_id,audit_at,created_at,updated_at';
         $orderby = 'id desc';
         $res = NovelsService::list(formatWhere($where), $field, $orderby, $limit, $page);

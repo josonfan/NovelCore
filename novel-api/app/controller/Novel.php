@@ -22,11 +22,34 @@ class Novel extends Common
     public function index()
     {       
         $page     = $this->request->param('page', 1, 'intval');
-        $limit = $this->request->param('limit', 20, 'intval');       
+        $limit = $this->request->param('limit', 20, 'intval');
+        $order = $this->request->param('order', 'newest', 'trim');
         $where = [];
         $where['category_id'] = $this->request->param('category_id', 0, 'intval');
         if(empty($where['category_id']))unset($where['category_id']);
-        $orderby  = 'created_at desc, id desc';
+        $tagParam = $this->request->param('tag_ids');
+        $tagIds = [];
+        if (is_string($tagParam)) {
+            $tagIds = array_values(array_filter(array_map('intval', explode(',', $tagParam))));
+        } elseif (is_array($tagParam)) {
+            $tagIds = array_values(array_filter(array_map('intval', $tagParam)));
+        }
+        if (!empty($tagIds)) {
+            $novelIds = \app\model\NovelTag::where('tag_id', 'in', $tagIds)->column('novel_id');
+            $novelIds = array_values(array_unique(array_map('intval', $novelIds)));
+            $where['id'] = ['in', !empty($novelIds) ? $novelIds : [-1]];
+        }
+        switch($order){
+            case 'newest':
+                $orderby  = 'created_at desc, id desc';
+                break;
+            case 'hotest':
+                $orderby  = 'view_count desc, id desc';
+                break;
+            default:
+                $orderby  = 'created_at desc, id desc';
+                break;
+        }
         $fields = 'novel_uuid as id,title,category_id,cover,intro,status,is_vip,word_count,updated_at';
         $result = NovelService::getList(formatWhere($where), $fields, $orderby, $page, $limit);       
         return $this->ajaxReturn(200, '获取成功', $result);
@@ -48,7 +71,7 @@ class Novel extends Common
         if (empty($novelId)) {
             throw new ValidateException('小说ID不能为空');
         }
-        $fields = 'novel_uuid as id,title,cover,intro,status,is_vip,word_count,updated_at';
+        $fields = 'novel_uuid as id,title,category_id,cover,intro,status,is_vip,view_count,word_count,updated_at';
         $row = \app\service\NovelService::getInfoByUuid($novelId, $fields);        
         return $this->ajaxReturn(200, '获取成功', $row);
     }

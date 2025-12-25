@@ -24,7 +24,7 @@ class NovelService
      * @return array 详情视图数据
      * @throws DataNotFoundException 当资源不存在时抛出 404 业务异常
      */
-    public static function info($id, string $fields = '*'): array
+    public static function info($id, string $fields = '*', bool $isIncreaseViewCount = false): array
     {
         $m = new Novel();
         $novel = $m->infoById($id, $fields);
@@ -33,6 +33,14 @@ class NovelService
         }
         $storage = new StorageService();
         $novel['cover'] = $storage->getPublicUrl((string) ($novel['cover'] ?? ''));
+        if (!$isIncreaseViewCount) {
+            return $novel;
+        }
+        $newCount = max(0, (int)($novel['view_count'] ?? 0) + 1);
+        $m->writeById($id, [
+            'view_count' => $newCount,
+        ]);
+        $novel['view_count'] = $newCount;
         return $novel;
     }
 
@@ -78,7 +86,7 @@ class NovelService
         if (!$id) {
             throw new DataNotFoundException('小说不存在');
         }
-        return self::info($id, $fields);       
+        return self::info($id, $fields, true);       
     }
 
     public static function getUserStatus(string $uuid, int $userId): array

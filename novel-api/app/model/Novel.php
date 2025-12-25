@@ -42,7 +42,7 @@ class Novel extends BaseModel
      */
     public function tags(): BelongsToMany
     {
-        return $this->belongsToMany(Tag::class, 'bl_novel_tags', 'tag_id', 'novel_id');
+        return $this->belongsToMany(Tag::class, 'novel_tags', 'tag_id', 'novel_id');
     }
 
     /**

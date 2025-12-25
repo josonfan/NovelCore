@@ -84,8 +84,9 @@ if (!function_exists('formatWhere')) {
         $where = [];
         foreach( $data as $k=>$v){
             if(is_array($v)){
-                if(((string) $v[1] <> null && !is_array($v[1])) || (is_array($v[1]) && (string) $v[1][0] <> null)){
-                    switch(strtolower($v[0])){
+                if((!is_array($v[1]) && (string) $v[1] <> '') || (is_array($v[1]) && (string) ($v[1][0] ?? '') <> '')){
+                    $op = strtolower($v[0]);
+                    switch($op){
                         //模糊查询
                         case 'like':
                             $v[1] = '%'.$v[1].'%';
@@ -95,8 +96,18 @@ if (!function_exists('formatWhere')) {
                         case 'exp':
                             $v[1] = Db::raw($v[1]);
                             break;
+                        case 'in':
+                            if (is_string($v[1])) {
+                                $arr = array_filter(array_map('trim', explode(',', $v[1])), function($x){ return $x !== ''; });
+                                $v[1] = array_values($arr);
+                            } elseif (!is_array($v[1])) {
+                                $v[1] = [$v[1]];
+                            }
+                            break;
                     }
-                    $where[] = [$k,$v[0],$v[1]];
+                    if (!($op === 'in' && is_array($v[1]) && count($v[1]) === 0)) {
+                        $where[] = [$k,$v[0],$v[1]];
+                    }
                 }
             }else{
                 if((string) $v != null){
