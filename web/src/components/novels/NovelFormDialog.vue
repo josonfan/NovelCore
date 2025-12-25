@@ -20,6 +20,7 @@
               :max-size="2"
               tip="建议尺寸 300×400，不超过 2MB"
             />
+            <p>{{ formData.cover }}</p>
           </el-form-item>
           <el-form-item label="标题">
             <el-input

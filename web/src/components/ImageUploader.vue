@@ -1,7 +1,13 @@
 <template>
-  <div class="image-uploader" :class="{ 'is-multiple': multiple, 'is-disabled': disabled }">
+  <div
+    class="image-uploader"
+    :class="{ 'is-multiple': multiple, 'is-disabled': disabled }"
+  >
     <!-- 已上传的图片列表 -->
-    <div v-if="multiple" class="upload-list">
+    <div
+      v-if="multiple"
+      class="upload-list"
+    >
       <div
         v-for="(img, idx) in imageList"
         :key="img.url || idx"
@@ -15,33 +21,57 @@
           :initial-index="idx"
         />
         <div class="upload-item-actions">
-          <el-icon class="action-icon" @click="handlePreview(idx)"><ZoomIn /></el-icon>
-          <el-icon v-if="!disabled" class="action-icon" @click="handleRemove(idx)"><Delete /></el-icon>
+          <el-icon
+            class="action-icon"
+            @click="handlePreview()"
+          >
+            <ZoomIn />
+          </el-icon>
+          <el-icon
+            v-if="!disabled"
+            class="action-icon"
+            @click="handleRemove(idx)"
+          >
+            <Delete />
+          </el-icon>
         </div>
       </div>
 
       <!-- 上传中的项 -->
-      <div v-for="(item, idx) in uploadingList" :key="'uploading-' + idx" class="upload-item is-uploading">
-        <el-progress type="circle" :percentage="item.percent" :width="60" />
+      <div
+        v-for="(item, idx) in uploadingList"
+        :key="'uploading-' + idx"
+        class="upload-item is-uploading"
+      >
+        <el-progress
+          type="circle"
+          :percentage="item.percent"
+          :width="60"
+        />
       </div>
 
       <!-- 添加按钮 -->
       <div
         v-if="!disabled && (!limit || imageList.length + uploadingList.length < limit)"
         class="upload-trigger"
+        :class="{ 'is-dragover': isDragover }"
         @click="triggerUpload"
         @dragover.prevent="onDragOver"
         @dragleave.prevent="onDragLeave"
         @drop.prevent="onDrop"
-        :class="{ 'is-dragover': isDragover }"
       >
-        <el-icon class="upload-icon"><Plus /></el-icon>
+        <el-icon class="upload-icon">
+          <Plus />
+        </el-icon>
         <span class="upload-text">{{ uploadText }}</span>
       </div>
     </div>
 
     <!-- 单图模式 -->
-    <div v-else class="upload-single">
+    <div
+      v-else
+      class="upload-single"
+    >
       <div
         v-if="singleImage"
         class="upload-item"
@@ -53,27 +83,47 @@
           :preview-src-list="[singleImage]"
         />
         <div class="upload-item-actions">
-          <el-icon class="action-icon" @click="handlePreviewSingle"><ZoomIn /></el-icon>
-          <el-icon v-if="!disabled" class="action-icon" @click="handleRemoveSingle"><Delete /></el-icon>
+          <el-icon
+            class="action-icon"
+            @click="handlePreviewSingle"
+          >
+            <ZoomIn />
+          </el-icon>
+          <el-icon
+            v-if="!disabled"
+            class="action-icon"
+            @click="handleRemoveSingle"
+          >
+            <Delete />
+          </el-icon>
         </div>
       </div>
 
       <!-- 上传中 -->
-      <div v-else-if="uploadingList.length > 0" class="upload-item is-uploading">
-        <el-progress type="circle" :percentage="uploadingList[0]?.percent || 0" :width="60" />
+      <div
+        v-else-if="uploadingList.length > 0"
+        class="upload-item is-uploading"
+      >
+        <el-progress
+          type="circle"
+          :percentage="uploadingList[0]?.percent || 0"
+          :width="60"
+        />
       </div>
 
       <!-- 上传触发器 -->
       <div
         v-else-if="!disabled"
         class="upload-trigger"
+        :class="{ 'is-dragover': isDragover }"
         @click="triggerUpload"
         @dragover.prevent="onDragOver"
         @dragleave.prevent="onDragLeave"
         @drop.prevent="onDrop"
-        :class="{ 'is-dragover': isDragover }"
       >
-        <el-icon class="upload-icon"><Plus /></el-icon>
+        <el-icon class="upload-icon">
+          <Plus />
+        </el-icon>
         <span class="upload-text">{{ uploadText }}</span>
       </div>
     </div>
@@ -86,10 +136,15 @@
       :multiple="multiple"
       style="display: none"
       @change="handleFileChange"
-    />
+    >
 
     <!-- 提示文字 -->
-    <div v-if="tip" class="upload-tip">{{ tip }}</div>
+    <div
+      v-if="tip"
+      class="upload-tip"
+    >
+      {{ tip }}
+    </div>
   </div>
 </template>
 
@@ -226,9 +281,9 @@ async function processFiles(files: File[]) {
     uploadingList.value.push(uploadItem)
 
     try {
-      const result = await uploadFile(file, (percent) => {
+      const result = await uploadFile(file, { onProgress: (percent) => {
         uploadItem.percent = percent
-      })
+      }})
 
       // 上传成功
       if (props.multiple) {
@@ -249,7 +304,7 @@ async function processFiles(files: File[]) {
 }
 
 // 预览图片
-function handlePreview(idx: number) {
+function handlePreview() {
   // el-image 自带预览功能
 }
 
@@ -287,6 +342,7 @@ function handleRemoveSingle() {
 
 .upload-item {
   position: relative;
+  box-sizing: border-box;
   width: var(--uploader-size);
   height: var(--uploader-size);
   border-radius: var(--uploader-radius);
@@ -336,6 +392,7 @@ function handleRemoveSingle() {
 }
 
 .upload-trigger {
+  box-sizing: border-box;
   width: var(--uploader-size);
   height: var(--uploader-size);
   border: 1px dashed var(--el-border-color);
