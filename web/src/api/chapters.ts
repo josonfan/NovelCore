@@ -9,7 +9,7 @@ export type Chapter = {
 }
 
 export async function fetchChapterList(params?: { page?: number; limit?: number; novel_id?: number | string }) {
-  const res = await http.get('Chapters/index', { params })
+  const res = await http.post('Chapters/index', params)
   return res.data?.data || { list: [], count: 0 }
 }
 

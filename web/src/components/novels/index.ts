@@ -1,0 +1,5 @@
+export { default as NovelToolbar } from './NovelToolbar.vue'
+export { default as NovelTable } from './NovelTable.vue'
+export { default as NovelFormDialog } from './NovelFormDialog.vue'
+export { default as NovelAuditDialog } from './NovelAuditDialog.vue'
+export { default as NovelTagsDialog } from './NovelTagsDialog.vue'

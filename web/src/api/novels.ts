@@ -4,14 +4,27 @@ export type Novel = {
   id: number | string
   title: string
   author?: string
+  cover?: string
   status?: number
   audit_status?: number
   category_id?: number | string
   tags?: Array<{ id: number | string; name: string; type?: string }>
-  cover?: string
+  seo_title?: string
+  seo_keywords?: string
+  seo_description?: string
 }
 
-export async function fetchNovelList(params?: { page?: number; limit?: number; kw?: string }) {
+export interface NovelListParams {
+  page?: number | string
+  limit?: number | string
+  kw?: string
+  category_id?: number | string
+  status?: number | string
+  is_vip?: number | string
+  is_r18?: number | string
+}
+
+export async function fetchNovelList(params?: NovelListParams) {
   const res = await http.get('Novels/index', { params })
   return res.data?.data || { list: [], count: 0 }
 }
