@@ -10,10 +10,12 @@ return [
         'admin_auth' => \app\middleware\AdminAuth::class,
         'admin_push' => \app\middleware\AdminPushAuth::class,
         'response_time' => \app\middleware\ResponseTime::class,
+        'no_auth' => \app\middleware\NoAuth::class,
     ],
     'priority' => [
         \think\middleware\LoadLangPack::class,
         \app\middleware\SiteInit::class,
+        \app\middleware\NoAuth::class,
         \app\middleware\BotBlock::class,
         \app\middleware\ResponseTime::class,
         \app\middleware\Cors::class,

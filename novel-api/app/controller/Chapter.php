@@ -8,7 +8,10 @@ use app\model\Chapter as ChapterModel;
 use app\service\NovelService;
 use app\service\ChapterService;
 use app\service\ContentService;
-use think\exception\ValidateException;  
+use think\exception\ValidateException;
+use app\model\UserReadingHistory;
+
+
 
 class Chapter extends Common
 {
@@ -20,8 +23,7 @@ class Chapter extends Common
      * 返回：data { list, count }
      */
     public function index()
-    {
-       
+    {       
         $page     = $this->request->param('page', 1, 'intval');
         $limit = $this->request->param('limit', 20, 'intval');
         $novelId = $this->request->param('novelId', '', 'trim');
@@ -34,6 +36,19 @@ class Chapter extends Common
         $fields = 'id,chapter_uuid,novel_id,title,content_short,sort_order,is_free,is_vip,created_at';
         $orderby = 'sort_order asc';
         $result = ChapterService::list(formatWhere($where), $fields, $orderby, $limit,$page);
+        if($this->request->user_id && !empty($result['list'])){
+            //这里实现用户阅读进度的获取
+            $chapterIds = array_column($result['list'], 'id');
+            $readingProgress = UserReadingHistory::where('user_id', $this->request->user_id)
+            ->where('chapter_id','in', $chapterIds)->column('id,progress','chapter_id');
+            $result['list'] = array_map(function($item) use ($readingProgress){
+                $item['progress'] = (int)($readingProgress[$item['id']]['progress'] ?? 0);
+                // //是否已读
+                // $item['isRead'] = isset($readingProgress[$item['id']]) ? true : false;
+                return $item;
+            }, $result['list']);
+        }
+        //增加一个阅读总进度
         return $this->ajaxReturn(200, '获取成功', $result);
     }
 

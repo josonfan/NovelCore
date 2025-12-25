@@ -5,7 +5,9 @@ namespace app\service;
 
 use app\model\UserReadLog;
 use app\model\UserReadingHistory;
-use think\exception\ValidateException;
+use think\exception\HttpException;
+
+
 
 class ReadingService
 {
@@ -42,7 +44,7 @@ class ReadingService
         $chapter = ChapterService::getInfoByUuid($chapterUuid, 'id,chapter_uuid,title');
         
         if (!$chapter) {
-            throw new ValidateException('章节不存在');
+            throw new HttpException(404, '章节不存在');
         }
         $historyId = UserReadingHistory::where('user_id', $userId)
             ->where('novel_id', (int)$novel['id'])
@@ -76,7 +78,7 @@ class ReadingService
         $chapter = ChapterService::getInfoByUuid($chapterUuid, 'id,chapter_uuid,title');
         
         if (!$chapter) {
-            throw new ValidateException('章节不存在');
+            throw new HttpException(404, '章节不存在');
         }
         $historyId = UserReadLog::where('user_id', $userId)
             ->where('novel_id', (int)$novel['id'])
@@ -93,6 +95,7 @@ class ReadingService
             'client_type'  => request()->header('Client-Type', ''),
             'ip'           => request()->ip(),
         ]);
+        
         if ($durationSec > 0) {
             UserStatsService::incReadMinutes($userId, $durationSec);
         }
@@ -109,6 +112,10 @@ class ReadingService
         if ($historyId) {
             (new UserReadingHistory())->writeById((int)$historyId, $data);
         } else {
+            try {
+                \app\service\StatsService::incReadCount(1);
+            } catch (\Throwable $e) {
+            }
             (new UserReadingHistory())->writeById(0, $data);
             UserStatsService::incReadNovelCount($userId, 1);
         }
@@ -120,4 +127,3 @@ class ReadingService
         ];
     }
 }
-

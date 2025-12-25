@@ -20,9 +20,7 @@ Route::group('api', function () {
     Route::rule('Tag/info', 'Tag/info', 'POST');
     
 
-    // 小说列表与详情（统一 Controller/Action，参数走 Body）
-    Route::rule('Novel/index', 'Novel/index', 'POST');
-    Route::rule('Novel/show', 'Novel/show', 'POST');
+    
     // VIP 套餐列表与详情
     Route::rule('Vip/index', 'Vip/index', 'POST');
     Route::rule('Vip/info', 'Vip/info', 'POST');
@@ -33,13 +31,15 @@ Route::group('api', function () {
     Route::rule('Order/notify/:icon_iden/:channel_id', 'Order/notify', 'POST');
 
 
-
+    // 小说列表与详情（统一 Controller/Action，参数走 Body）
+    Route::rule('Novel/index', 'Novel/index', 'POST')->middleware(\app\middleware\NoAuth::class);
+    Route::rule('Novel/show', 'Novel/show', 'POST')->middleware(\app\middleware\NoAuth::class);
     // 章节列表与内容（统一 Controller/Action，参数走 Body）
-    Route::rule('Chapter/index', 'Chapter/index', 'POST');
-    Route::rule('Chapter/show', 'Chapter/show', 'POST');
+    Route::rule('Chapter/index', 'Chapter/index', 'POST')->middleware(\app\middleware\NoAuth::class);
+    Route::rule('Chapter/show', 'Chapter/show', 'POST')->middleware(\app\middleware\NoAuth::class);
 
     // 阅读进度与搜索（统一 Controller/Action）
-    Route::rule('Search/index', 'Search/index', 'POST');
+    Route::rule('Search/index', 'Search/index', 'POST')->middleware(\app\middleware\NoAuth::class);
     Route::rule('Reading/getProgress', 'Reading/getProgress', 'POST')->middleware(\app\middleware\Auth::class);
     Route::rule('Reading/saveProgress', 'Reading/saveProgress', 'POST')->middleware(\app\middleware\Auth::class);
     Route::rule('Domain/index', 'Domain/index', 'POST');

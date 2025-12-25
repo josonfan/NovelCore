@@ -110,6 +110,17 @@ class SyncReceiveService
                 }
                 
                 break;
+            case 'stats':
+                $payload['stats_id'] = $payload['id'];
+                $payload[$pk] = $model->where('site_id',$siteId)->where('stats_id',$payload['stats_id'])->value('id');
+                
+                if(empty($payload[$pk])){
+                    $payload[$pk] = 0;
+                }else{
+                    $payload[$pk] = (int)$payload[$pk];
+                }
+                
+                break;
             default:
                 break;
         }
@@ -124,6 +135,7 @@ class SyncReceiveService
             'user' => \app\common\model\SiteUsers::class,
             'comment' => \app\common\model\SiteComments::class,
             'order' => \app\common\model\SiteOrders::class,
+            'stats' => \app\common\model\SiteStats::class,
             default      => null,
         };
     }

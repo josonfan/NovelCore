@@ -7,8 +7,8 @@ use app\model\Novel;
 use app\model\UserNovelLike;
 use app\model\UserNovelFavorite;
 use think\facade\Db;
-use think\db\exception\DataNotFoundException;
-use think\db\exception\ModelNotFoundException;
+use think\exception\ValidateException;
+use think\exception\HttpException;
 
 
 
@@ -22,14 +22,14 @@ class NovelService
      * @param  $id    主键ID（字符串形式，兼容控制器映射后的数值ID）
      * @param  $fields 视图字段列表，支持 `field as alias`，默认 '*'
      * @return array 详情视图数据
-     * @throws DataNotFoundException 当资源不存在时抛出 404 业务异常
+     * @throws HttpException 当资源不存在时抛出 404 业务异常
      */
     public static function info($id, string $fields = '*', bool $isIncreaseViewCount = false): array
     {
         $m = new Novel();
         $novel = $m->infoById($id, $fields);
         if (empty($novel)) {
-            throw new DataNotFoundException('小说不存在');
+            throw new HttpException(404, '小说不存在');
         }
         $storage = new StorageService();
         $novel['cover'] = $storage->getPublicUrl((string) ($novel['cover'] ?? ''));
@@ -76,7 +76,7 @@ class NovelService
      * @param string $uuid   外部 `novel_uuid`
      * @param string $fields 视图字段列表
      * @return array 详情视图数据
-     * @throws DataNotFoundException 当资源不存在时抛出 404 业务异常
+     * @throws HttpException 当资源不存在时抛出 404 业务异常
      */
     public static function getInfoByUuid(string $uuid, string $fields = '*'): array
     {
@@ -84,7 +84,7 @@ class NovelService
         $pk = $m->getPk();
         $id = $m->where('novel_uuid', $uuid)->value($pk);
         if (!$id) {
-            throw new DataNotFoundException('小说不存在');
+            throw new HttpException(404, '小说不存在');
         }
         return self::info($id, $fields, true);       
     }

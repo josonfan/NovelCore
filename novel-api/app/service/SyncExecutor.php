@@ -48,7 +48,7 @@ class SyncExecutor
         $url = rtrim($adminApiUrl, '/') . config('sync.push_path', '/Sync/receive');
         $headers = ['Content-Type: application/json', 'X-Api-Token: ' . (string)$site['api_token']];
         $payload = json_encode(['code' => (string)$site['code'], 'type' => (string)$row['content_type'], 'id' => (int)$row['content_id'], 'operation' => (string)$row['operation'], 'data' => $data], JSON_UNESCAPED_UNICODE);
-        
+        // dd($payload);
         $ok = self::postJson($url, $payload, $headers, (int)config('sync.timeout', 5));
         if ($ok) {
             $q->deleteById((int)$row['id']);           

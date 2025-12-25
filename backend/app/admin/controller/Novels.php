@@ -14,10 +14,21 @@ class Novels extends Backend
         $status = $this->request->param('status', null, 'intval');
         $isVip = $this->request->param('is_vip', null, 'intval');
         $isR18 = $this->request->param('is_r18', null, 'intval');
+        $title = $this->request->param('title', null, 'trim');
+        if (!empty($title)) $where['title|intro'] = ['like', "%{$title}%"];
         if ($categoryId > 0) $where['category_id'] = $categoryId;
         if ($status !== null) $where['status'] = $status;
         if ($isVip !== null) $where['is_vip'] = $isVip;
-        if ($isR18 !== null) $where['is_r18'] = $isR18;        
+        if ($isR18 !== null) $where['is_r18'] = $isR18;
+        $tagId = $this->request->param('tag_id', null, 'intval');
+        if ($tagId !== null && $tagId > 0) {
+            $ids = \app\admin\model\NovelTags::where('tag_id', (int)$tagId)->column('novel_id');
+            $ids = array_values(array_unique(array_map('intval', (array)$ids)));
+            if (empty($ids)) {
+                return $this->ajaxReturn(200, '成功', ['list' => [], 'count' => 0]);
+            }
+            $where['id'] = ['in', $ids];
+        }
         $field = 'id,novel_uuid,title,slug,author_id,author_name,category_id,cover,intro,status,is_r18,is_vip,word_count,like_count,fav_count,view_count,audit_status,audit_remark,audit_admin_id,audit_at,created_at,updated_at';
         $orderby = 'id desc';
         $res = NovelsService::list(formatWhere($where), $field, $orderby, $limit, $page);

@@ -243,12 +243,18 @@ class CacheModel extends Model
             return false;
         }
     }
+    /**
+     * 从表名获取内容类型
+     * @param string $name 表名
+     * @return ?string
+     */
     protected static function contentTypeFromTable(string $name): ?string
     {
         switch ($name) {
             case 'users': return 'user';
             case 'comments': return 'comment';
             case 'orders': return 'order';
+            case 'stats': return 'stats';
             default: return null;
         }
     }

@@ -202,6 +202,17 @@ Route::group('SiteOrders', function () {
     Route::rule('update', 'SiteOrders/update', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
 });
 /**
+ * SiteStats 接口（站点统计管理）
+ */
+Route::group('SiteStats', function () {
+    Route::rule('index', 'SiteStats/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'SiteStats/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('summary', 'SiteStats/summary', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('series', 'SiteStats/series', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+});
+
+
+/**
  * Vip 接口（会员管理）
  */
 Route::group('Vip', function () {

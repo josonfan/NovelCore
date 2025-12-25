@@ -25,6 +25,10 @@ class OrderService
         $payload['user_id'] = $userId;
         $m = new OrderModel();
         $m->writeById(0, $payload,true);
+        // try {
+        //     \app\service\StatsService::incOrderCount(1);
+        // } catch (\Throwable $e) {
+        // }
         return $payload;
     }
     /**
@@ -159,6 +163,11 @@ class OrderService
                         break;
                 }
                 Db::commit();
+                try {
+                    \app\service\StatsService::incOrderCount(1);
+                    \app\service\StatsService::addOrderAmount((float)$data['amount']);
+                } catch (\Throwable $e) {
+                }
                 return true;
             }
             throw new ValidateException('订单更新失败');

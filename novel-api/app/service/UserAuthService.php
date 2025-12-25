@@ -27,6 +27,10 @@ class UserAuthService
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
         }        
+        try {
+            \app\service\StatsService::onUserRegistered();
+        } catch (\Throwable $e) {
+        }
         return $user;
     }
 

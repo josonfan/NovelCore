@@ -57,24 +57,24 @@ class ExceptionHandle extends Handle
         //验证器异常
         if ($e instanceof ValidateException) {
             $msg = is_string($e->getError()) ? lang($e->getError()) : lang('参数校验失败');
-            return json(['code'=>422,'msg'=>$msg])->code(422);
+            return json(['code'=>422,'msg'=>$msg]);
         }
         // 模型不存在异常
         if ($e instanceof ModelNotFoundException) {
-            return json(['code'=>404,'msg'=>lang($e->getMessage())])->code(404);
+            return json(['code'=>404,'msg'=>lang($e->getMessage())]);
         }
         // 数据不存在异常
         if ($e instanceof DataNotFoundException) {
-            return json(['code'=>404,'msg'=>lang($e->getMessage())])->code(404);
+            return json(['code'=>404,'msg'=>lang($e->getMessage())]);
         }
         // 添加自定义异常处理机制
         if ($e instanceof HttpException ) {
-            return json(['code'=>$e->getStatusCode(),'msg'=>lang($e->getMessage())])->code($e->getStatusCode());
+            return json(['code'=>$e->getStatusCode(),'msg'=>lang($e->getMessage())]);
         }
         // 业务异常
         if ($e instanceof BusinessException) {
             $status = method_exists($e, 'getHttpStatus') ? $e->getHttpStatus() : 400;
-            return json(['code'=>$status,'msg'=>lang($e->getMessage()),'data'=>$e->getData()])->code($status);
+            return json(['code'=>$status,'msg'=>lang($e->getMessage()),'data'=>$e->getData()]);
         }
 
         // 其他错误交给系统处理

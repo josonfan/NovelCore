@@ -4,6 +4,7 @@ return [
         'user',
         'comment',
         'order',
+        'stats',
     ],
     'push_path' => '/Sync/receive',
     'timeout' => 5,

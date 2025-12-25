@@ -27,7 +27,7 @@ class UserSummaryService
         ];
         return [
             'user'  => [
-                'id'         => (int)($user['id'] ?? 0),
+                'uid'        => (string)($user['uid'] ?? ''),
                 'username'   => (string)($user['username'] ?? ''),
                 'nickname'   => (string)($user['nickname'] ?? ''),
                 'avatar'     => (string)($user['avatar'] ?? ''),

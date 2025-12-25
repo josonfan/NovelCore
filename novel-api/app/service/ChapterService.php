@@ -6,7 +6,7 @@ namespace app\service;
 use app\exception\BusinessException;
 use app\model\Chapter;
 use app\model\User;
-use think\db\exception\DataNotFoundException;
+use think\exception\HttpException;
 
 
 
@@ -67,7 +67,7 @@ class ChapterService
         $pk = $m->getPk();
         $id = $m->where('chapter_uuid', $chapterId)->value($pk);
         if (!$id) {
-            throw new DataNotFoundException('章节不存在');
+            throw new HttpException(404, '章节不存在');
         }
         return self::info($id, $fields);       ;
     }
@@ -83,7 +83,7 @@ class ChapterService
         $m = new Chapter();
         $chapter = $m->infoById($id, $fields);
         if (empty($chapter)) {
-            throw new DataNotFoundException('章节不存在');
+            throw new HttpException(404, '章节不存在');
         }
         return $chapter;
     }

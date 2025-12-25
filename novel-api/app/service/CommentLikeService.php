@@ -5,7 +5,7 @@ namespace app\service;
 
 use app\model\Comment as CommentModel;
 use app\model\CommentLike;
-use think\db\exception\DataNotFoundException;
+use think\exception\HttpException;
 
 class CommentLikeService
 {
@@ -13,7 +13,7 @@ class CommentLikeService
     {
         $cid = (int) CommentModel::where('id', $commentId)->value('id');
         if (!$cid) {
-            throw new DataNotFoundException('评论不存在');
+            throw new HttpException(404, '评论不存在');
         }
         $existsId = CommentLike::where('user_id', $userId)
             ->where('comment_id', $cid)
@@ -38,7 +38,7 @@ class CommentLikeService
     {
         $cid = (int) CommentModel::where('id', $commentId)->value('id');
         if (!$cid) {
-            throw new DataNotFoundException('评论不存在');
+            throw new HttpException(404, '评论不存在');
         }
         $likeId = CommentLike::where('user_id', $userId)
             ->where('comment_id', $cid)
