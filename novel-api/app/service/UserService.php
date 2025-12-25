@@ -112,7 +112,7 @@ class UserService
             $update['email'] = $email;
         }
         if ($avatar !== null) {
-            $update['avatar'] = $avatar;
+            $update['avatar'] = (new StorageService())->filterDomain($avatar);
         }
         if (!$update) {
             throw new ValidateException('参数错误');

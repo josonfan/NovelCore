@@ -126,7 +126,7 @@ class CacheModel extends Model
      */
     public function writeById(int $id, array $data, string $type = 'async_exec_method_custom_queue'): bool
     {
-        if (!$this->is_cache) {            
+        if (!$this->is_cache) {          
             $ok = self::persistById(static::class, $id, $data);
             return $ok;
         } 
@@ -232,6 +232,7 @@ class CacheModel extends Model
            
             return $res;
         } catch (\Throwable $e) {
+            
             return false;
         }
     }

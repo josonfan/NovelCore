@@ -27,7 +27,18 @@ class StorageService
 
         return $path;
     }
-
+    /**
+     * 过滤 URL 中的 CDN 域名，返回相对路径。
+     */
+    public function filterDomain(string $url): string
+    {
+        $config = (new ConfigService())->get('storage_config');
+        $cdn = rtrim((string) $config['base_url'], '/');
+        if ($cdn !== '') {
+            $url = str_replace($cdn, '', $url);
+        }
+        return ltrim($url, '/');
+    }
     /**
      * 预留上传接口：未来接入 B2 SDK，支持直传/分片等。
      */

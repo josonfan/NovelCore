@@ -131,6 +131,9 @@ class NovelsService
     {
         try {
             validate(\app\admin\validate\Novel::class)->scene('create')->check($data);
+            if (!empty($data['cover'])) {
+                $data['cover'] = StorageClient::forSite()->filterDomain((string)$data['cover']);
+            }
             if (empty($data['novel_uuid'])) {
                 $data['novel_uuid'] = self::uuid();
             }
@@ -157,8 +160,11 @@ class NovelsService
      */
     public static function update(int $id, array $data): bool
     {
-        try {
+        try {            
             validate(\app\admin\validate\Novel::class)->scene('update')->check($data);
+            if (!empty($data['cover'])) {
+                $data['cover'] = StorageClient::forSite()->filterDomain((string)$data['cover']);
+            }
             $m = new Novels();
             return $m->writeById($id, $data);
         } catch (ValidateException $e) {

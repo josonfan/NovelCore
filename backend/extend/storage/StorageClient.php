@@ -99,4 +99,14 @@ class StorageClient
 
         return $path;
     }
+    //实现一个 过滤域名的方法
+    public function filterDomain(string $url): string
+    {
+        $config = $this->cfg;
+        $cdn = rtrim((string) $config['base_url'], '/');
+        if ($cdn !== '') {
+            $url = str_replace($cdn, '', $url);
+        }
+        return ltrim($url, '/');
+    }
 }
