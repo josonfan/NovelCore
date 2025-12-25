@@ -22,13 +22,22 @@
             />
           </el-form-item>
           <el-form-item label="标题">
-            <el-input v-model="formData.title" placeholder="请输入小说标题" />
+            <el-input
+              v-model="formData.title"
+              placeholder="请输入小说标题"
+            />
           </el-form-item>
           <el-form-item label="作者ID">
-            <el-input v-model="formData.author_id" placeholder="关联前台用户或作者表ID" />
+            <el-input
+              v-model="formData.author_id"
+              placeholder="关联前台用户或作者表ID"
+            />
           </el-form-item>
           <el-form-item label="作者名称">
-            <el-input v-model="formData.author_name" placeholder="作者名称" />
+            <el-input
+              v-model="formData.author_name"
+              placeholder="作者名称"
+            />
           </el-form-item>
           <el-form-item label="分类">
             <el-select

@@ -34,7 +34,7 @@ export function useNovelList() {
     return rows.value.filter(
       (x) =>
         (x.title || '').toLowerCase().includes(k) ||
-        (x.author || '').toLowerCase().includes(k)
+        (x.author_name || '').toLowerCase().includes(k)
     )
   })
 
