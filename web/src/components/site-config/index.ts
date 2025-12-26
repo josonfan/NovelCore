@@ -1,0 +1,8 @@
+export { default as StorageConfigForm } from './StorageConfigForm.vue'
+export { default as EmailConfigForm } from './EmailConfigForm.vue'
+export { default as SearchConfigForm } from './SearchConfigForm.vue'
+export { default as AiConfigForm } from './AiConfigForm.vue'
+export { default as RecommendationConfigForm } from './RecommendationConfigForm.vue'
+export { default as CustomerServiceConfigForm } from './CustomerServiceConfigForm.vue'
+export { default as CommentReviewConfigForm } from './CommentReviewConfigForm.vue'
+export { default as TelegramAuditConfigForm } from './TelegramAuditConfigForm.vue'
