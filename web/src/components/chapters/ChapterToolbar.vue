@@ -1,5 +1,8 @@
 <template>
-  <el-card shadow="never" class="toolbar">
+  <el-card
+    shadow="never"
+    class="toolbar"
+  >
     <template #header>
       章节管理<span v-if="novelTitle">（{{ novelTitle }}）</span>
     </template>
@@ -12,7 +15,10 @@
         />
       </div>
       <div class="actions">
-        <template v-for="btn in actionButtons" :key="btn.id">
+        <template
+          v-for="btn in actionButtons"
+          :key="btn.id"
+        >
           <el-button
             :type="resolveBtnType(btn)"
             @click="$emit('action', btn)"
@@ -27,15 +33,23 @@
             {{ btn.name }}
           </el-button>
         </template>
-        <el-button :loading="loading" @click="$emit('refresh')">
+        <el-button
+          :loading="loading"
+          @click="$emit('refresh')"
+        >
           刷新
         </el-button>
-        <el-button type="primary" @click="$emit('add')">
+        <el-button
+          type="primary"
+          @click="$emit('add')"
+        >
           新建
         </el-button>
       </div>
     </div>
-    <div class="subline">共 {{ total }} 条</div>
+    <div class="subline">
+      共 {{ total }} 条
+    </div>
   </el-card>
 </template>
 
@@ -53,10 +67,10 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: string): void
-  (e: 'action', btn: ActionButton): void
-  (e: 'refresh'): void
-  (e: 'add'): void
+  'update:modelValue': [value: string]
+  'action': [btn: ActionButton]
+  'refresh': []
+  'add': []
 }>()
 
 const { resolveIcon, resolveBtnType } = useActionButtons()
