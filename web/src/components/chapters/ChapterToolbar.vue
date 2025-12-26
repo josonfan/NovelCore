@@ -4,14 +4,33 @@
     class="toolbar"
   >
     <template #header>
-      章节管理<span v-if="novelTitle">（{{ novelTitle }}）</span>
+      <div class="toolbar-header">
+        <div class="title-group">
+          <span class="title">章节管理</span>
+          <el-tag
+            v-if="novelTitle"
+            type="warning"
+            size="small"
+          >
+            {{ novelTitle }}
+          </el-tag>
+        </div>
+        <el-tag
+          type="info"
+          size="small"
+        >
+          共 {{ total }} 条
+        </el-tag>
+      </div>
     </template>
-    <div class="toolbar-grid">
-      <div class="cell">
+    <div class="toolbar-content">
+      <div class="search-area">
         <el-input
           v-model="searchValue"
           placeholder="搜索标题/小说ID"
           clearable
+          :prefix-icon="Search"
+          class="search-input"
         />
       </div>
       <div class="actions">
@@ -34,6 +53,7 @@
           </el-button>
         </template>
         <el-button
+          :icon="Refresh"
           :loading="loading"
           @click="$emit('refresh')"
         >
@@ -41,20 +61,19 @@
         </el-button>
         <el-button
           type="primary"
+          :icon="Plus"
           @click="$emit('add')"
         >
-          新建
+          新建章节
         </el-button>
       </div>
-    </div>
-    <div class="subline">
-      共 {{ total }} 条
     </div>
   </el-card>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { Search, Refresh, Plus } from '@element-plus/icons-vue'
 import type { ActionButton } from '../../composables/useActionButtons'
 import { useActionButtons } from '../../composables/useActionButtons'
 
@@ -82,26 +101,46 @@ const searchValue = computed({
 </script>
 
 <style scoped>
-.toolbar {
-  display: grid;
-  gap: 8px;
-}
-
-.toolbar-grid {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 12px;
+.toolbar-header {
+  display: flex;
   align-items: center;
-}
-
-.toolbar-grid .actions {
-  justify-self: end;
-  display: inline-flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
-.subline {
-  color: var(--nc-muted);
-  font-size: 12px;
+.title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title-group .title {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.toolbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.search-area {
+  flex: 1;
+  max-width: 320px;
+}
+
+.search-input {
+  width: 100%;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 </style>
