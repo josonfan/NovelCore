@@ -12,7 +12,15 @@ export interface ChapterFormData {
   id?: number | string
   novel_id: string
   title: string
-  index: number
+  content_short: string
+  seo_title: string
+  seo_keywords: string
+  seo_description: string
+  is_free: string
+  is_vip: string
+  price: string
+  word_count: string
+  sort_order: string
   content: string
 }
 
@@ -23,7 +31,15 @@ export function useChapterForm(reload: () => void, novelId: () => string) {
   const form = ref<ChapterFormData>({
     novel_id: '',
     title: '',
-    index: 1,
+    content_short: '',
+    seo_title: '',
+    seo_keywords: '',
+    seo_description: '',
+    is_free: '1',
+    is_vip: '0',
+    price: '0',
+    word_count: '0',
+    sort_order: '1',
     content: '',
   })
 
@@ -32,7 +48,15 @@ export function useChapterForm(reload: () => void, novelId: () => string) {
     form.value = {
       novel_id: novelId() || '',
       title: '',
-      index: 1,
+      content_short: '',
+      seo_title: '',
+      seo_keywords: '',
+      seo_description: '',
+      is_free: '1',
+      is_vip: '0',
+      price: '0',
+      word_count: '0',
+      sort_order: '1',
       content: '',
     }
     activeTab.value = 'basic'
@@ -47,7 +71,15 @@ export function useChapterForm(reload: () => void, novelId: () => string) {
         id: row.id,
         novel_id: String(d?.novel_id ?? row.novel_id ?? ''),
         title: d?.title ?? row.title ?? '',
-        index: Number(d?.index ?? row.index ?? 1),
+        content_short: d?.content_short ?? '',
+        seo_title: d?.seo_title ?? '',
+        seo_keywords: d?.seo_keywords ?? '',
+        seo_description: d?.seo_description ?? '',
+        is_free: d?.is_free ?? '1',
+        is_vip: d?.is_vip ?? '0',
+        price: d?.price ?? '0',
+        word_count: d?.word_count ?? '0',
+        sort_order: d?.sort_order ?? '1',
         content: '',
       }
     } catch {
@@ -55,7 +87,15 @@ export function useChapterForm(reload: () => void, novelId: () => string) {
         id: row.id,
         novel_id: String(row.novel_id ?? ''),
         title: row.title ?? '',
-        index: Number(row.index ?? 1),
+        content_short: row.content_short ?? '',
+        seo_title: row.seo_title ?? '',
+        seo_keywords: row.seo_keywords ?? '',
+        seo_description: row.seo_description ?? '',
+        is_free: row.is_free ?? '1',
+        is_vip: row.is_vip ?? '0',
+        price: row.price ?? '0',
+        word_count: row.word_count ?? '0',
+        sort_order: row.sort_order ?? '1',
         content: '',
       }
     }
@@ -79,7 +119,15 @@ export function useChapterForm(reload: () => void, novelId: () => string) {
       const payload = {
         novel_id: form.value.novel_id,
         title: form.value.title,
-        index: form.value.index,
+        content_short: form.value.content_short,
+        seo_title: form.value.seo_title,
+        seo_keywords: form.value.seo_keywords,
+        seo_description: form.value.seo_description,
+        is_free: form.value.is_free,
+        is_vip: form.value.is_vip,
+        price: form.value.price,
+        word_count: form.value.word_count,
+        sort_order: form.value.sort_order,
         content: form.value.content,
       }
       const res =

@@ -4,7 +4,15 @@ export type Chapter = {
   id: number | string
   novel_id?: number | string
   title: string
-  index?: number
+  content_short?: string
+  seo_title?: string
+  seo_keywords?: string
+  seo_description?: string
+  is_free?: string
+  is_vip?: string
+  price?: string
+  word_count?: string
+  sort_order?: string
   content?: string
 }
 

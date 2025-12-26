@@ -1,5 +1,8 @@
 <template>
-  <el-card shadow="hover" class="table-card">
+  <el-card
+    shadow="hover"
+    class="table-card"
+  >
     <el-table
       v-loading="loading"
       :data="data"
@@ -8,15 +11,46 @@
       stripe
       highlight-current-row
     >
-      <el-table-column prop="id" label="ID" width="80" />
-      <el-table-column prop="novel_id" label="小说ID" width="120" />
-      <el-table-column prop="title" label="标题" min-width="220" />
-      <el-table-column prop="index" label="序号" width="120" />
-      <el-table-column prop="word_count" label="字数" width="120" />
-      <el-table-column prop="updated_at" label="更新时间" min-width="160" />
-      <el-table-column label="操作" width="320" fixed="right">
+      <el-table-column
+        prop="id"
+        label="ID"
+        width="80"
+      />
+      <el-table-column
+        prop="novel_id"
+        label="小说ID"
+        width="120"
+      />
+      <el-table-column
+        prop="title"
+        label="标题"
+        min-width="220"
+      />
+      <el-table-column
+        prop="index"
+        label="序号"
+        width="120"
+      />
+      <el-table-column
+        prop="word_count"
+        label="字数"
+        width="120"
+      />
+      <el-table-column
+        prop="updated_at"
+        label="更新时间"
+        min-width="160"
+      />
+      <el-table-column
+        label="操作"
+        width="320"
+        fixed="right"
+      >
         <template #default="{ row }">
-          <template v-for="btn in actionButtonsRow" :key="btn.id">
+          <template
+            v-for="btn in actionButtonsRow"
+            :key="btn.id"
+          >
             <el-button
               :type="resolveBtnType(btn)"
               link
@@ -32,13 +66,25 @@
               {{ btn.name }}
             </el-button>
           </template>
-          <el-button type="primary" link @click="$emit('edit', row)">
+          <el-button
+            type="primary"
+            link
+            @click="$emit('edit', row)"
+          >
             编辑
           </el-button>
-          <el-button type="success" link @click="$emit('view-content', row)">
+          <el-button
+            type="success"
+            link
+            @click="$emit('view-content', row)"
+          >
             查看内容
           </el-button>
-          <el-button type="danger" link @click="$emit('delete', row)">
+          <el-button
+            type="danger"
+            link
+            @click="$emit('delete', row)"
+          >
             删除
           </el-button>
         </template>
