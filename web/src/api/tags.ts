@@ -3,8 +3,14 @@ import { http } from './http'
 export type Tag = {
   id: number | string
   name: string
+  slug?: string
   code?: string
   is_active?: number
+  seo_title?: string
+  seo_keywords?: string
+  seo_description?: string
+  created_at?: string
+  updated_at?: string
 }
 
 export async function fetchTagList(params?: { page?: number; limit?: number; kw?: string }) {
