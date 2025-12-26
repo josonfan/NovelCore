@@ -20,6 +20,9 @@ return [
         'payment_channel',
         'vip',
     ],
+    'elasticsearch_index' => [
+        'novel'
+    ],
     'push_path' => '/Sync/receive',
     'timeout' => 5,
     'sync_data' => true,

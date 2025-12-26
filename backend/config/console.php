@@ -7,5 +7,6 @@ return [
     'commands' => [
         'sync:push' => 'app\command\SyncPush',
         'sync:init' => 'app\command\SyncInit',
+        'push:elastic' => 'app\command\PushToElastic',
     ],
 ];

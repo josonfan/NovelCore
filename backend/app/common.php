@@ -81,24 +81,28 @@ if (!function_exists('formatWhere')) {
     function formatWhere($data){
         $where = [];
         foreach( $data as $k=>$v){
-            if(is_array($v)){
-                if(((string) $v[1] <> null && !is_array($v[1])) || (is_array($v[1]) && (string) $v[1][0] <> null)){
-                    switch(strtolower($v[0])){
-                        //模糊查询
-                        case 'like':
-                            $v[1] = '%'.$v[1].'%';
-                            break;
-
-                        //表达式查询
-                        case 'exp':
-                            $v[1] = Db::raw($v[1]);
-                            break;
-                    }
-                    $where[] = [$k,$v[0],$v[1]];
+            if (is_array($v)) {
+                $op = strtolower((string)($v[0] ?? '='));
+                $val = $v[1] ?? null;
+                if ($val === null) {
+                    continue;
                 }
-            }else{
-                if((string) $v != null){
-                    $where[] = [$k,'=',$v];
+                switch ($op) {
+                    case 'like':
+                        if (!is_array($val)) {
+                            $val = '%'.$val.'%';
+                        }
+                        break;
+                    case 'exp':
+                        if (is_string($val)) {
+                            $val = Db::raw($val);
+                        }
+                        break;
+                }
+                $where[] = [$k, $op, $val];
+            } else {
+                if ($v !== '' && $v !== null) {
+                    $where[] = [$k, '=', $v];
                 }
             }
         }

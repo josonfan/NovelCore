@@ -22,9 +22,9 @@ class Search extends Common
         $keyword  = $this->request->param('keyword', '', 'trim');
         $page     = $this->request->param('page', 1, 'intval');
         $pageSize = $this->request->param('limit', 10, 'intval');
-        // if ($keyword === '') {
-        //     throw new ValidateException('keyword不能为空');
-        // }
+        if ($keyword === '') {
+            throw new ValidateException('keyword不能为空');
+        }
         $options = [
             'category_id' => $this->request->param('category_id', 0, 'intval'),
             'tag_ids'     => $this->request->param('tag_ids'),

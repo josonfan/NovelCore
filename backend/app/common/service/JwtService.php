@@ -115,7 +115,8 @@ class JwtService
     private static function config(): Configuration
     {
         $secret = (string)self::env('JWT.SECRET', 'changeme');
-        return Configuration::forSymmetricSigner(new Sha256(), InMemory::plainText($secret));
+        $key = hash('sha256', $secret, true);
+        return Configuration::forSymmetricSigner(new Sha256(), InMemory::plainText($key));
     }
 
     private static function env(string $key, $default = null)

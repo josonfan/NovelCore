@@ -303,6 +303,16 @@ class CacheModel extends Model
                     trace($name);
                     \app\common\service\SyncService::enqueue($name, (int)$id, 'delete');
                 }
+                $esc =  \app\common\model\SearchConfig::where('site_id', 0)->where('provider', 'elasticsearch')->where('is_active', 1)->value('id');
+                $indexes = (array)(config('sync.elasticsearch_index') ?? []);
+                if(in_array($name, $indexes, true)){
+                    $esc =  \app\common\model\SearchConfig::where('site_id', 0)->where('provider', 'elasticsearch')->where('is_active', 1)->value('id');
+                    if($esc > 0){
+                        $elasticService = new \utils\ElasticService();
+                        $toDelete = ['_id' => (string)$id];
+                        $elasticService->bulkDelete($name,$toDelete,true);
+                    }
+                }
             }
             return $ok;
         } catch (\Throwable $e) {

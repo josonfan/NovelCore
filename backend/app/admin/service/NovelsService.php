@@ -229,8 +229,7 @@ class NovelsService
             Db::rollback();
             throw new \Exception($e->getMessage());
         }
-    }
-
+    }    
     /**
      * 绑定标签
      * @param int $novelId 小说ID

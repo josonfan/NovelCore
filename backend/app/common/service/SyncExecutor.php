@@ -8,11 +8,12 @@ use app\common\model\Tags;
 use app\common\model\Novels;
 use app\common\model\Chapters;
 use app\common\model\ChapterContents;
-
+use app\common\model\SearchConfig;
 class SyncExecutor
 {
     public static function run(int $limit = 20): int
     {
+        
         $q = new SyncQueue();
         $list = $q->where('status', 'pending')
         ->order('id asc')
