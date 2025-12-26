@@ -246,6 +246,9 @@ class NovelsService
             if (!$tid) continue;
             (new NovelTags())->writeById(0, ['novel_id' => $novelId, 'tag_id' => (int)$tid]);
         }
+        $tags_json = Tags::where('id', 'in', $tagIds)->column('id as tag_id,name');
+        $tags_json = json_encode($tags_json, JSON_UNESCAPED_UNICODE);
+        (new Novels())->writeById($novelId, ['tags_json' => $tags_json]);
         return true;
     }
 }

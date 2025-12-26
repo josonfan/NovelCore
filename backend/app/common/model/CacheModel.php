@@ -288,19 +288,8 @@ class CacheModel extends Model
             if ($ok) {
                 $this->setCacheData($this->getCacheKey($id), null);
                 $name = method_exists($this, 'getName') ? (string)$this->getName() : '';
-                $enabled = (array)(config('sync.enable_types') ?? []);
-                $topLevel = [];
-                foreach ($enabled as $k => $v) {
-                    if (is_int($k)) {
-                        $topLevel[] = (string)$v;
-                    }
-                }
-                $configGroup = (array)($enabled['config'] ?? []);
-                if (!empty($configGroup) && in_array($name, $configGroup, true)) {
-                    $siteId = (int)($row['site_id'] ?? 0);
-                    \app\common\service\SyncService::enqueue('config', $siteId, 'update');
-                } elseif (in_array($name, $topLevel, true)) {
-                    trace($name);
+                $enabledTables = (array)(config('sync.enable_types') ?? []);
+                if (!empty($enabledTables) && in_array($name, $enabledTables, true)) {                    
                     \app\common\service\SyncService::enqueue($name, (int)$id, 'delete');
                 }
                 $esc =  \app\common\model\SearchConfig::where('site_id', 0)->where('provider', 'elasticsearch')->where('is_active', 1)->value('id');

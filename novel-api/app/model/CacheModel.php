@@ -219,6 +219,7 @@ class CacheModel extends Model
                         $res = (bool)$m->where($pk,$id)->save($data);
                     }
                 }catch(\Throwable $e){
+                    dd($e);
                     trace($e->getMessage(),'error');
                     return false;
                 }                

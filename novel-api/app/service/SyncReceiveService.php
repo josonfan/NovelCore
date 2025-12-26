@@ -110,6 +110,8 @@ class SyncReceiveService
             case 'payment_channel':
                 break;
             case 'vip':
+                break;
+            case 'novel_tags':
                 break;        
             default:
                 break;

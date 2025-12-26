@@ -29,9 +29,7 @@ class AiConfigService
     public static function save(array $data)
     {
         $siteId = (int)($data['site_id'] ?? 0);
-        if ($siteId <= 0) {
-            throw new \think\exception\ValidateException('site_id 必填');
-        }
+        
         $exists = self::getBySiteId($siteId);
         $m = new AiConfig();
         if (!empty($exists)) {
