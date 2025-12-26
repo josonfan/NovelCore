@@ -1,37 +1,37 @@
 import { http } from './http'
 
 export async function fetchEmailConfigBySite(site_id: number) {
-  const res = await http.get('EmailConfig/detailBySite', { params: { site_id } })
+  const res = await http.post('EmailConfig/detailBySite', {  site_id })
   return res.data?.data || null
 }
 
 export async function fetchSearchConfigBySite(site_id: number) {
-  const res = await http.get('SearchConfig/detailBySite', { params: { site_id } })
+  const res = await http.post('SearchConfig/detailBySite', {  site_id })
   return res.data?.data || null
 }
 
 export async function fetchAiConfigBySite(site_id: number) {
-  const res = await http.get('AiConfig/detailBySite', { params: { site_id } })
+  const res = await http.post('AiConfig/detailBySite', {  site_id })
   return res.data?.data || null
 }
 
 export async function fetchRecommendationConfigBySite(site_id: number) {
-  const res = await http.get('RecommendationConfig/detailBySite', { params: { site_id } })
+  const res = await http.post('RecommendationConfig/detailBySite', {  site_id })
   return res.data?.data || null
 }
 
 export async function fetchCustomerServiceConfigBySite(site_id: number) {
-  const res = await http.get('CustomerServiceConfig/detailBySite', { params: { site_id } })
+  const res = await http.post('CustomerServiceConfig/detailBySite', {  site_id })
   return res.data?.data || null
 }
 
 export async function fetchCommentReviewConfigBySite(site_id: number) {
-  const res = await http.get('CommentReviewConfig/detailBySite', { params: { site_id } })
+  const res = await http.post('CommentReviewConfig/detailBySite', {  site_id })
   return res.data?.data || null
 }
 
 export async function fetchTelegramAuditConfigBySite(site_id: number) {
-  const res = await http.get('TelegramAuditConfig/detailBySite', { params: { site_id } })
+  const res = await http.post('TelegramAuditConfig/detailBySite', {  site_id })
   return res.data?.data || null
 }
 

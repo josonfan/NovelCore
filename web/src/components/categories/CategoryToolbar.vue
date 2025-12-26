@@ -3,12 +3,25 @@
     shadow="never"
     class="toolbar"
   >
-    <div class="toolbar-grid">
-      <div class="cell">
+    <template #header>
+      <div class="toolbar-header">
+        <span class="title">分类管理</span>
+        <el-tag
+          type="info"
+          size="small"
+        >
+          共 {{ total }} 条
+        </el-tag>
+      </div>
+    </template>
+    <div class="toolbar-content">
+      <div class="search-area">
         <el-input
           v-model="searchValue"
-          placeholder="搜索名称"
+          placeholder="搜索分类名称"
           clearable
+          :prefix-icon="Search"
+          class="search-input"
         />
       </div>
       <div class="actions">
@@ -31,6 +44,7 @@
           </el-button>
         </template>
         <el-button
+          :icon="Refresh"
           :loading="loading"
           @click="$emit('refresh')"
         >
@@ -38,20 +52,19 @@
         </el-button>
         <el-button
           type="primary"
+          :icon="Plus"
           @click="$emit('add')"
         >
-          新建
+          新建分类
         </el-button>
       </div>
-    </div>
-    <div class="subline">
-      共 {{ total }} 条
     </div>
   </el-card>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { Search, Refresh, Plus } from '@element-plus/icons-vue'
 import type { ActionButton } from '../../composables/useActionButtons'
 import { useActionButtons } from '../../composables/useActionButtons'
 
@@ -78,26 +91,38 @@ const searchValue = computed({
 </script>
 
 <style scoped>
-.toolbar {
-  display: grid;
-  gap: 8px;
-}
-
-.toolbar-grid {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 12px;
+.toolbar-header {
+  display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
-.toolbar-grid .actions {
-  justify-self: end;
-  display: inline-flex;
+.toolbar-header .title {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.toolbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.search-area {
+  flex: 1;
+  max-width: 320px;
+}
+
+.search-input {
+  width: 100%;
+}
+
+.actions {
+  display: flex;
   gap: 8px;
-}
-
-.subline {
-  color: var(--nc-muted);
-  font-size: 12px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 </style>

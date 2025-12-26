@@ -5,7 +5,7 @@
   >
     <template #header>
       <div class="toolbar-header">
-        <span class="title">小说管理</span>
+        <span class="title">标签管理</span>
         <el-tag
           type="info"
           size="small"
@@ -18,7 +18,7 @@
       <div class="search-area">
         <el-input
           v-model="searchValue"
-          placeholder="搜索标题/作者"
+          placeholder="搜索标签名称"
           clearable
           :prefix-icon="Search"
           class="search-input"
@@ -55,96 +55,31 @@
           :icon="Plus"
           @click="$emit('add')"
         >
-          新建小说
+          新建标签
         </el-button>
       </div>
-    </div>
-    <div class="filter-row">
-      <el-select
-        v-model="localFilters.category_id"
-        placeholder="全部分类"
-        clearable
-        @change="onFilterChange"
-      >
-        <el-option
-          v-for="cat in categories"
-          :key="cat.id"
-          :label="cat.name"
-          :value="String(cat.id)"
-        />
-      </el-select>
-      <el-select
-        v-model="localFilters.status"
-        placeholder="完结状态"
-        clearable
-        @change="onFilterChange"
-      >
-        <el-option
-          label="未完结"
-          value="0"
-        />
-        <el-option
-          label="已完结"
-          value="1"
-        />
-      </el-select>
-      <el-select
-        v-model="localFilters.is_vip"
-        placeholder="VIP"
-        clearable
-        @change="onFilterChange"
-      >
-        <el-option
-          label="否"
-          value="0"
-        />
-        <el-option
-          label="是"
-          value="1"
-        />
-      </el-select>
-      <el-select
-        v-model="localFilters.is_r18"
-        placeholder="R18"
-        clearable
-        @change="onFilterChange"
-      >
-        <el-option
-          label="否"
-          value="0"
-        />
-        <el-option
-          label="是"
-          value="1"
-        />
-      </el-select>
     </div>
   </el-card>
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, watch } from 'vue'
+import { computed } from 'vue'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
 import type { ActionButton } from '../../composables/useActionButtons'
 import { useActionButtons } from '../../composables/useActionButtons'
-import type { NovelFilters } from '../../composables/useNovelList'
 
 const props = defineProps<{
   modelValue: string
   loading: boolean
   total: number
   actionButtons: ActionButton[]
-  filters: NovelFilters
-  categories: Array<{ id: number | string; name: string }>
 }>()
 
 const emit = defineEmits<{
   'update:modelValue': [value: string]
-  'update:filters': [value: NovelFilters]
   'action': [btn: ActionButton]
   'refresh': []
   'add': []
-  'filter-change': []
 }>()
 
 const { resolveIcon, resolveBtnType } = useActionButtons()
@@ -153,33 +88,6 @@ const searchValue = computed({
   get: () => props.modelValue,
   set: (v) => emit('update:modelValue', v),
 })
-
-// 本地筛选状态
-const localFilters = reactive<NovelFilters>({
-  category_id: '',
-  status: '',
-  is_vip: '',
-  is_r18: '',
-})
-
-// 同步外部 filters 到本地
-watch(
-  () => props.filters,
-  (val) => {
-    if (val) {
-      localFilters.category_id = val.category_id
-      localFilters.status = val.status
-      localFilters.is_vip = val.is_vip
-      localFilters.is_r18 = val.is_r18
-    }
-  },
-  { immediate: true, deep: true }
-)
-
-function onFilterChange() {
-  emit('update:filters', { ...localFilters })
-  emit('filter-change')
-}
 </script>
 
 <style scoped>
@@ -199,7 +107,6 @@ function onFilterChange() {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 12px;
 }
 
 .search-area {
@@ -217,15 +124,5 @@ function onFilterChange() {
   flex-shrink: 0;
   flex-wrap: wrap;
   justify-content: flex-end;
-}
-
-.filter-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.filter-row .el-select {
-  width: 140px;
 }
 </style>
