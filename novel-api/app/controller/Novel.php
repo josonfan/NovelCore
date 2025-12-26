@@ -50,7 +50,7 @@ class Novel extends Common
                 $orderby  = 'created_at desc, id desc';
                 break;
         }
-        $fields = 'novel_uuid as id,title,category_id,cover,intro,status,is_vip,word_count,updated_at';
+        $fields = 'novel_uuid as id,title,category_id,cover,intro,author_name,is_r18,status,is_vip,word_count,updated_at';
         $result = NovelService::getList(formatWhere($where), $fields, $orderby, $page, $limit);       
         return $this->ajaxReturn(200, '获取成功', $result);
     }

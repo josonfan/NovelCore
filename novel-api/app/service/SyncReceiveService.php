@@ -85,7 +85,7 @@ class SyncReceiveService
             case 'tags':
                 break;
             case 'novels':
-                $unset = ['author_name', 'audit_status','audit_remark','audit_admin_id','audit_at'];    
+                $unset = [ 'audit_status','audit_remark','audit_admin_id','audit_at'];    
                 if(empty($payload['author_id'])){
                     $payload['author_id'] = 0;
                 }            
