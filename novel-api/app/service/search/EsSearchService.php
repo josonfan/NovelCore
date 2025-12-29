@@ -6,6 +6,7 @@ namespace app\service\search;
 use app\service\ConfigService;
 use app\service\StorageService;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 use think\facade\Log;
 
 class EsSearchService implements SearchServiceInterface
@@ -17,6 +18,9 @@ class EsSearchService implements SearchServiceInterface
     {
         $this->config = $config;
         $baseUri = rtrim((string) ($config['host'] ?? ''), '/');
+        if ($baseUri !== '' && !preg_match('#^https?://#i', $baseUri)) {
+            $baseUri = 'http://' . $baseUri;
+        }
 
         $options = [
             'base_uri' => $baseUri . '/',
@@ -30,37 +34,80 @@ class EsSearchService implements SearchServiceInterface
         $this->client = new Client($options);
     }
 
-    public function searchNovels(string $keyword, int $page = 1, int $pageSize = 20, array $options = []): array
+    public function searchNovels(string $keyword ,  int $page = 1, int $pageSize = 20, array $options = []): array
     {
         $page     = max(1, $page);
         $pageSize = min(50, max(1, $pageSize));
 
-        $index = ($this->config['indexPrefix'] ?? '') . 'novels';
+        $indexPrefix = $this->config['index_prefix'] ?? ($this->config['indexPrefix'] ?? '');
+        $index = rtrim($indexPrefix, '-') . 'novels';
         $from  = ($page - 1) * $pageSize;
-
+        $categoryId = (int) ($options['category_id'] ?? 0);
+        $statusProvided = array_key_exists('status', $options) && $options['status'] !== null && $options['status'] !== '';
+        $status = (int) ($options['status'] ?? -1);
+        $orderKey = (string) ($options['order'] ?? '');
+        $tagIdsRaw = $options['tag_ids'] ?? [];
+        if (is_string($tagIdsRaw)) {
+            $tagIds = array_values(array_filter(array_map('intval', explode(',', $tagIdsRaw)), fn($v) => $v > 0));
+        } else {
+            $tagIds = array_values(array_filter(array_map('intval', (array) $tagIdsRaw), fn($v) => $v > 0));
+        }
+        $filters = [];
+        if ($categoryId > 0) {
+            $filters[] = ['term' => ['category_id' => $categoryId]];
+        }
+        if ($statusProvided && $status >= 0) {
+            $filters[] = ['term' => ['status' => $status]];
+        }
+        if (!empty($tagIds)) {
+            $filters[] = ['terms' => ['tag_ids' => $tagIds]];
+        }
         $body = [
             'from' => $from,
             'size' => $pageSize,
             'query' => [
-                'multi_match' => [
-                    'query'  => $keyword,
-                    'fields' => ['title^3', 'intro', 'author_name'],
+                'bool' => [
+                    'must' => [
+                        [
+                            'multi_match' => [
+                                'query'  => $keyword,
+                                'fields' => ['title^3', 'intro'],
+                            ],
+                        ],
+                    ],
+                    'filter' => $filters,
+                    'must_not' => $statusProvided ? [] : [
+                        ['term' => ['status' => 0]],
+                    ],
                 ],
             ],
         ];
 
-        // 简单排序扩展
-        if (!empty($options['order'])) {
+        // 排序：将前端传入的 order 映射到 ES 字段，避免未映射字段报错
+        $orderKey = (string) ($options['order'] ?? '');
+        $sortMap = [
+            'newest'     => ['field' => 'id', 'type' => 'long'],
+            'view_count' => ['field' => 'view_count', 'type' => 'long'],
+            'like_count' => ['field' => 'like_count', 'type' => 'long'],
+            'fav_count'  => ['field' => 'fav_count', 'type' => 'long'],
+            'word_count' => ['field' => 'word_count', 'type' => 'long'],
+        ];
+        if (isset($sortMap[$orderKey])) {
+            $sortField = $sortMap[$orderKey]['field'];
+            $sortType  = $sortMap[$orderKey]['type'];
             $body['sort'] = [
-                [$options['order'] => ['order' => 'desc']],
+                [$sortField => ['order' => 'desc', 'unmapped_type' => $sortType]],
             ];
+        } else {
+            $body['sort'] = [['_score' => ['order' => 'desc']]];
         }
-
+        
         $list = [];
         $total = 0;
-
         try {
-            $response = $this->client->post($index . '/_search', ['json' => $body]);
+            $response = $this->client->post($index . '/_search', [
+                'json' => $body,
+            ]);
             $data = json_decode((string) $response->getBody(), true);
             $total = (int) ($data['hits']['total']['value'] ?? 0);
             $hits  = $data['hits']['hits'] ?? [];
@@ -79,9 +126,22 @@ class EsSearchService implements SearchServiceInterface
                     'word_count' => (int) ($source['word_count'] ?? 0),
                 ];
             }
+        } catch (RequestException $e) {
+            $status = $e->getResponse() ? $e->getResponse()->getStatusCode() : 0;
+            $respBody = $e->getResponse() ? (string) $e->getResponse()->getBody() : '';
+            $msg = json_encode([
+                'endpoint' => $index . '/_search',
+                'status'   => $status,
+                'error'    => $e->getMessage(),
+                'response' => $respBody,
+            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            Log::error('ES search error: ' . $msg);
         } catch (\Throwable $e) {
-            Log::error('ES search failed: ' . $e->getMessage());
-            // 回退：返回空结果，或上层决定回退 MySQL
+            $msg = json_encode([
+                'endpoint' => $index . '/_search',
+                'error'    => $e->getMessage(),
+            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            Log::error('ES search failed: ' . $msg);
         }
 
         return [

@@ -9,10 +9,10 @@ class SearchServiceFactory
 {
     public static function make(ConfigService $configService): SearchServiceInterface
     {
-        $engine = env('SEARCH_ENGINE', 'mysql');
-
+        $engine = env('SEARCH.ENGINE', 'mysql');
+        
         if ($engine === 'elasticsearch') {
-            $config = $configService->getSearchConfig();
+            $config = $configService->get('search_config');
             if (empty($config) || ($config['provider'] ?? '') !== 'elasticsearch' || empty($config['host'])) {
                 return new MysqlSearchService($configService);
             }
