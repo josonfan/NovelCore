@@ -1,4 +1,4 @@
-import { ref, computed, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   fetchCommentList,
@@ -8,7 +8,7 @@ import {
   COMMENT_STATUS_MAP,
   REVIEW_SOURCE_MAP,
 } from '../api/comments'
-import type { SiteComment } from '../api/comments'
+import type { SiteComment, CommentListParams } from '../api/comments'
 
 export interface CommentFilters {
   siteId: string
@@ -47,7 +47,7 @@ export function useCommentList() {
 
     loading.value = true
     try {
-      const params: Record<string, unknown> = {
+      const params: CommentListParams = {
         page: page.value,
         limit: limit.value,
         site_id: filters.value.siteId,
@@ -55,7 +55,7 @@ export function useCommentList() {
       if (filters.value.novelId) {
         params.novel_id = filters.value.novelId
       }
-      const data = await fetchCommentList(params as Parameters<typeof fetchCommentList>[0])
+      const data = await fetchCommentList(params)
       rows.value = data?.list || []
       total.value = data?.count || 0
     } finally {
