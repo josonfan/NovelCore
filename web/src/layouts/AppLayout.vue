@@ -1,231 +1,315 @@
 <template>
-  <div :class="['layout', { collapsed }]">
+  <div :class="['layout', { 'is-collapsed': collapsed }]">
+    <!-- 侧边栏 -->
     <aside class="sidebar">
-      <div class="logo-bar" @click="goHome" role="button" tabindex="0" aria-label="返回首页" @keydown.enter="goHome">
+      <div
+        class="logo-bar"
+        role="button"
+        tabindex="0"
+        aria-label="返回首页"
+        @click="goHome"
+        @keydown.enter="goHome"
+      >
         <LogoIcon :size="22" />
       </div>
-      <el-skeleton :loading="loading" animated style="padding: 8px">
+
+      <el-skeleton
+        :loading="loading"
+        animated
+        class="menu-skeleton"
+      >
         <template #template>
-          <el-skeleton-item variant="p" style="height: 20px; margin: 8px 0" />
-          <el-skeleton-item variant="p" style="height: 20px; margin: 8px 0" />
-          <el-skeleton-item variant="p" style="height: 20px; margin: 8px 0" />
+          <el-skeleton-item
+            v-for="i in 3"
+            :key="i"
+            variant="p"
+            class="skeleton-item"
+          />
         </template>
-        <el-menu :default-active="active" class="menu" router :collapse="collapsed" :collapse-transition="false">
-          <template v-for="m in menus" :key="m.id">
-            <el-sub-menu v-if="m.children && m.children.length" :index="resolveIndex(m)" :title="collapsed ? m.name : ''">
-              <template #title>
-                <el-icon v-if="resolveIcon(m.icon)" :size="16" class="menu-icon">
-                  <component :is="resolveIcon(m.icon)" />
-                </el-icon>
-                <span class="menu-text">{{ m.name }}</span>
-              </template>
-              <template v-for="c in m.children" :key="c.id">
-                <el-sub-menu v-if="c.children && c.children.length" :index="resolveIndex(c)" :title="collapsed ? c.name : ''">
-                  <template #title>
-                    <el-icon v-if="resolveIcon(c.icon)" :size="16" class="menu-icon">
-                      <component :is="resolveIcon(c.icon)" />
-                    </el-icon>
-                    <span class="menu-text">{{ c.name }}</span>
-                  </template>
-                  <el-menu-item v-for="gc in c.children" :key="gc.id" :index="resolveIndex(gc)" :title="collapsed ? gc.name : ''">
-                    <el-icon v-if="resolveIcon(gc.icon)" :size="16" class="menu-icon">
-                      <component :is="resolveIcon(gc.icon)" />
-                    </el-icon>
-                    <span class="menu-text">{{ gc.name }}</span>
-                  </el-menu-item>
-                </el-sub-menu>
-                <el-menu-item v-else :index="resolveIndex(c)">
-                  <el-icon v-if="resolveIcon(c.icon)" :size="16" class="menu-icon">
-                    <component :is="resolveIcon(c.icon)" />
-                  </el-icon>
-                  {{ c.name }}
-                </el-menu-item>
-              </template>
-            </el-sub-menu>
-            <el-menu-item v-else :index="resolveIndex(m)" :title="collapsed ? m.name : ''">
-              <el-icon v-if="resolveIcon(m.icon)" :size="16" class="menu-icon">
-                <component :is="resolveIcon(m.icon)" />
-              </el-icon>
-              <span class="menu-text">{{ m.name }}</span>
-            </el-menu-item>
-          </template>
-        </el-menu>
+
+        <el-scrollbar class="menu-scrollbar">
+          <el-menu
+            :default-active="activeRoute"
+            class="sidebar-menu"
+            router
+            :collapse="collapsed"
+            :collapse-transition="false"
+          >
+            <SideMenuItem
+              v-for="menu in menus"
+              :key="menu.id"
+              :menu="menu"
+              :collapsed="collapsed"
+              :resolve-index="resolveIndex"
+            />
+          </el-menu>
+        </el-scrollbar>
       </el-skeleton>
     </aside>
-    <main class="content">
+
+    <!-- 主内容区 -->
+    <main class="main">
       <header class="header">
-        <div style="flex:1;display:flex;align-items:center;gap:8px">
-          <el-button text circle @click="toggleCollapse" aria-label="折叠菜单" title="折叠菜单">
-            <el-icon :size="18"><component :is="collapseIcon" /></el-icon>
+        <div class="header-left">
+          <el-button
+            text
+            circle
+            aria-label="折叠菜单"
+            title="折叠菜单"
+            @click="toggleSidebar"
+          >
+            <el-icon :size="18">
+              <component :is="collapseIcon" />
+            </el-icon>
           </el-button>
           <Breadcrumbs />
         </div>
+
         <div class="header-right">
-          <el-popover placement="bottom-end" width="220" trigger="click">
+          <!-- 主题选择器 -->
+          <el-popover
+            placement="bottom-end"
+            :width="220"
+            trigger="click"
+          >
             <template #reference>
-              <el-button text circle>
-                <el-icon :size="18"><component :is="(Icons as any).Brush || (Icons as any).Setting" /></el-icon>
+              <el-button
+                text
+                circle
+                title="主题色"
+              >
+                <el-icon :size="18">
+                  <Brush />
+                </el-icon>
               </el-button>
             </template>
-            <div class="theme-swatches">
-              <div
-                v-for="c in palettes"
-                :key="c.p"
-                class="swatch"
-                :class="{ 'is-active': c.p === activePrimary }"
-                :style="{ background: c.p }"
-                @click="applyPalette(c.p, c.s)"
-              />
+            <div class="theme-panel">
+              <div class="theme-label">
+                选择主题色
+              </div>
+              <div class="theme-swatches">
+                <div
+                  v-for="(palette, idx) in palettes"
+                  :key="idx"
+                  class="swatch"
+                  :class="{ 'is-active': palette.primary === activePrimary }"
+                  :style="{ background: palette.primary }"
+                  :title="palette.primary"
+                  @click="applyPalette(palette)"
+                />
+              </div>
             </div>
           </el-popover>
+
           <UserDropdown />
         </div>
       </header>
+
       <section class="body">
-        <router-view />
+        <router-view v-slot="{ Component }">
+          <transition
+            name="fade"
+            mode="out-in"
+          >
+            <component :is="Component" />
+          </transition>
+        </router-view>
       </section>
     </main>
   </div>
-  <el-backtop right="24" bottom="24" />
+
+  <el-backtop
+    :right="24"
+    :bottom="24"
+  />
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '../store'
-import { fetchContext } from '../api/auth'
-import * as Icons from '@element-plus/icons-vue'
+import { Brush } from '@element-plus/icons-vue'
+
+// Components
 import LogoIcon from '../components/LogoIcon.vue'
 import UserDropdown from '../components/UserDropdown.vue'
 import Breadcrumbs from '../components/Breadcrumbs.vue'
+import SideMenuItem from '../components/SideMenuItem.vue'
+
+// Composables
+import { useSidebar } from '../composables/useSidebar'
+import { useTheme } from '../composables/useTheme'
+import { useMenus } from '../composables/useMenus'
 import { pathOf } from '../router/routes'
-import type { MenuNode } from '../api/menus'
 
 const router = useRouter()
-const auth = useAuthStore()
-const active = computed(() => router.currentRoute.value.path || '/')
-const menus = ref<MenuNode[]>([])
-const loading = ref(true)
-const collapsed = ref(false)
-function goHome(){
+
+// 侧边栏状态
+const { collapsed, collapseIcon, toggle: toggleSidebar } = useSidebar()
+
+// 主题管理
+const { palettes, activePrimary, applyPalette } = useTheme()
+
+// 菜单数据
+const { menus, loading, resolveIndex, loadMenus } = useMenus()
+
+// 当前激活路由
+const activeRoute = computed(() => router.currentRoute.value.path || '/')
+
+// 返回首页
+function goHome() {
   router.push(pathOf('/'))
 }
-const palettes = ref([ { p: '#3B82F6', s: '#2563EB' }, { p: '#409EFF', s: '#337ecc' }, { p: '#22C55E', s: '#16A34A' }, { p: '#F59E0B', s: '#D97706' }, { p: '#EF4444', s: '#DC2626' }, { p: '#8B5CF6', s: '#7C3AED' } ])
-const activePrimary = ref('')
 
-function resolveIndex(m: any) {
-  const p = m.path || m.route || ''
-  if (p) return pathOf(p)
-  const n = String(m.name || '')
-  if (n === '分类管理') return '/content/categories'
-  if (n === '标签管理') return '/content/tags'
-  if (n === '小说管理') return '/content/novels'
-  if (n === '章节管理') return '/content/chapters'
-  if (n === '系统配置') return '/system/config'
-  if (n === '支付渠道') return '/financial/payment_channel'
-  if (n === 'VIP套餐') return '/financial/vip'
-  if (n === '订单列表') return '/financial/orders'
-  return pathOf('/')
-}
-
-function resolveIcon(name?: string) {
-  if (!name) return null
-  const n = name.replace(/^el-icon-/, '')
-  const pascal = n
-    .split(/[-_\s]/)
-    .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-    .join('')
-  return (Icons as any)[pascal] || null
-}
-
-const collapseIcon = computed(() => (collapsed.value ? (Icons as any).Expand : (Icons as any).Fold))
-function toggleCollapse() {
-  collapsed.value = !collapsed.value
-  try {
-    localStorage.setItem('nc-sidebar-collapsed', collapsed.value ? '1' : '0')
-  } catch (_) {}
-}
-
-function applyPalette(p: string, s: string) {
-  activePrimary.value = p
-  document.documentElement.style.setProperty('--nc-primary', p)
-  document.documentElement.style.setProperty('--nc-primary-600', s)
-  try {
-    localStorage.setItem('nc-primary', p)
-    localStorage.setItem('nc-primary600', s)
-  } catch (_) {}
-}
-
-onMounted(async () => {
-  try {
-    const token = localStorage.getItem('token') || ''
-    if (!token) return
-    try {
-      collapsed.value = localStorage.getItem('nc-sidebar-collapsed') === '1'
-    } catch (_) {}
-    try {
-      const sp = localStorage.getItem('nc-primary') || ''
-      const ss = localStorage.getItem('nc-primary600') || ''
-      if (sp && ss) applyPalette(sp, ss)
-    } catch (_) {}
-    const ctx = await fetchContext()
-    auth.setContext(ctx)
-    function norm(list: MenuNode[]): MenuNode[] {
-      const arr = Array.isArray(list) ? list : []
-      return arr
-        .map((m: MenuNode) => ({
-          ...m,
-          children: norm(m?.children || []),
-        }))
-        .filter((m: MenuNode) => String(m?.type || 'menu').toLowerCase() === 'menu' && Number(m?.visible ?? 1) !== 0 && Number(m?.is_active ?? 1) !== 0)
-    }
-    menus.value = norm(ctx?.menus || [])
-  } finally {
-    loading.value = false
-  }
-})
+onMounted(loadMenus)
 </script>
 
 <style scoped>
+/* ========== 布局结构 ========== */
 .layout {
   display: grid;
-  grid-template-columns: 200px 1fr;
+  grid-template-columns: var(--sidebar-width, 200px) 1fr;
   height: 100vh;
+  transition: grid-template-columns 0.2s ease;
 }
-.layout .el-menu{ border-right: none; }
-.layout.collapsed { grid-template-columns: 64px 1fr; }
+
+.layout.is-collapsed {
+  --sidebar-width: 64px;
+}
+
+/* ========== 侧边栏 ========== */
 .sidebar {
-  background: #ffffff;
-  border-right: 1px solid #e5e7eb;
-  padding: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--nc-bg, #fff);
+  border-right: 1px solid var(--nc-border, #e5e7eb);
+  overflow: hidden;
 }
- .logo-bar{ padding: calc((var(--nc-header-height) - 22px)/2) 0; display:flex; align-items:center; justify-content:center; color: var(--nc-primary); border-bottom: 1px solid var(--nc-border); box-sizing: border-box; }
-.menu {
-  background: transparent;
+
+.logo-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--nc-header-height, 56px);
+  color: var(--nc-primary);
+  border-bottom: 1px solid var(--nc-border, #e5e7eb);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.2s;
+  box-sizing: border-box;
+}
+
+.logo-bar:hover {
+  opacity: 0.85;
+}
+
+.menu-skeleton {
+  padding: 8px;
+  flex: 1;
+}
+
+.skeleton-item {
+  height: 20px;
+  margin: 8px 0;
+}
+
+.menu-scrollbar {
+  flex: 1;
+}
+
+.sidebar-menu {
   border-right: none;
+  background: transparent;
 }
-.menu-icon {
-  margin-right: 8px;
+
+.sidebar-menu :deep(.el-menu-item),
+.sidebar-menu :deep(.el-sub-menu__title) {
+  height: 44px;
+  line-height: 44px;
 }
-.menu-entry{ display:inline-flex; align-items:center; gap: 8px; }
-.sidebar svg {
-  width: 1em;
-  height: 1em;
+
+/* ========== 主内容区 ========== */
+.main {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--nc-bg-page, #f5f7fa);
 }
-.content {
-  display: grid;
-  grid-template-rows: var(--nc-header-height) 1fr;
-}
+
 .header {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
+  min-height: var(--nc-header-height, 56px);
   padding: 0 18px;
-  border-bottom: 1px solid var(--nc-border);
+  background: var(--nc-bg, #fff);
+  border-bottom: 1px solid var(--nc-border, #e5e7eb);
+  flex-shrink: 0;
   box-sizing: border-box;
 }
-.header-right { display: flex; align-items: center; gap: 12px; }
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .body {
+  flex: 1;
   padding: 24px;
+  overflow: auto;
+}
+
+/* ========== 主题选择器 ========== */
+.theme-panel {
+  padding: 4px 0;
+}
+
+.theme-label {
+  font-size: 12px;
+  color: var(--nc-muted, #6b7280);
+  margin-bottom: 12px;
+}
+
+.theme-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.swatch {
+  width: 28px;
+  aspect-ratio: 1;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  outline: 2px solid transparent;
+  outline-offset: -2px;
+}
+
+.swatch:hover {
+  transform: scale(1.1);
+}
+
+.swatch.is-active {
+  outline-color: var(--nc-text, #1f2937);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+/* ========== 路由过渡动画 ========== */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
