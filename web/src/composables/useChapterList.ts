@@ -116,7 +116,3 @@ export function useChapterList() {
     handleDelete,
   }
 }
-
-
-
-
