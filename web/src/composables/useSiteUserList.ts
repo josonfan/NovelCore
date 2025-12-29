@@ -6,7 +6,7 @@ import {
   setUserStatus,
   USER_STATUS_MAP,
 } from '../api/siteUsers'
-import type { SiteUser, UserStatusInfo } from '../api/siteUsers'
+import type { SiteUser, UserStatusInfo, SiteUserListParams } from '../api/siteUsers'
 
 export interface SiteUserFilters {
   siteId: string
@@ -45,7 +45,7 @@ export function useSiteUserList() {
 
     loading.value = true
     try {
-      const params: Record<string, unknown> = {
+      const params: SiteUserListParams = {
         page: page.value,
         limit: limit.value,
         site_id: filters.value.siteId,
@@ -53,7 +53,7 @@ export function useSiteUserList() {
       if (filters.value.keyword) {
         params.keyword = filters.value.keyword
       }
-      const data = await fetchSiteUserList(params as Parameters<typeof fetchSiteUserList>[0])
+      const data = await fetchSiteUserList(params)
       rows.value = data?.list || []
       total.value = data?.count || 0
     } finally {
