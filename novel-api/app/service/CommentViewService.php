@@ -12,7 +12,7 @@ class CommentViewService
     {
         $userView = null;
         if (!empty($row['user_id'])) {
-            $user = (new UserModel())->infoById((int)$row['user_id'], 'id,nickname,avatar');
+            $user = (new UserService())->info((int)$row['user_id'], 'id,nickname,avatar');
             if (!empty($user)) {
                 $userView = [
                     'uid' => $user['id'] ?? null,

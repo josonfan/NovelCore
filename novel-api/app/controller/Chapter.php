@@ -67,7 +67,55 @@ class Chapter extends Common
         }
         $fields = 'id,chapter_uuid,novel_id,title,content_short,sort_order,is_free,is_vip,created_at';
         $chapter = ChapterService::getInfoByUuid($chapterId, $fields);
+        if(empty($chapter)){
+            throw new BusinessException('章节不存在');
+        }
+        $user_id = $this->request->user_id;
+        $user = (new \app\service\UserService())->info($user_id);
+        $isCheckUserCanRead = true;
+        if ((int) $chapter['is_free'] === 1) {
+            return;
+        }elseif((int) $chapter['is_vip'] === 1){
+            if ((int) $user['vip_expire'] <= time()) {
+                $isCheckUserCanRead = false;
+            }
+        }
+
+        if($isCheckUserCanRead){
+           $content = ContentService::getByChapterId($chapter['id'],'content');
+        $chapter['content'] = $content['content'];
+        }else{
+            $chapter['content'] = '';
+        }   
         return $this->ajaxReturn(200, '获取成功', $chapter);
         
+    }
+    /**
+     * 章节内容
+     * 路由：POST /api/Chapter/content
+     * 鉴权：无需登录（VIP章节由服务层校验权限）
+     * 入参：chapterId（外部 chapter_uuid）
+     * 返回：data { chapter_id, content }
+     */
+    public function content()
+    {
+        $chapterId = $this->request->param('chapterId', '', 'trim');
+        if(empty($chapterId)){
+            throw new ValidateException('参数错误');
+        }
+        $fields = 'id,chapter_uuid,novel_id,title,content_short,sort_order,is_free,is_vip,created_at';
+        $chapter = ChapterService::getInfoByUuid($chapterId, $fields);
+        if(empty($chapter)){
+            throw new BusinessException('章节不存在');
+        }
+        $user_id = $this->request->user_id;
+        if(!empty($user_id)){
+            $user = (new \app\service\UserService())->info($user_id);
+        }else{
+            $user = null;
+        }
+        ChapterService::checkUserCanRead($user, $chapter);
+        $content = ContentService::getByChapterId($chapter['id'],'content');
+        return $this->ajaxReturn(200, '获取成功', $content);
     }
 }

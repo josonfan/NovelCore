@@ -36,7 +36,7 @@ Route::group('api', function () {
     Route::rule('Novel/show', 'Novel/show', 'POST')->middleware(\app\middleware\NoAuth::class);
     // 章节列表与内容（统一 Controller/Action，参数走 Body）
     Route::rule('Chapter/index', 'Chapter/index', 'POST')->middleware(\app\middleware\NoAuth::class);
-    Route::rule('Chapter/show', 'Chapter/show', 'POST')->middleware(\app\middleware\NoAuth::class);
+    
 
     // 阅读进度与搜索（统一 Controller/Action）
     Route::rule('Search/index', 'Search/index', 'POST')->middleware(\app\middleware\NoAuth::class);
@@ -65,6 +65,10 @@ Route::group('api', function () {
         Route::rule('Reading/listHistory', 'Reading/listHistory', 'POST');
         Route::rule('Reading/saveHistory', 'Reading/saveHistory', 'POST');
         Route::rule('Novel/userStatus', 'Novel/userStatus', 'POST');
+        // 章节内容
+        Route::rule('Chapter/content', 'Chapter/content', 'POST');
+        Route::rule('Chapter/show', 'Chapter/show', 'POST');
+
 
         // 点赞小说
         Route::rule('Like/like', 'Like/like', 'POST');

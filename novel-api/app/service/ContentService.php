@@ -7,6 +7,7 @@ use app\model\Novel;
 use app\model\Chapter;
 use think\facade\Db;
 use think\exception\ValidateException;
+use app\model\ChapterContent;
 
 class ContentService
 {
@@ -28,7 +29,20 @@ class ContentService
         }
         return $novel;
     }
-
+    /**
+     * 获取章节内容
+     * @param int $chapterId 章节ID
+     * @param string $field 要获取的字段，默认获取所有字段
+     * @return array 章节内容
+     */
+    public static function getByChapterId($chapterId, string $field = '*')
+    {
+        $content = (new ChapterContent())->infoById($chapterId, $field);
+        if (!$content) {
+            throw new ValidateException('内容不存在');
+        }
+        return $content;
+    }
     public static function findChapterByExternalId(Novel $novel, string $chapterId): ?Chapter
     {
         $chapter = Chapter::where('novel_id', $novel->id)

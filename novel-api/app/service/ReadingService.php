@@ -84,17 +84,21 @@ class ReadingService
             ->where('novel_id', (int)$novel['id'])
             ->where('chapter_id', (int)$chapter['id'])
             ->value('id');
-        (new UserReadLog())->writeById($historyId ?? 0, [
+        $readLog = [
             'user_id'      => $userId,
             'novel_id'     => (int)$novel['id'],
-            'chapter_id'   => (int)$chapter['id'],  
-            'start_time'   => $historyId ?? null ?: date('Y-m-d H:i:s'),
-            'end_time'     => $historyId ? date('Y-m-d H:i:s') : null,
+            'chapter_id'   => (int)$chapter['id'],              
             'duration_sec' => $durationSec,
             'device_id'    => request()->header('X-Device-Id', ''),
             'client_type'  => request()->header('Client-Type', ''),
             'ip'           => request()->ip(),
-        ]);
+        ];
+        if (!$historyId) {
+            $readLog['start_time'] = date('Y-m-d H:i:s');
+        }else{
+            $readLog['end_time'] = date('Y-m-d H:i:s');
+        }
+        (new UserReadLog())->writeById($historyId ?? 0, $readLog);
         
         if ($durationSec > 0) {
             UserStatsService::incReadMinutes($userId, $durationSec);
