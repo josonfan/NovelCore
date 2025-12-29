@@ -219,7 +219,7 @@ class CacheModel extends Model
                         $res = (bool)$m->where($pk,$id)->save($data);
                     }
                 }catch(\Throwable $e){
-                    dd($e);
+                    dd($e->getMessage());
                     trace($e->getMessage(),'error');
                     return false;
                 }                
@@ -239,7 +239,7 @@ class CacheModel extends Model
                 }                
             }
             return $res;
-        } catch (\Throwable $e) {
+        } catch (\Throwable $e) {dd($e->getMessage());
             trace($e->getMessage(),'error');            
             return false;
         }
@@ -256,6 +256,8 @@ class CacheModel extends Model
             case 'comments': return 'comment';
             case 'orders': return 'order';
             case 'stats': return 'stats';
+            case 'tickets': return 'ticket';
+            case 'ticket_attachments': return 'ticket_attachment';
             default: return null;
         }
     }

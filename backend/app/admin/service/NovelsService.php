@@ -238,15 +238,32 @@ class NovelsService
      */
     public static function bindTags(int $novelId, array $tagIds): bool
     {
-        $rows = NovelTags::where('novel_id', $novelId)->field('id')->select()->toArray();
-        foreach ($rows as $r) {
-            (new NovelTags())->deleteById((int)$r['id']);
-        }
+        // 查出已存在的关联 [tag_id => id]
+        $existList = NovelTags::where('novel_id', $novelId)->column('id', 'tag_id');
+        $existTagIds = array_keys($existList);
+
+        // 统一转为整型比较
+        $inputTagIds = [];
         foreach ($tagIds as $tid) {
-            if (!$tid) continue;
+            if ($tid > 0) $inputTagIds[] = (int)$tid;
+        }
+        $inputTagIds = array_unique($inputTagIds);
+
+        // 需要删除的：在已存在中，但不在输入中
+        $toDel = array_diff($existTagIds, $inputTagIds);
+        foreach ($toDel as $tagId) {
+            if (isset($existList[$tagId])) {
+                (new NovelTags())->deleteById((int)$existList[$tagId]);
+            }
+        }
+
+        // 需要新增的：在输入中，但不在已存在中
+        $toAdd = array_diff($inputTagIds, $existTagIds);
+        foreach ($toAdd as $tid) {
             (new NovelTags())->writeById(0, ['novel_id' => $novelId, 'tag_id' => (int)$tid]);
         }
-        $tags_json = Tags::where('id', 'in', $tagIds)->column('id as tag_id,name');
+
+        $tags_json = Tags::where('id', 'in', $inputTagIds)->column('id as tag_id,name');
         $tags_json = json_encode($tags_json, JSON_UNESCAPED_UNICODE);
         (new Novels())->writeById($novelId, ['tags_json' => $tags_json]);
         return true;

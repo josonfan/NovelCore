@@ -35,11 +35,16 @@ class Search extends Common
         $searchService = SearchServiceFactory::make($configService);
         $result = $searchService->searchNovels($keyword, $page, $pageSize, $options);
         if (!empty($keyword)) {
-            SearchLogService::write(($this->request->user->id ?? null) ?? null, $keyword, $options);
+            SearchLogService::write( $keyword, $options);
         }
         return $this->ajaxReturn(200, '获取成功', [
             'list'  => $result['list'] ?? [],
             'count' => (int)($result['total'] ?? 0),
         ]);
+    }
+    public function hot_keywords()
+    {
+        $keywords = SearchLogService::getHotKeywords();
+        return $this->ajaxReturn(200, '获取成功', $keywords);
     }
 }

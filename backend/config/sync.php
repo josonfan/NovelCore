@@ -19,6 +19,7 @@ return [
         'site_users',
         'payment_channel',
         'vip',
+        'site_tickets',
     ],
     'elasticsearch_index' => [
         'novel'

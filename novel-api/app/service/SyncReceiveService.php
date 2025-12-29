@@ -48,6 +48,7 @@ class SyncReceiveService
                     'updated_at' => date('Y-m-d H:i:s'),
                 ];
             }
+            $payload['updated_at'] = date('Y-m-d H:i:s');
             $ok = false;            
             switch ($op) {
                 case 'update':
@@ -72,6 +73,7 @@ class SyncReceiveService
             // self::save($raw);
             return (bool)$ok;
         } catch (\Throwable $e) {
+            
             trace($e->getMessage());
             return false;
         }
@@ -112,7 +114,15 @@ class SyncReceiveService
             case 'vip':
                 break;
             case 'novel_tags':
-                break;        
+                break;  
+            case 'site_tickets':
+                $payload['id'] =$payload['ticket_id'];
+                $unset = ['ticket_id','site_id','last_synced_at'];
+                break;
+            case 'site_ticket_attachments':
+                $payload['id'] =$payload['ticket_attachment_id'];
+                $unset = ['ticket_attachment_id','site_id','last_synced_at'];
+                break;      
             default:
                 break;
         }
@@ -137,6 +147,8 @@ class SyncReceiveService
             'site_comments' => \app\model\Comment::class,
             'payment_channel' => \app\model\PaymentChannel::class,
             'vip' => \app\model\Vip::class,
+            'site_tickets' => \app\model\Ticket::class,
+            'site_ticket_attachments' => \app\model\TicketAttachment::class,
             default      => null,
         };
     }

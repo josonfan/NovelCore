@@ -9,10 +9,10 @@ use think\console\Output;
 class SyncPush extends Command
 {
     protected $name = 'sync:push';
-    protected $description = '推送同步任务到子站点';
+    protected $description = '推送同步任务到总站';
     protected function configure()
     {
-        $this->setName('sync:push')->setDescription('推送同步任务到子站点');
+        $this->setName('sync:push')->setDescription('推送同步任务到总站');
     }
 
     protected function execute(Input $input, Output $output)

@@ -5,6 +5,8 @@ return [
         'comment',
         'order',
         'stats',
+        'ticket',
+        'ticket_attachment',
     ],
     'push_path' => '/Sync/receive',
     'timeout' => 5,

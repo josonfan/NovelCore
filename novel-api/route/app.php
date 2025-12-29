@@ -40,12 +40,17 @@ Route::group('api', function () {
 
     // 阅读进度与搜索（统一 Controller/Action）
     Route::rule('Search/index', 'Search/index', 'POST')->middleware(\app\middleware\NoAuth::class);
+    Route::rule('Search/hotKeywords', 'Search/hot_keywords', 'GET')->middleware(\app\middleware\NoAuth::class);
     Route::rule('Reading/getProgress', 'Reading/getProgress', 'POST')->middleware(\app\middleware\Auth::class);
     Route::rule('Reading/saveProgress', 'Reading/saveProgress', 'POST')->middleware(\app\middleware\Auth::class);
     Route::rule('Domain/index', 'Domain/index', 'POST');
     Route::rule('UserSummary/summary', 'UserSummary/summary', 'GET')->middleware(\app\middleware\Auth::class);
     Route::rule('Sync/receive', 'Sync/receive', 'POST')->middleware(\app\middleware\AdminPushAuth::class);
     Route::rule('Health/index', 'Health/index', 'GET')->middleware(\app\middleware\AdminPushAuth::class);
+    Route::rule('Ticket/types', 'Ticket/types', 'GET');
+    Route::rule('Ticket/statuses', 'Ticket/statuses', 'GET');
+    
+    
     // 需要登录的接口
     Route::group(function () {
         // 文件上传
@@ -78,6 +83,11 @@ Route::group('api', function () {
         Route::rule('Favorite/favorite', 'Favorite/favorite', 'POST');
         Route::rule('Favorite/unfavorite', 'Favorite/unfavorite', 'POST');
 
+        // 工单
+        Route::rule('Ticket/add', 'Ticket/add', 'POST');
+        Route::rule('Ticket/list', 'Ticket/list', 'POST');
+        Route::rule('Ticket/info', 'Ticket/info', 'POST');
+
         // 关注作者/小说
         Route::rule('Follow/followAuthor', 'Follow/followAuthor', 'POST');
         Route::rule('Follow/unfollowAuthor', 'Follow/unfollowAuthor', 'POST');
@@ -94,6 +104,9 @@ Route::group('api', function () {
     Route::rule('Comment/index', 'Comment/index', 'POST');
     // 支付回调无需登录
     Route::rule('Order/notify', 'Order/notify', 'POST');
+    // 工单类型与状态（无参数，可 GET）
+    Route::rule('Ticket/types', 'Ticket/types', 'GET')->middleware(\app\middleware\NoAuth::class);
+    Route::rule('Ticket/statuses', 'Ticket/statuses', 'GET')->middleware(\app\middleware\NoAuth::class);
 
     // 后台只读接口，受 AdminAuth 保护
     Route::group('admin', function () {

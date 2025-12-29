@@ -232,7 +232,7 @@ class CacheModel extends Model
            
             return $res;
         } catch (\Throwable $e) {
-            
+            // dd($e->getMessage());
             return false;
         }
     }

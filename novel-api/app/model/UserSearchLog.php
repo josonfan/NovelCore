@@ -16,10 +16,4 @@ class UserSearchLog extends BaseModel
      * @var string|false
      */
     protected $updateTime = false;
-
-    /**
-     * JSON 自动转换字段。
-     * @var array
-     */
-    protected $json = ['filters_json'];
 }

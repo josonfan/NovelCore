@@ -121,12 +121,34 @@ class SyncReceiveService
                 }
                 
                 break;
+            case 'ticket':
+                $payload['ticket_id'] = $payload['id'];
+                $payload[$pk] = $model->where('site_id',$siteId)->where('ticket_id',$payload['ticket_id'])->value('id');
+                
+                if(empty($payload[$pk])){
+                    $payload[$pk] = 0;
+                }else{
+                    $payload[$pk] = (int)$payload[$pk];
+                }
+                
+                break;
+            case 'ticket_attachment':
+                $payload['ticket_attachment_id'] = $payload['id'];
+                $payload[$pk] = $model->where('site_id',$siteId)->where('ticket_attachment_id',$payload['ticket_attachment_id'])->value('id');
+                
+                if(empty($payload[$pk])){
+                    $payload[$pk] = 0;
+                }else{
+                    $payload[$pk] = (int)$payload[$pk];
+                }
+                
+                break;
             default:
                 break;
         }
         foreach ($unset as $key) {            
             unset($payload[$key]);
-        }        
+        }
         return $payload;
     }
     private static function resolveModelClass(string $type): ?string
@@ -136,6 +158,8 @@ class SyncReceiveService
             'comment' => \app\common\model\SiteComments::class,
             'order' => \app\common\model\SiteOrders::class,
             'stats' => \app\common\model\SiteStats::class,
+            'ticket' => \app\common\model\SiteTickets::class,
+            'ticket_attachment' => \app\common\model\SiteTicketAttachments::class,
             default      => null,
         };
     }
