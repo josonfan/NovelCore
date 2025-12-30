@@ -56,7 +56,7 @@ class SyncReceiveService
                 case 'save':
                 case 'create':
                 case 'insert':                    
-                    $ok = $model->writeById($id ?? 0, $payload);
+                    $ok = $model->writeById($id ?? 0, $payload, false, false);
                     break;
                 case 'delete':
                 case 'remove':
@@ -122,6 +122,14 @@ class SyncReceiveService
             case 'site_ticket_attachments':
                 $payload['id'] =$payload['ticket_attachment_id'];
                 $unset = ['ticket_attachment_id','site_id','last_synced_at'];
+                break;
+            case 'site_feedbacks':
+                $payload['id'] =$payload['feedback_id'];
+                $unset = ['feedback_id','site_id','last_synced_at'];
+                break;
+            case 'site_feedback_attachments':
+                $payload['id'] =$payload['feedback_attachment_id'];
+                $unset = ['feedback_attachment_id','site_id','last_synced_at'];
                 break;      
             default:
                 break;
@@ -149,6 +157,8 @@ class SyncReceiveService
             'vip' => \app\model\Vip::class,
             'site_tickets' => \app\model\Ticket::class,
             'site_ticket_attachments' => \app\model\TicketAttachment::class,
+            'site_feedbacks' => \app\model\Feedback::class,
+            'site_feedback_attachments' => \app\model\FeedbackAttachment::class,
             default      => null,
         };
     }

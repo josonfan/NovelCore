@@ -35,9 +35,9 @@ class SyncService
                 'last_error' => null,
             ];
             if ($existingId) {
-                (new SyncQueue())->writeById((int)$existingId, $data, 'sync_exec_method_custom_queue');
+                (new SyncQueue())->writeById((int)$existingId, $data, true, 'sync_exec_method_custom_queue');
             } else {
-                (new SyncQueue())->writeById(0, $data, 'sync_exec_method_custom_queue');   
+                (new SyncQueue())->writeById(0, $data, true, 'sync_exec_method_custom_queue');   
             }
         } catch (\Throwable $e) {}
     }

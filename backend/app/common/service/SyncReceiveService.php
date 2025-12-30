@@ -52,7 +52,7 @@ class SyncReceiveService
                 case 'save':
                 case 'create':
                 case 'insert':
-                    $ok = $model->writeById($id ?? 0, $payload);
+                    $ok = $model->writeById($id ?? 0, $payload, false);
                     break;
                 case 'delete':
                 case 'remove':
@@ -143,6 +143,28 @@ class SyncReceiveService
                 }
                 
                 break;
+            case 'feedback':
+                $payload['feedback_id'] = $payload['id'];
+                $payload[$pk] = $model->where('site_id',$siteId)->where('feedback_id',$payload['feedback_id'])->value('id');
+                
+                if(empty($payload[$pk])){
+                    $payload[$pk] = 0;
+                }else{
+                    $payload[$pk] = (int)$payload[$pk];
+                }
+                
+                break;
+            case 'feedback_attachment':
+                $payload['feedback_attachment_id'] = $payload['id'];
+                $payload[$pk] = $model->where('site_id',$siteId)->where('feedback_attachment_id',$payload['feedback_attachment_id'])->value('id');
+                
+                if(empty($payload[$pk])){
+                    $payload[$pk] = 0;
+                }else{
+                    $payload[$pk] = (int)$payload[$pk];
+                }
+                
+                break;
             default:
                 break;
         }
@@ -160,6 +182,8 @@ class SyncReceiveService
             'stats' => \app\common\model\SiteStats::class,
             'ticket' => \app\common\model\SiteTickets::class,
             'ticket_attachment' => \app\common\model\SiteTicketAttachments::class,
+            'feedback' => \app\common\model\SiteFeedbacks::class,
+            'feedback_attachment' => \app\common\model\SiteFeedbackAttachments::class,
             default      => null,
         };
     }

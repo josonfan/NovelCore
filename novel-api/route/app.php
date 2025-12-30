@@ -49,6 +49,11 @@ Route::group('api', function () {
     Route::rule('Health/index', 'Health/index', 'GET')->middleware(\app\middleware\AdminPushAuth::class);
     Route::rule('Ticket/types', 'Ticket/types', 'GET');
     Route::rule('Ticket/statuses', 'Ticket/statuses', 'GET');
+    // 投诉建议提交（无需登录）
+    Route::rule('Feedback/add', 'Feedback/add', 'POST')->middleware(\app\middleware\NoAuth::class);
+    // 投诉建议类型与状态
+    Route::rule('Feedback/types', 'Feedback/types', 'GET');
+    Route::rule('Feedback/statuses', 'Feedback/statuses', 'GET');
     
     
     // 需要登录的接口
@@ -87,6 +92,9 @@ Route::group('api', function () {
         Route::rule('Ticket/add', 'Ticket/add', 'POST');
         Route::rule('Ticket/list', 'Ticket/list', 'POST');
         Route::rule('Ticket/info', 'Ticket/info', 'POST');
+        // 投诉建议（我的）
+        Route::rule('Feedback/list', 'Feedback/list', 'POST');
+        Route::rule('Feedback/info', 'Feedback/info', 'POST');
 
         // 关注作者/小说
         Route::rule('Follow/followAuthor', 'Follow/followAuthor', 'POST');

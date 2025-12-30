@@ -208,6 +208,13 @@ Route::group('SiteTickets', function () {
     Route::rule('types', 'SiteTickets/types', 'GET|POST')->middleware('AdminAuth');
     Route::rule('statuses', 'SiteTickets/statuses', 'GET|POST')->middleware('AdminAuth');
 });
+Route::group('SiteFeedbacks', function () {
+    Route::rule('index', 'SiteFeedbacks/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'SiteFeedbacks/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('process', 'SiteFeedbacks/process', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('types', 'SiteFeedbacks/types', 'GET|POST')->middleware('AdminAuth');
+    Route::rule('statuses', 'SiteFeedbacks/statuses', 'GET|POST')->middleware('AdminAuth');
+});
 /**
  * SiteStats 接口（站点统计管理）
  */

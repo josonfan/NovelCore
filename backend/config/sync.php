@@ -14,12 +14,13 @@ return [
         'novels',
         'novel_tags',
         'chapters',
-        'chapter_contents', 
-        'site_comments',
-        'site_users',
+        'chapter_contents',
         'payment_channel',
         'vip',
+        'site_comments',
+        'site_users',
         'site_tickets',
+        'site_feedbacks',
     ],
     'elasticsearch_index' => [
         'novel'

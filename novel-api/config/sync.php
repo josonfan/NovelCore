@@ -7,6 +7,8 @@ return [
         'stats',
         'ticket',
         'ticket_attachment',
+        'feedback',
+        'feedback_attachment',
     ],
     'push_path' => '/Sync/receive',
     'timeout' => 5,

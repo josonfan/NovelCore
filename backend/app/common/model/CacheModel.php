@@ -124,10 +124,10 @@ class CacheModel extends Model
      * @param string $type 缓存类型
      * @return bool
      */
-    public function writeById(int $id, array $data, string $type = 'async_exec_method_custom_queue'): bool
+    public function writeById(int $id, array $data, bool $isAsync = true, string $type = 'async_exec_method_custom_queue'): bool
     {
         if (!$this->is_cache) {          
-            $ok = self::persistById(static::class, $id, $data);
+            $ok = self::persistById(static::class, $id, $data, $isAsync);
             return $ok;
         } 
         $ttl = env('CACHE.TTL', 600);
@@ -144,7 +144,7 @@ class CacheModel extends Model
             $updKey = $this->getCacheKey($id, 'upd');
         }
         $ok = $this->setCacheData($updKey, $info, 0);
-        Async::delayUseCustomQueue(0, \app\common\model\CacheModel::class, 'persistByIdRef', getAsyncQueueKey(md5((string)$id), $type), static::class, $id, $updKey);       
+        Async::delayUseCustomQueue(0, \app\common\model\CacheModel::class, 'persistByIdRef', getAsyncQueueKey(md5((string)$id), $type), static::class, $id, $updKey, $isAsync);       
         return $ok;
     }
     /**
@@ -185,7 +185,7 @@ class CacheModel extends Model
      * @param array $data 缓存数据
      * @return bool
      */
-    public static function persistById(string $modelClass, int $id, array $data): bool
+    public static function persistById(string $modelClass, int $id, array $data, bool $isAsync = true): bool
     {        
         try {
             $m = new $modelClass();
@@ -216,17 +216,20 @@ class CacheModel extends Model
                     $key = $m->getCacheKey($id);
                     Cache::delete($key);
                 }
-                $name = method_exists($m,'getName') ? (string)$m->getName() : '';
-                $enabledTables = (array)(config('sync.enable_types') ?? []);
-                if ($name && in_array($name, $enabledTables, true)) {
-                    if(in_array($name, ['site_comments', 'site_users'])){
-                        $site_id = $m->where($pk, $id)->value('site_id');
-                        if(!empty($site_id)){
-                           \app\common\service\SyncService::enqueueForSite((int)$site_id, $name, (int)$id, $op);
-                        }
-                    }else{
-                        \app\common\service\SyncService::enqueue($name, (int)$id, $op);
-                    }                    
+                if($isAsync){
+                    $name = method_exists($m,'getName') ? (string)$m->getName() : '';
+                    $enabledTables = (array)(config('sync.enable_types') ?? []);
+                    if ($name && in_array($name, $enabledTables, true)) 
+                        {
+                            if(in_array($name, ['site_comments', 'site_users', 'site_feedbacks', 'site_tickets'])){
+                                $site_id = $m->where($pk, $id)->value('site_id');
+                            if(!empty($site_id)){
+                            \app\common\service\SyncService::enqueueForSite((int)$site_id, $name, (int)$id, $op);
+                            }
+                        }else{
+                            \app\common\service\SyncService::enqueue($name, (int)$id, $op);
+                        }                    
+                    }
                 }
             }
            
@@ -244,7 +247,7 @@ class CacheModel extends Model
      * @param string $updKey 缓存键名
      * @return bool
      */
-    public static function persistByIdRef(string $modelClass, int $id, string $updKey): bool
+    public static function persistByIdRef(string $modelClass, int $id, string $updKey, bool $isAsync = true): bool
     {
         try {
             $m = new $modelClass();
@@ -256,7 +259,7 @@ class CacheModel extends Model
             if (!$data || !is_array($data)) {
                 return false;
             }            
-            self::persistById($modelClass, $id, $data);
+            self::persistById($modelClass, $id, $data, $isAsync);
             Cache::delete($updKey);
             return true;
         } catch (\Throwable $e) {

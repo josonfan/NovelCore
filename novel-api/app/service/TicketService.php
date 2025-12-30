@@ -103,14 +103,14 @@ class TicketService
             $raw['status'] = $status;
         }
         $where = formatWhere($raw);
-        $res = $m->getList($where, 'id,ticket_no,type,title,priority,status,created_at', 'created_at desc, id desc', $limit, $page);
+        $res = $m->getList($where, 'id,ticket_no,type,title,priority,status,reply_content,reply_at,created_at', 'created_at desc, id desc', $limit, $page);
         return $res;
     }
 
     public static function info(int $userId, int $id): array
     {
         $m = new Ticket();
-        $ticket = $m->infoById($id, 'id,ticket_no,user_id,type,title,description,work_id,contact,priority,status,created_at');
+        $ticket = $m->infoById($id, 'id,ticket_no,user_id,type,title,description,work_id,contact,priority,status,reply_content,reply_admin_id,reply_at,created_at');
         if (empty($ticket) || (int)$ticket['user_id'] !== $userId) {
             throw new ValidateException('资源不存在');
         }

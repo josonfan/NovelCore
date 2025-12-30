@@ -21,9 +21,9 @@ class SyncService
                 'last_error' => null,
             ];
             if ($existingId) {
-                (new SyncQueue())->writeById((int)$existingId, $data, 'sync_async_exec_method_custom_queue');
+                (new SyncQueue())->writeById((int)$existingId, $data,false,true, 'sync_async_exec_method_custom_queue');
             } else {
-                (new SyncQueue())->writeById(0, $data, 'sync_async_exec_method_custom_queue');    
+                (new SyncQueue())->writeById(0, $data,false,true, 'sync_async_exec_method_custom_queue');    
             }
         } catch (\Throwable $e) {}
     }

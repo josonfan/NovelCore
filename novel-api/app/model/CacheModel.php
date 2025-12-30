@@ -123,10 +123,10 @@ class CacheModel extends Model
      * @param array $data 缓存数据
      * @return bool
      */
-    public function writeById($id, array $data,$upDb=false): bool
+    public function writeById($id, array $data, bool $upDb=false ,bool $isAsync = true, string $type = 'async_exec_method_custom_queue'): bool
     {
         if (!$this->is_cache || $upDb) {     
-            $ok = self::persistById(static::class, $id, $data);
+            $ok = self::persistById(static::class, $id, $data,$isAsync);
             return $ok;
         } 
         $ttl = env('CACHE.TTL', 600);
@@ -143,7 +143,17 @@ class CacheModel extends Model
             $updKey = $this->getCacheKey($id, 'upd');
         }
         $ok = $this->setCacheData($updKey, $info, 0);
-        Async::delayUseCustomQueue(0, \app\model\CacheModel::class, 'persistByIdRef', getAsyncQueueKey(md5((string)$id)), static::class, $id, $updKey);
+        if($isAsync){
+            Async::delayUseCustomQueue(0,
+                \app\model\CacheModel::class,
+                'persistByIdRef',
+                getAsyncQueueKey(md5((string)$id),$type),
+                static::class,
+                $id,
+                $updKey,
+                $isAsync
+            );
+        }
         return $ok;
     }
     
@@ -194,7 +204,7 @@ class CacheModel extends Model
      * @param array $data 缓存数据
      * @return bool
      */
-    public static function persistById(string $modelClass, $id, array $data): bool
+    public static function persistById(string $modelClass, $id, array $data, bool $isAsync = true): bool
     {  
         try {            
             $m = new $modelClass();            
@@ -231,12 +241,14 @@ class CacheModel extends Model
                     $key = $m->getCacheKey($id);
                     Cache::delete($key);
                 }
-                $name = method_exists($m,'getName') ? (string)$m->getName() : '';
-                $type = self::contentTypeFromTable($name);
-                $enabled = (array)(config('sync.enable_types') ?? []);
-                if ($type && in_array($type, $enabled, true)) {
-                    \app\service\SyncService::enqueue($type, (int)$id, $op);
-                }                
+                if($isAsync){
+                    $name = method_exists($m,'getName') ? (string)$m->getName() : '';
+                    $type = self::contentTypeFromTable($name);
+                    $enabled = (array)(config('sync.enable_types') ?? []);
+                    if ($type && in_array($type, $enabled, true)) {
+                        \app\service\SyncService::enqueue($type, (int)$id, $op);
+                    }                
+                }
             }
             return $res;
         } catch (\Throwable $e) {dd($e->getMessage());
@@ -258,6 +270,8 @@ class CacheModel extends Model
             case 'stats': return 'stats';
             case 'tickets': return 'ticket';
             case 'ticket_attachments': return 'ticket_attachment';
+            case 'feedbacks': return 'feedback';
+            case 'feedback_attachments': return 'feedback_attachment';
             default: return null;
         }
     }
