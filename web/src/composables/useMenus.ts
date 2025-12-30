@@ -16,6 +16,9 @@ const MENU_PATH_MAP: Record<string, string> = {
   订单列表: '/financial/orders',
   用户评论: '/site/comments',
   站点用户: '/site/users',
+  工单管理: '/site/tickets',
+  用户建议: '/site/feedbacks',
+  站点统计: '/site/stats',
 }
 
 export function useMenus() {

@@ -19,7 +19,25 @@ http.interceptors.request.use((config) => {
 })
 
 http.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    const data = res.data
+    // 处理业务响应码
+    if (data && typeof data.code === 'number' && data.code !== 200) {
+      const msg = data.msg || data.message || '请求失败'
+      // 业务码 401 表示登录过期
+      if (data.code === 401) {
+        const auth = useAuthStore()
+        auth.clear()
+        ElMessage.error(msg)
+        router.push('/login')
+        return Promise.reject(new Error(msg))
+      }
+      // 其他非 200 业务码，提示错误信息
+      ElMessage.error(msg)
+      return Promise.reject(new Error(msg))
+    }
+    return res
+  },
   async (err) => {
     const status = err?.response?.status
     const body = err?.response?.data
@@ -30,6 +48,7 @@ http.interceptors.response.use(
       const alt = base.replace(/\/admin$/, '/admin.php')
       return http.request({ ...cfg, baseURL: alt, __retryAdminAlt: true })
     }
+    // HTTP 状态码 401
     if (status === 401) {
       const auth = useAuthStore()
       auth.clear()

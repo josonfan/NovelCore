@@ -49,6 +49,9 @@ export const ROUTES = {
   // 站点管理
   'site-comments': { path: '/site/comments', name: 'site-comments', title: '用户评论' },
   'site-users': { path: '/site/users', name: 'site-users', title: '站点用户' },
+  'site-tickets': { path: '/site/tickets', name: 'site-tickets', title: '工单管理' },
+  'site-feedbacks': { path: '/site/feedbacks', name: 'site-feedbacks', title: '用户建议' },
+  'site-stats': { path: '/site/stats', name: 'site-stats', title: '站点统计' },
 } as const
 
 export type RouteKey = keyof typeof ROUTES
@@ -122,6 +125,9 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
   'financial-orders': () => import('../pages/FinancialOrders.vue'),
   'site-comments': () => import('../pages/SiteComments.vue'),
   'site-users': () => import('../pages/SiteUsers.vue'),
+  'site-tickets': () => import('../pages/SiteTickets.vue'),
+  'site-feedbacks': () => import('../pages/SiteFeedbacks.vue'),
+  'site-stats': () => import('../pages/SiteStats.vue'),
 }
 
 /**
@@ -172,6 +178,9 @@ const LAYOUT_CHILD_KEYS: RouteKey[] = [
   'financial-orders',
   'site-comments',
   'site-users',
+  'site-tickets',
+  'site-feedbacks',
+  'site-stats',
 ]
 
 /**
