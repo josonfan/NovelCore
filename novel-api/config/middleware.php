@@ -11,6 +11,7 @@ return [
         'admin_push' => \app\middleware\AdminPushAuth::class,
         'response_time' => \app\middleware\ResponseTime::class,
         'no_auth' => \app\middleware\NoAuth::class,
+        'validate_email_code' => \app\middleware\ValidateEmailCode::class,
     ],
     'priority' => [
         \think\middleware\LoadLangPack::class,
@@ -21,5 +22,6 @@ return [
         \app\middleware\Cors::class,
         \app\middleware\Auth::class,
         \app\middleware\AdminAuth::class,
+        \app\middleware\ValidateEmailCode::class,
     ],
 ];

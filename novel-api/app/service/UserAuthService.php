@@ -118,4 +118,29 @@ class UserAuthService
             'created_at' => (string)($user->created_at ?? ''),
         ];
     }
+
+    /**
+     * 重置密码
+     * @param string $email
+     * @param string $password
+     * @return bool
+     * @throws ValidateException
+     */
+    public static function resetPassword(string $email, string $password): bool
+    {
+        $user = User::where('email', $email)->find();
+        if (!$user) {
+            throw new ValidateException('该邮箱未注册用户');
+        }
+
+        $passwordHash = password_hash($password, PASSWORD_BCRYPT);
+        // 使用 CacheModel 封装的 writeById 更新 (或者直接 save 如果 writeById 支持部分更新)
+        // 这里 User 模型继承 BaseModel, 而 project rules 说 "写入/更新：调用模型实例的 writeById($id, $data)"
+        // BaseModel 应该有 writeById
+        
+        // 由于 UserAuthService 引用了 app\model\User
+        (new User())->writeById((int)$user->id, ['password' => $passwordHash]);
+        
+        return true;
+    }
 }

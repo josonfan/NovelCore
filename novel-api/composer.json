@@ -28,7 +28,7 @@
         "ext-mbstring": "*",
         "topthink/framework": "^8.0",
         "topthink/think-orm": "^3.0|^4.0",
-        "topthink/think-filesystem": "^2.0|^3.0",
+        "topthink/think-filesystem": "^2.0|^3.0",        
         "firebase/php-jwt": "^6.10",
         "baiy/think-async": "^1.0",
         "predis/predis": "^2.2",
@@ -37,6 +37,7 @@
         "aws/aws-sdk-php": "^3.300",
         "topthink/think-throttle": "^2.0",
         "elasticsearch/elasticsearch": "8.7",
+        "daniel-zahariev/php-aws-ses": "^0.9.5",
         "geoip2/geoip2": "~2.0"
     },
     "require-dev": {

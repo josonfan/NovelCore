@@ -12,6 +12,10 @@ Route::group('api', function () {
     // 用户注册与登录
     Route::rule('User/register', 'User/register', 'POST');
     Route::rule('User/login', 'User/login', 'POST');
+    // 忘记密码
+    Route::rule('User/sendForgotPasswordCode', 'User/sendForgotPasswordCode', 'POST')
+        ->middleware(\app\middleware\ApiThrottle::class, ['visit_rate' => '1/m', 'key_field' => 'email']);
+    Route::rule('User/resetPassword', 'User/resetPassword', 'POST')->middleware(\app\middleware\ValidateEmailCode::class);
 
     // 分类与标签（统一 Controller/Action，参数走 Body）
     Route::rule('Category/index', 'Category/index', 'POST');
@@ -50,7 +54,9 @@ Route::group('api', function () {
     Route::rule('Ticket/types', 'Ticket/types', 'GET');
     Route::rule('Ticket/statuses', 'Ticket/statuses', 'GET');
     // 投诉建议提交（无需登录）
-    Route::rule('Feedback/add', 'Feedback/add', 'POST')->middleware(\app\middleware\NoAuth::class);
+    Route::rule('Feedback/add', 'Feedback/add', 'POST')
+        ->middleware(\app\middleware\NoAuth::class)
+        ->middleware(\app\middleware\ApiThrottle::class, ['visit_rate' => '1/m']);
     // 投诉建议类型与状态
     Route::rule('Feedback/types', 'Feedback/types', 'GET');
     Route::rule('Feedback/statuses', 'Feedback/statuses', 'GET');
@@ -65,6 +71,9 @@ Route::group('api', function () {
         Route::rule('User/logout', 'User/logout', 'POST');
         Route::rule('User/info', 'User/info', 'GET');
         Route::rule('User/update', 'User/update', 'POST');
+        Route::rule('User/sendEmailCode', 'User/sendEmailCode', 'POST')
+            ->middleware(\app\middleware\ApiThrottle::class, ['visit_rate' => '1/m', 'key_field' => 'email']);// 发送邮箱验证码
+        Route::rule('User/bindEmail', 'User/bindEmail', 'POST')->middleware(\app\middleware\ValidateEmailCode::class);// 绑定邮箱
         // 小说用户状态
         Route::rule('Novel/userStatus', 'Novel/userStatus', 'POST');
         // 订单
@@ -89,7 +98,8 @@ Route::group('api', function () {
         Route::rule('Favorite/unfavorite', 'Favorite/unfavorite', 'POST');
 
         // 工单
-        Route::rule('Ticket/add', 'Ticket/add', 'POST');
+        Route::rule('Ticket/add', 'Ticket/add', 'POST')
+            ->middleware(\app\middleware\ApiThrottle::class, ['visit_rate' => '1/m']);
         Route::rule('Ticket/list', 'Ticket/list', 'POST');
         Route::rule('Ticket/info', 'Ticket/info', 'POST');
         // 投诉建议（我的）
@@ -103,7 +113,8 @@ Route::group('api', function () {
         Route::rule('Follow/unfollowNovel', 'Follow/unfollowNovel', 'POST');
 
         // 发表评论与评论点赞
-        Route::rule('Comment/store', 'Comment/store', 'POST');
+        Route::rule('Comment/store', 'Comment/store', 'POST')
+            ->middleware(\app\middleware\ApiThrottle::class, ['visit_rate' => '3/m']);
         Route::rule('Comment/like', 'Comment/like', 'POST');
         Route::rule('Comment/unlike', 'Comment/unlike', 'POST');
     })->middleware(\app\middleware\Auth::class);
@@ -138,7 +149,7 @@ Route::group('api', function () {
         Route::get('stats/daily', 'admin.Stats/getDailyStats');
         
     })->middleware(\app\middleware\AdminAuth::class);
-});
+})->middleware(\think\middleware\Throttle::class);
 
 /**
  * 未匹配路由的兜底处理

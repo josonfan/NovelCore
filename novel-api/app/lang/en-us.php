@@ -37,4 +37,12 @@ return [
     '支付渠道不存在' => 'Payment channel not found',
     '支付渠道不存在或已下线' => 'Payment channel not found or disabled',
     '签名错误' => 'Signature error',
+    '邮箱格式错误' => 'Email format error',
+    '发送太频繁，请稍后再试' => 'Send too frequent, please try again later',
+    '邮箱验证码标题' => '【{:site_name}】Email verification code',
+    '邮箱验证码内容' => 'Your verification code is：<b>{:code}</b>. It is valid for 10 minutes. Do not disclose it to anyone.',
+    '发送失败' => 'Send failed',
+    '邮件发送失败，请检查邮箱是否正确或联系客服' => 'Email send failed, please check your email address or contact customer service',
+    '验证码错误或已过期' => 'Verification code is incorrect or expired',
+    'throttle.visit_fail_response' => 'Request too frequent, please try again in {:wait_seconds} seconds',
 ];

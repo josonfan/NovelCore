@@ -41,7 +41,7 @@ class EmailConfig extends Backend
 
     public function save()
     {
-        $postField = 'site_id,provider,region,access_key,secret_key,from_address,from_name,is_active';
+        $postField = 'site_id,provider,region,host,access_key,secret_key,from_address,from_name,is_active';
         $data = $this->request->only(explode(',', $postField), 'post', null);
         $res = EmailConfigService::save($data);
         return $this->ajaxReturn(200, '保存成功', $res);
