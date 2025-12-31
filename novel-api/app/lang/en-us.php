@@ -45,4 +45,10 @@ return [
     '邮件发送失败，请检查邮箱是否正确或联系客服' => 'Email send failed, please check your email address or contact customer service',
     '验证码错误或已过期' => 'Verification code is incorrect or expired',
     'throttle.visit_fail_response' => 'Request too frequent, please try again in {:wait_seconds} seconds',
+    'order_pay_success_title' => 'Payment Successful',
+    'order_pay_success_message' => 'Your payment of {:amount} was successful.',
+    'comment_reply_title' => 'Comment Replied',
+    'comment_reply_message' => 'Your comment "{:content}" has been replied.',
+    'comment_like_title' => 'Comment Liked',
+    'comment_like_message' => 'Your comment "{:content}" has been liked.',
 ];

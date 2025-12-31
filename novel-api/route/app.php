@@ -74,6 +74,11 @@ Route::group('api', function () {
         Route::rule('User/sendEmailCode', 'User/sendEmailCode', 'POST')
             ->middleware(\app\middleware\ApiThrottle::class, ['visit_rate' => '1/m', 'key_field' => 'email']);// 发送邮箱验证码
         Route::rule('User/bindEmail', 'User/bindEmail', 'POST')->middleware(\app\middleware\ValidateEmailCode::class);// 绑定邮箱
+        // 用户登录日志
+        Route::rule('User/loginLogs', 'User/getLoginLogs', 'POST');
+        // 用户设备日志
+        Route::rule('User/deviceLogs', 'User/getDeviceLogs', 'POST');
+
         // 小说用户状态
         Route::rule('Novel/userStatus', 'Novel/userStatus', 'POST');
         // 订单
@@ -102,6 +107,9 @@ Route::group('api', function () {
             ->middleware(\app\middleware\ApiThrottle::class, ['visit_rate' => '1/m']);
         Route::rule('Ticket/list', 'Ticket/list', 'POST');
         Route::rule('Ticket/info', 'Ticket/info', 'POST');
+        Route::rule('Ticket/reply', 'Ticket/reply', 'POST');
+        Route::rule('Ticket/replies', 'Ticket/replies', 'POST');
+        Route::rule('Ticket/evaluate', 'Ticket/evaluate', 'POST');
         // 投诉建议（我的）
         Route::rule('Feedback/list', 'Feedback/list', 'POST');
         Route::rule('Feedback/info', 'Feedback/info', 'POST');
@@ -117,6 +125,11 @@ Route::group('api', function () {
             ->middleware(\app\middleware\ApiThrottle::class, ['visit_rate' => '3/m']);
         Route::rule('Comment/like', 'Comment/like', 'POST');
         Route::rule('Comment/unlike', 'Comment/unlike', 'POST');
+        
+        // 消息中心
+        Route::rule('Message/index', 'Message/index', 'POST');
+        Route::rule('Message/info', 'Message/info', 'POST');
+        Route::rule('Message/unreadCount', 'Message/unreadCount', 'GET');
     })->middleware(\app\middleware\Auth::class);
 
     // 评论列表无需登录（统一 Controller/Action）
@@ -125,6 +138,8 @@ Route::group('api', function () {
     Route::rule('Order/notify', 'Order/notify', 'POST');
     // App 初始化
     Route::rule('App/init', 'App/init', 'POST')->middleware(\app\middleware\NoAuth::class);
+    // 获取协议内容
+    Route::rule('App/agreement', 'App/agreement', 'POST')->middleware(\app\middleware\NoAuth::class);
     // 工单类型与状态（无参数，可 GET）
     Route::rule('Ticket/types', 'Ticket/types', 'GET')->middleware(\app\middleware\NoAuth::class);
     Route::rule('Ticket/statuses', 'Ticket/statuses', 'GET')->middleware(\app\middleware\NoAuth::class);

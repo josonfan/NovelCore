@@ -45,4 +45,10 @@ return [
     '邮件发送失败，请检查邮箱是否正确或联系客服' => '邮件发送失败，请检查邮箱是否正确或联系客服',
     '验证码错误或已过期' => '验证码错误或已过期',
     'throttle.visit_fail_response' => '请求过于频繁，请{:wait_seconds}秒后再试',
+    'order_pay_success_title' => '订单支付成功',
+    'order_pay_success_message' => '您的订单已支付成功，金额为：{:amount}',
+    'comment_reply_title' => '您的评论被回复了',
+    'comment_reply_message' => '您的评论“{:content}”被回复了',
+    'comment_like_title' => '您的评论被点赞了',
+    'comment_like_message' => '您的评论“{:content}”被点赞了',
 ];

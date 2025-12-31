@@ -175,6 +175,14 @@ Route::group('Chapters', function () {
     Route::rule('delete', 'Chapters/delete', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('batchImport', 'Chapters/batchImport', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
 });
+Route::group('Categories', function () {
+    Route::rule('index', 'Categories/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'Categories/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('create', 'Categories/create', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('toggle', 'Categories/toggle', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('options', 'Categories/options', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+
+});
 
 Route::group('Tags', function () {
     Route::rule('index', 'Tags/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
@@ -187,8 +195,11 @@ Route::group('Tags', function () {
 Route::group('SiteTickets', function () {
     Route::rule('index', 'SiteTickets/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('detail', 'SiteTickets/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::post('process', 'SiteTickets/process')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::post('reply', 'SiteTickets/reply')->middleware('AdminAuth')->middleware('RbacAuth');
-    Route::post('close', 'SiteTickets/close')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('replies', 'SiteTickets/replies', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('types', 'SiteTickets/types', 'GET|POST')->middleware('AdminAuth');
+    Route::rule('statuses', 'SiteTickets/statuses', 'GET|POST')->middleware('AdminAuth');
 });
 
 Route::group('SiteFeedbacks', function () {
@@ -210,4 +221,46 @@ Route::group('AppVersions', function () {
     Route::rule('save', 'AppVersions/save', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('delete', 'AppVersions/delete', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('toggle', 'AppVersions/toggle', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+});
+
+Route::group('PaymentChannel', function () {
+    Route::rule('index', 'PaymentChannel/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'PaymentChannel/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('create', 'PaymentChannel/create', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('update', 'PaymentChannel/update', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('delete', 'PaymentChannel/delete', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('toggle', 'PaymentChannel/toggle', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+});
+
+Route::group('SiteOrders', function () {
+    Route::rule('index', 'SiteOrders/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'SiteOrders/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('update', 'SiteOrders/update', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+});
+Route::group('Vip', function () {
+    Route::rule('index', 'Vip/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'Vip/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('create', 'Vip/create', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('update', 'Vip/update', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('delete', 'Vip/delete', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('toggle', 'Vip/toggle', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+});
+
+Route::group('SiteStats', function () {
+    Route::rule('index', 'SiteStats/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'SiteStats/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('summary', 'SiteStats/summary', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('series', 'SiteStats/series', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+});
+
+Route::group('SiteUsers', function () {
+    Route::rule('index', 'SiteUsers/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'SiteUsers/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('setStatus', 'SiteUsers/setStatus', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+});
+
+Route::group('SiteComments', function () {
+    Route::rule('index', 'SiteComments/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'SiteComments/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('audit', 'SiteComments/audit', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
 });

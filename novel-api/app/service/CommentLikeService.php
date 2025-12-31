@@ -23,10 +23,33 @@ class CommentLikeService
                 'user_id'    => $userId,
                 'comment_id' => $cid,
             ]);
-            $info = (new CommentModel())->infoById($cid, 'like_count');
-            (new CommentModel())->writeById($cid, [
+            $cm = new CommentModel();
+            $info = $cm->infoById($cid, 'like_count,user_id,novel_id,content');
+            $cm->writeById($cid, [
                 'like_count' => (int)($info['like_count'] ?? 0) + 1,
             ]);
+
+            // 发送点赞互动消息
+            if ($info && (int)$info['user_id'] !== $userId) {
+                $user = (new UserService())->info($userId);
+                \app\service\MessageService::create(
+                    $userId,
+                    (int)$info['user_id'],
+                    2,
+                    ['name' => 'comment_like_title', 'vars' => ['nickname' => $user['nickname']]],
+                    ['name' => 'comment_like_message', 'vars' => ['content' => mb_substr($info['content'], 0, 50)]],
+                    [
+                        'type' => $cm->getName(),
+                        'ids' => $cid,
+                        'extend' => [
+                            [
+                                'id' => $cid,
+                                'novel_id' => (int)$info['novel_id']
+                            ]
+                        ]
+                    ]
+                );
+            }
         }
         return [
             'comment_id' => $cid,

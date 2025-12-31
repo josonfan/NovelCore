@@ -46,4 +46,29 @@ class App extends Common
 
         return $this->ajaxReturn(200, '初始化成功', $data);
     }
+
+    /**
+     * 获取协议内容
+     * 路由：POST /api/App/agreement
+     * 鉴权：无需登录
+     * 入参：name (18_content/privacy_policy/payment_agreement)
+     * 返回：data { content }
+     */
+    public function agreement()
+    {
+        $name = $this->request->param('name', '', 'trim');
+        $allowed = ['18_content', 'privacy_policy', 'payment_agreement'];
+        if (!in_array($name, $allowed)) {
+            throw new \think\exception\ValidateException('协议不存在');
+        }
+
+        $configService = app(ConfigService::class);
+        $siteConfig = $configService->get('base_config', []);
+
+        $content = $siteConfig[$name] ?? '';
+
+        return $this->ajaxReturn(200, '获取成功', ['content' => $content]);
+    }
+    
 }
+

@@ -272,6 +272,7 @@ class CacheModel extends Model
             case 'ticket_attachments': return 'ticket_attachment';
             case 'feedbacks': return 'feedback';
             case 'feedback_attachments': return 'feedback_attachment';
+            case 'ticket_replies': return 'ticket_reply';
             default: return null;
         }
     }

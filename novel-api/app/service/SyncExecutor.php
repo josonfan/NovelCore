@@ -39,6 +39,7 @@ class SyncExecutor
         $site = config('site');        
         $includeData = (bool)config('sync.sync_data', true);
         $data = $includeData ? self::payload((string)$row['content_type'], (int)$row['content_id']) : [];
+        
         if ($row['operation'] !== 'delete' && empty($data)) {
             $q->deleteById((int)$row['id']);
             trace('sync_queue delete id: ' . json_encode($row) . ' data_empty');

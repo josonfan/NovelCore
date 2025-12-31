@@ -22,16 +22,35 @@ class ApiThrottle extends Throttle
      */
     public function handle(Request $request, \Closure $next, array $params = []): Response
     {
-        // 支持通过 key_field 指定请求参数作为限流 Key
-        if (isset($params['key_field'])) {
-            $field = $params['key_field'];
-            $params['key'] = function ($throttle, $request) use ($field) {
-                return $request->param($field) ?: $request->ip();
-            };
-            // 移除 key_field 避免污染 config
-            unset($params['key_field']);
+        // 1. 放行 OPTIONS 预检请求
+        if ($request->method(true) === 'OPTIONS') {
+            return $next($request);
         }
 
+        // 2. 构造限流 Key 生成策略
+        // 优先级：指定 key_field > 已登录用户ID > IP
+        $keyField = $params['key_field'] ?? null;
+        unset($params['key_field']); // 移除自定义参数，避免影响父类
+
+        $params['key'] = function ($throttle, $request) use ($keyField) {
+            $suffix = '';
+            
+            if ($keyField && $val = $request->param($keyField)) {
+                // 策略 A: 指定字段 (如 email, username)
+                $suffix = 'param:' . $val;
+            } elseif (isset($request->user_id) && $request->user_id > 0) {
+                // 策略 B: 已登录用户 (基于 user_id)
+                $suffix = 'user:' . $request->user_id;
+            } else {
+                // 策略 C: 游客 (基于 IP)
+                $suffix = 'ip:' . $request->ip();
+            }
+
+            // 组合 Key: 路由地址 + 身份标识 + 中间件隔离后缀
+            // 加上 :api_throttle 是为了与全局 Throttle 中间件隔离，避免共享计数器
+            return md5($request->url() . ':' . $suffix . ':api_throttle');
+        };
+        
         return parent::handle($request, $next, $params);
     }
 }

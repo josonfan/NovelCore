@@ -64,6 +64,37 @@ class CommentService
         }
     }
 
+    public static function sendReplyNotification(int $user_id, int $commentId, int $parentId, int $novelId, string $content, array $user): void
+    {
+        if ($parentId <= 0) {
+            return;
+        }
+
+        $cm = new \app\model\Comment();
+        $parent = $cm->infoById($parentId, 'user_id');
+        $to_uid = (int)$parent['user_id'];
+        if ($parent && $to_uid !== $user_id) {
+            \app\service\MessageService::create(
+                $user_id,
+                $to_uid,
+                2,
+                ['name' => 'comment_reply_title', 'vars' => ['nickname' => $user['nickname']]],
+                ['name' => 'comment_reply_message', 'vars' => ['content' => mb_substr($content, 0, 50)]],
+                [
+                    'type' => $cm->getName(),
+                    'ids' => $commentId,
+                    'extend' => [
+                        [
+                            'id' => $commentId,
+                            'novel_id' => $novelId,
+                            'parent_id' => $parentId
+                        ]
+                    ]
+                ]
+            );
+        }
+    }
+
     public static function validateStore(int $novelId, int $userId, string $content, int $parentId = 0): array
     {
         $config = ConfigService::get('comment_review_config');

@@ -5,6 +5,7 @@ namespace app\service;
 
 use app\model\Ticket;
 use app\model\TicketAttachment;
+use app\model\TicketReply;
 use think\exception\ValidateException;
 use think\facade\Db;
 
@@ -88,6 +89,105 @@ class TicketService
         return 'image';
     }
 
+    public static function reply(int $userId, int $ticketId, string $content, array $attachments = []): array
+    {
+        $content = trim($content);
+        if ($content === '' && empty($attachments)) {
+            throw new ValidateException('回复内容不能为空');
+        }
+        
+        $ticketModel = new Ticket();
+        $ticket = $ticketModel->infoById($ticketId, 'id,user_id,status');
+        if (!$ticket || (int)$ticket['user_id'] !== $userId) {
+            throw new ValidateException('工单不存在');
+        }
+
+        // 状态：0待处理 1处理中 2已解决 3已关闭 4已拒绝
+        if (in_array((int)$ticket['status'], [3, 4], true)) {
+             throw new ValidateException('该工单已结束，无法回复');
+        }
+
+        // 处理附件
+        $validAttachments = [];
+        if (!empty($attachments)) {
+            $storage = new StorageService();
+            foreach ($attachments as $url) {
+                $urlStr = $storage->filterDomain(trim((string)$url));
+                if ($urlStr !== '') {
+                    $validAttachments[] = $urlStr;
+                }
+            }
+        }
+
+        $replyData = [
+            'ticket_id'   => $ticketId,
+            'user_id'     => $userId,
+            'user_type'   => 1, // User
+            'content'     => $content,
+            'attachments' => empty($validAttachments) ? null : json_encode($validAttachments),
+            'created_at'  => date('Y-m-d H:i:s'),
+        ];
+        
+        (new TicketReply())->writeById(0, $replyData);
+        
+        return $replyData;
+    }
+
+    public static function getReplies(int $userId, int $ticketId): array
+    {
+        $ticketModel = new Ticket();
+        $ticket = $ticketModel->infoById($ticketId, 'id,user_id');
+        if (!$ticket || (int)$ticket['user_id'] !== $userId) {
+            throw new ValidateException('工单不存在');
+        }
+
+        $replies = TicketReply::where('ticket_id', $ticketId)
+            ->order('id', 'asc')
+            ->select()
+            ->toArray();
+
+        $storage = new StorageService();
+        return array_map(function($row) use ($storage) {
+            $attachments = [];
+            if (!empty($row['attachments'])) {
+                
+                if (is_array($row['attachments'])) {
+                    foreach ($row['attachments'] as $url) {
+                        $attachments[] = $storage->getPublicUrl($url);
+                    }
+                }
+            }
+            return [
+                'id'        => $row['id'],
+                'user_type' => (int)$row['user_type'], // 1=User, 2=Admin, 3=System
+                'content'   => $row['content'],
+                'attachments' => $attachments,
+                'created_at' => $row['created_at'],
+            ];
+        }, $replies);
+    }
+
+    public static function evaluate(int $userId, int $ticketId, int $score, string $content): bool
+    {
+        $ticketModel = new Ticket();
+        $ticket = $ticketModel->infoById($ticketId, 'id,user_id,status,score');
+        if (!$ticket || (int)$ticket['user_id'] !== $userId) {
+            throw new ValidateException('工单不存在');
+        }
+        
+        if ((int)($ticket['score'] ?? 0) > 0) {
+             throw new ValidateException('您已评价过该工单');
+        }
+        
+        $ticketModel->writeById($ticketId, [
+            'score' => max(1, min(5, $score)),
+            'evaluation' => trim($content),
+            'evaluation_at' => date('Y-m-d H:i:s'),
+        ]);
+        
+        return true;
+    }
+
     public static function list(int $userId, int $page = 1, int $limit = 10, ?string $type = null, ?int $status = null): array
     {
         $page = max(1, $page);
@@ -110,7 +210,7 @@ class TicketService
     public static function info(int $userId, int $id): array
     {
         $m = new Ticket();
-        $ticket = $m->infoById($id, 'id,ticket_no,user_id,type,title,description,work_id,contact,priority,status,reply_content,reply_admin_id,reply_at,created_at');
+        $ticket = $m->infoById($id, 'id,ticket_no,user_id,type,title,description,work_id,contact,priority,status,reply_content,reply_admin_id,reply_at,created_at,score,evaluation,evaluation_at');
         if (empty($ticket) || (int)$ticket['user_id'] !== $userId) {
             throw new ValidateException('资源不存在');
         }
@@ -118,8 +218,8 @@ class TicketService
             ->order('id', 'asc')
             ->column(['file_url','file_type','mime_type','size_bytes','created_at'], 'id');
         
-        $ticket['attachments'] = array_values(array_map(function($row){
-            $storage = new StorageService();
+        $storage = new StorageService();
+        $ticket['attachments'] = array_values(array_map(function($row) use ($storage) {
             return [
                 'file_url'  => $storage->getPublicUrl($row['file_url']),
                 'file_type' => $row['file_type'],
@@ -128,6 +228,32 @@ class TicketService
                 'created_at'=> $row['created_at'],
             ];
         }, $attachments));
+
+        // 获取沟通记录
+        $replies = TicketReply::where('ticket_id', $ticket['id'])
+            ->order('id', 'asc')
+            ->select()
+            ->toArray();
+
+        $ticket['replies'] = array_map(function($row) use ($storage) {
+            $attachments = [];
+            if (!empty($row['attachments'])) {
+                $arr = json_decode($row['attachments'], true);
+                if (is_array($arr)) {
+                    foreach ($arr as $url) {
+                        $attachments[] = $storage->getPublicUrl($url);
+                    }
+                }
+            }
+            return [
+                'id'        => $row['id'],
+                'user_type' => (int)$row['user_type'], // 1=User, 2=Admin, 3=System
+                'content'   => $row['content'],
+                'attachments' => $attachments,
+                'created_at' => $row['created_at'],
+            ];
+        }, $replies);
+
         return $ticket;
     }
 

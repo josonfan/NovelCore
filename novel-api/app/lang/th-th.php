@@ -45,4 +45,10 @@ return [
     '邮件发送失败，请检查邮箱是否正确或联系客服' => 'ไม่สามารถส่งอีเมล์ได้ โปรดตรวจสอบอีเมล์ของคุณหรือติดต่อ客服',
     '验证码错误或已过期' => 'รหัสยืนยันไม่ถูกต้องหรือหมดอายุ',
     'throttle.visit_fail_response' => 'กรุณารอ{:wait_seconds}วินาทีก่อนลองอีกครั้ง',
+    'order_pay_success_title' => 'การชำระเงินสำเร็จ',
+    'order_pay_success_message' => '您的การชำระเงินสำเร็จแล้ว，จำนวนเงินที่ชำระคือ {:amount}',
+    'comment_reply_title' => 'คุณได้รับการตอบกลับ',
+    'comment_reply_message' => 'คุณได้รับการตอบกลับจาก "{:content}"',
+    'comment_like_title' => 'คุณได้รับการ讚',
+    'comment_like_message' => 'คุณได้รับการ讚จาก "{:content}"',
 ];

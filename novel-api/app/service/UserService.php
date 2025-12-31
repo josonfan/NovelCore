@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace app\service;
 
 use app\model\UserLoginLog;
+use app\model\UserDeviceLog;
+
 use app\model\User as UserModel;
 use think\exception\ValidateException;
 
@@ -120,4 +122,21 @@ class UserService
         (new UserModel())->writeById($userId, $update);
         return self::info($userId, 'id,username,email,nickname,avatar,status');
     }
+
+    public static function getLoginLogs(int $userId, int $page, int $pageSize): array
+    {
+        $m = new UserLoginLog();
+        return $m->getList([
+            'user_id' => $userId,
+        ], '*', 'id desc', $pageSize, $page);
+    }
+    public static function getDeviceLogs(int $userId, int $page, int $pageSize): array
+    {
+        $m = new UserDeviceLog();
+        return $m->getList([
+            'user_id' => $userId,
+        ], '*', 'id desc', $pageSize, $page);
+    }
+    
+    
 }

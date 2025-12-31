@@ -85,4 +85,29 @@ class SiteTickets extends Backend
     {
         return $this->ajaxReturn(200, '成功', SiteTicketsService::statuses());
     }
+
+    public function reply()
+    {
+        $postField = 'id,content,attachments';
+        $data = $this->request->only(explode(',', $postField), 'post', null);
+        $id = (int)($data['id'] ?? 0);
+        $content = (string)($data['content'] ?? '');
+        $attachments = (array)($data['attachments'] ?? []);
+        $adminId = (int)($this->request->uid ?? 0);
+        $ok = SiteTicketsService::reply($id, $content, $attachments, $adminId);
+        return $this->ajaxReturn(200, '回复成功', ['success' => $ok]);
+    }
+
+
+
+    public function replies()
+    {
+        $id = (int)($this->request->param('id') ?? 0);
+        if ($id <= 0) {
+            return $this->ajaxReturn(400, '参数错误');
+        }
+        $list = SiteTicketsService::replies($id);
+        return $this->ajaxReturn(200, '成功', $list);
+    }
+
 }

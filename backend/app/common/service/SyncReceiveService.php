@@ -45,6 +45,7 @@ class SyncReceiveService
             if(!empty($payload[$pk])&&(int)$id!==(int)$payload[$pk]){
                 $id = $payload[$pk];
             }
+            $payload['updated_at'] = date('Y-m-d H:i:s');
             $ok = false;            
             switch ($op) {
                 case 'update':
@@ -143,6 +144,17 @@ class SyncReceiveService
                 }
                 
                 break;
+            case 'ticket_reply':
+                $payload['ticket_reply_id'] = $payload['id'];
+                $payload[$pk] = $model->where('site_id',$siteId)->where('ticket_reply_id',$payload['ticket_reply_id'])->value('id');
+                
+                if(empty($payload[$pk])){
+                    $payload[$pk] = 0;
+                }else{
+                    $payload[$pk] = (int)$payload[$pk];
+                }
+                
+                break;
             case 'feedback':
                 $payload['feedback_id'] = $payload['id'];
                 $payload[$pk] = $model->where('site_id',$siteId)->where('feedback_id',$payload['feedback_id'])->value('id');
@@ -182,6 +194,7 @@ class SyncReceiveService
             'stats' => \app\common\model\SiteStats::class,
             'ticket' => \app\common\model\SiteTickets::class,
             'ticket_attachment' => \app\common\model\SiteTicketAttachments::class,
+            'ticket_reply' => \app\common\model\SiteTicketReplies::class,
             'feedback' => \app\common\model\SiteFeedbacks::class,
             'feedback_attachment' => \app\common\model\SiteFeedbackAttachments::class,
             default      => null,

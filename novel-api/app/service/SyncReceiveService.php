@@ -38,7 +38,7 @@ class SyncReceiveService
                 $id = $payload[$pk];
             }
             $payload = self::formatPayload($type, $payload,$config_type);
-            if(!empty($payload[$pk])&&(int)$id!==(int)$payload[$pk]){
+            if(isset($payload[$pk])&&(int)$id!==(int)$payload[$pk]){
                 $id = $payload[$pk];
             }
             if ($type === 'system_config') {
@@ -124,6 +124,10 @@ class SyncReceiveService
                 $payload['id'] =$payload['ticket_attachment_id'];
                 $unset = ['ticket_attachment_id','site_id','last_synced_at'];
                 break;
+            case 'site_ticket_replies':
+                $payload['id'] =$payload['ticket_reply_id'];
+                $unset = ['ticket_reply_id','site_id','last_synced_at'];
+                break;
             case 'site_feedbacks':
                 $payload['id'] =$payload['feedback_id'];
                 $unset = ['feedback_id','site_id','last_synced_at'];
@@ -158,6 +162,7 @@ class SyncReceiveService
             'vip' => \app\model\Vip::class,
             'site_tickets' => \app\model\Ticket::class,
             'site_ticket_attachments' => \app\model\TicketAttachment::class,
+            'site_ticket_replies' => \app\model\TicketReply::class,
             'site_feedbacks' => \app\model\Feedback::class,
             'site_feedback_attachments' => \app\model\FeedbackAttachment::class,
             default      => null,

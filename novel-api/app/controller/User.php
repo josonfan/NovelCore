@@ -196,4 +196,37 @@ class User extends Common
         UserAuthService::updatePassword($userId, $password);
         return $this->ajaxReturn(200, '密码更新成功');
     }
+
+    /**
+     * 用户登录日志
+     * 路由：GET /api/User/loginLogs
+     * 鉴权：需登录
+     * 入参：无
+     * 返回：data 登录日志列表
+     */
+    public function getLoginLogs()
+    {
+        $userId = (int)($this->request->user_id ?? 0);
+        $page = $this->request->param('page', 1, 'intval');
+        $pageSize = $this->request->param('page_size', 10, 'intval');
+        $logs = UserService::getLoginLogs($userId, $page, $pageSize);
+        return $this->ajaxReturn(200, '登录日志', $logs);
+    }
+
+    /**
+     * 用户登录日志
+     * 路由：GET /api/User/deviceLogs
+     * 鉴权：需登录
+     * 入参：无
+     * 返回：data 登录日志列表
+     */
+    public function getDeviceLogs()
+    {
+        $userId = (int)($this->request->user_id ?? 0);
+        $page = $this->request->param('page', 1, 'intval');
+        $pageSize = $this->request->param('page_size', 10, 'intval');
+        $logs = UserService::getDeviceLogs($userId, $page, $pageSize);
+        return $this->ajaxReturn(200, '登录日志', $logs);
+    }
+
 }

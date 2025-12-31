@@ -161,6 +161,26 @@ class OrderService
                 try {
                     \app\service\StatsService::incOrderCount(1);
                     \app\service\StatsService::addOrderAmount((float)$data['amount']);
+                    // 发送支付成功消息
+                    MessageService::create(
+                        0,
+                        (int)$data['user_id'],
+                        1,
+                        ['name' => 'order_pay_success_title', 'vars' => []],
+                        ['name' => 'order_pay_success_message', 'vars' => ['amount' => $data['amount']]],
+                        [
+                            'type' => $m->getName(),
+                            'ids' => (int)$data[$m->getPk()],
+                            'extend' => [
+                                [
+                                    'id' => (int)$data[$m->getPk()],
+                                    'order_no' => $orderNo,
+                                    'amount' => $data['amount'],
+                                    'order_type' => $data['order_type'] ?? ''
+                                ]
+                            ]
+                        ]
+                    );
                 } catch (\Throwable $e) {
                 }
                 Db::commit();

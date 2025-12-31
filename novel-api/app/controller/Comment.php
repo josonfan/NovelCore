@@ -64,7 +64,8 @@ class Comment extends Common
         $validated = CommentService::validateStore((int)$novel['id'], $userId, $content, $parentId);
         $rootId = $validated['root_id'];
         $status = (int)($validated['status'] ?? 0);
-        (new CommentModel())->writeById(0, [
+        $cm = new CommentModel();
+        $cid = $cm->writeById(0, [
             'novel_id'      => (int)$novel['id'],
             'chapter_id'    => null,
             'user_id'       => $userId,
@@ -84,9 +85,14 @@ class Comment extends Common
             'user_id' => $userId,
             'is_r18' => $isR18,
         ]);
+
+        if ($status === 1) {
+             CommentService::sendReplyNotification($userId, (int)$cid, $parentId, (int)$novel['id'], $content, $user);
+        }
+
         $msg = $status === 1 ? lang('评论成功') : lang('评论已提交，审核中');
         return $this->ajaxReturn(200, $msg, [
-            'id'         => null,
+            'id'         => (string)$cid,
             'novel_id'   => (string)$novel['novel_uuid'],
             'chapter_id' => null,
             'parent_id'  => $parentId ?: null,

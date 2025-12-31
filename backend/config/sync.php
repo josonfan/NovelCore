@@ -22,6 +22,7 @@ return [
         'site_users',
         'site_tickets',
         'site_feedbacks',
+        'site_ticket_replies',
     ],
     'elasticsearch_index' => [
         'novel'

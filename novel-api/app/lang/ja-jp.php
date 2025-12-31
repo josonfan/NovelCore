@@ -45,4 +45,10 @@ return [
     '邮件发送失败，请检查邮箱是否正确或联系客服' => 'メール送信に失敗しました。メールアドレスを確認してください。',
     '验证码错误或已过期' => '確認コードが正しくありません。または、確認コードの有効期限が切れています',
     'throttle.visit_fail_response' => '操作が頻繁すぎます。{:wait_seconds}秒後に再試してください',
+    'order_pay_success_title' => '支払い成功',
+    'order_pay_success_message' => 'あなたの支払いが成功しました。支払額は {:amount} です。',
+    'comment_reply_title' => 'コメントに返信しました',
+    'comment_reply_message' => 'あなたのコメント "{:content}" に返信しました。',
+    'comment_like_title' => 'コメントにいいねしました',
+    'comment_like_message' => 'あなたのコメント "{:content}" にいいねしました。',
 ];
