@@ -61,6 +61,7 @@ class SyncExecutor
         }else{
             $payload = json_encode(['type' => (string)$row['content_type'], 'id' => (int)$row['content_id'], 'operation' => (string)$row['operation'], 'data' => $data], JSON_UNESCAPED_UNICODE);
         }
+        // dd($payload);
         $ok = self::postJson($url, $payload, $headers, (int)config('sync.timeout', 5));
         if ($ok) {
             (new SyncQueue())->deleteById((int)$row['id']);

@@ -203,3 +203,11 @@ Route::group('BaseConfig', function () {
     Route::rule('detail', 'BaseConfig/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('save', 'BaseConfig/save', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
 });
+
+Route::group('AppVersions', function () {
+    Route::rule('index', 'AppVersions/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'AppVersions/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('save', 'AppVersions/save', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('delete', 'AppVersions/delete', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('toggle', 'AppVersions/toggle', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+});

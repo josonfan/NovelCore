@@ -12,23 +12,24 @@ class App extends Common
      * App 初始化
      * 路由：POST /api/App/init
      * 鉴权：无需登录（NoAuth，若有 token 则返回用户信息）
-     * 入参：无
+     * 入参：无  平台:1=Android,2=iOS
      * 返回：data { config, user? }
      */
     public function init()
     {
         $configService = app(ConfigService::class);
-        
+
         // 读取公共配置
         $siteConfig = $configService->get('base_config', []); // 站点基础配置
         $csConfig   = $configService->get('customer_service_config', []); // 客服配置
-        $appConfig  = $configService->get('app', []); // App 版本与升级配置
+        $appVersionsConfig['Android']  = $configService->get('app_versions_1_config', []); 
+        $appVersionsConfig['iOS']  = $configService->get('app_versions_2_config', []); // App 版本与升级配置
         
         $data = [
             'config' => [
                 'site'             => $siteConfig,
                 'customer_service' => $csConfig,
-                'app'              => $appConfig,
+                'app_versions'     => $appVersionsConfig,
             ]
         ];
 

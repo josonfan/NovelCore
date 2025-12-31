@@ -47,7 +47,7 @@ class BaseConfigService extends BaseService
             // 检查是否存在
             $id = BaseConfig::where('site_id', $siteId)
                 ->where('config_name', $configName)
-                ->value('id')??1;
+                ->value('id')??0;
 
             (new BaseConfig())->writeById($id, $newData);
         } catch (ValidateException $e) {
@@ -57,4 +57,5 @@ class BaseConfigService extends BaseService
         }
         return $newData;
     }
+    
 }
