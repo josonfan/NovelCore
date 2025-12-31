@@ -175,4 +175,25 @@ class User extends Common
         $res = UserService::update($userId, $data);
         return $this->ajaxReturn(200, '保存成功', $res);
     }
+    /**
+     * 编辑用户密码
+     * 路由：POST /api/User/updatePassword
+     * 鉴权：需登录
+     * 入参：password, confirm_password
+     * 返回：code=200
+     */
+    public function updatePassword()
+    {
+        $userId = (int)($this->request->user_id ?? 0);
+        $password = $this->request->param('password', '', 'trim');
+        $confirmPassword = $this->request->param('confirm_password', '', 'trim');
+        if (empty($password) || empty($confirmPassword)) {
+            return $this->ajaxReturn(400, '密码不能为空');
+        }
+        if ($password !== $confirmPassword) {
+            return $this->ajaxReturn(400, '两次密码输入不一致');
+        }
+        UserAuthService::updatePassword($userId, $password);
+        return $this->ajaxReturn(200, '密码更新成功');
+    }
 }

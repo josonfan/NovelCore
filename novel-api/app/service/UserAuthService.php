@@ -143,4 +143,24 @@ class UserAuthService
         
         return true;
     }
+
+    /**
+     * 更新密码
+     * @param int $userId
+     * @param string $password
+     * @return bool
+     * @throws ValidateException
+     */
+    public static function updatePassword(int $userId, string $password): bool
+    {
+        $passwordHash = password_hash($password, PASSWORD_BCRYPT);
+        // 使用 CacheModel 封装的 writeById 更新 (或者直接 save 如果 writeById 支持部分更新)
+        // 这里 User 模型继承 BaseModel, 而 project rules 说 "写入/更新：调用模型实例的 writeById($id, $data)"
+        // BaseModel 应该有 writeById
+        
+        // 由于 UserAuthService 引用了 app\model\User
+        (new User())->writeById($userId, ['password' => $passwordHash]);
+        
+        return true;
+    }
 }

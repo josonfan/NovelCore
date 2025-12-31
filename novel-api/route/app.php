@@ -123,6 +123,8 @@ Route::group('api', function () {
     Route::rule('Comment/index', 'Comment/index', 'POST');
     // 支付回调无需登录
     Route::rule('Order/notify', 'Order/notify', 'POST');
+    // App 初始化
+    Route::rule('App/init', 'App/init', 'POST')->middleware(\app\middleware\NoAuth::class);
     // 工单类型与状态（无参数，可 GET）
     Route::rule('Ticket/types', 'Ticket/types', 'GET')->middleware(\app\middleware\NoAuth::class);
     Route::rule('Ticket/statuses', 'Ticket/statuses', 'GET')->middleware(\app\middleware\NoAuth::class);

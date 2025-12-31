@@ -5,33 +5,22 @@ namespace app\service\search;
 
 use app\service\ConfigService;
 use app\service\StorageService;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
+use utils\ElasticService;
+use Elastic\Elasticsearch\Exception\ClientResponseException;
+use Elastic\Elasticsearch\Exception\ServerResponseException;
 use think\facade\Log;
 
 class EsSearchService implements SearchServiceInterface
 {
-    protected Client $client;
     protected array $config;
+    protected ConfigService $configService;
+    protected ElasticService $elastic;
 
     public function __construct(ConfigService $configService, array $config)
     {
+        $this->configService = $configService;
         $this->config = $config;
-        $baseUri = rtrim((string) ($config['host'] ?? ''), '/');
-        if ($baseUri !== '' && !preg_match('#^https?://#i', $baseUri)) {
-            $baseUri = 'http://' . $baseUri;
-        }
-
-        $options = [
-            'base_uri' => $baseUri . '/',
-            'timeout'  => 5,
-        ];
-
-        if (!empty($config['username'])) {
-            $options['auth'] = [$config['username'], $config['password'] ?? ''];
-        }
-
-        $this->client = new Client($options);
+        $this->elastic = new ElasticService();
     }
 
     public function searchNovels(string $keyword ,  int $page = 1, int $pageSize = 20, array $options = []): array
@@ -62,25 +51,83 @@ class EsSearchService implements SearchServiceInterface
         if (!empty($tagIds)) {
             $filters[] = ['terms' => ['tag_ids' => $tagIds]];
         }
+        $safeKeyword = trim($keyword);
+        $queryBool = [
+            'filter' => $filters,
+            'must_not' => [],
+        ];
+        if ($safeKeyword === '') {
+            $query = ['match_all' => (object)[]];
+        } else {
+            // 提升中文短语匹配与前缀匹配的准确度，并增加容错匹配
+            $queryBool['should'] = [
+                // 标题精确短语匹配优先
+                [
+                    'match_phrase' => [
+                        'title' => [
+                            'query' => $safeKeyword,
+                            'boost' => 4,
+                            'slop'  => 0,
+                        ],
+                    ],
+                ],
+                // 简介短语匹配次级
+                [
+                    'match_phrase' => [
+                        'intro' => [
+                            'query' => $safeKeyword,
+                            'boost' => 2,
+                            'slop'  => 0,
+                        ],
+                    ],
+                ],
+                // 多字段分词匹配，使用 AND 提升相关性
+                [
+                    'multi_match' => [
+                        'query'  => $safeKeyword,
+                        'fields' => ['title^3', 'intro'],
+                        'type'   => 'best_fields',
+                        'operator' => 'and',
+                        'minimum_should_match' => '70%',
+                    ],
+                ],
+                // 容错匹配：允许轻微差异（如缺字/近似）
+                [
+                    'multi_match' => [
+                        'query'  => $safeKeyword,
+                        'fields' => ['title^3', 'intro'],
+                        'type'   => 'most_fields',
+                        'fuzziness' => 'AUTO',
+                        'minimum_should_match' => '60%',
+                    ],
+                ],
+                // 标题前缀短语匹配，兼容“读水浒”这类词组前缀搜索
+                [
+                    'match_phrase_prefix' => [
+                        'title' => [
+                            'query' => $safeKeyword,
+                            'boost' => 3,
+                            'max_expansions' => 10,
+                        ],
+                    ],
+                ],
+                // 简化查询字符串匹配，支持前缀/通配分析（取决于分词器）
+                [
+                    'simple_query_string' => [
+                        'query' => $safeKeyword,
+                        'fields' => ['title^4', 'intro^2'],
+                        'default_operator' => 'and',
+                        'analyze_wildcard' => true,
+                    ],
+                ],
+            ];
+            $queryBool['minimum_should_match'] = 1;
+            $query = ['bool' => $queryBool];
+        }
         $body = [
             'from' => $from,
             'size' => $pageSize,
-            'query' => [
-                'bool' => [
-                    'must' => [
-                        [
-                            'multi_match' => [
-                                'query'  => $keyword,
-                                'fields' => ['title^3', 'intro'],
-                            ],
-                        ],
-                    ],
-                    'filter' => $filters,
-                    'must_not' => $statusProvided ? [] : [
-                        ['term' => ['status' => 0]],
-                    ],
-                ],
-            ],
+            'query' => $query,
         ];
 
         // 排序：将前端传入的 order 映射到 ES 字段，避免未映射字段报错
@@ -105,10 +152,8 @@ class EsSearchService implements SearchServiceInterface
         $list = [];
         $total = 0;
         try {
-            $response = $this->client->post($index . '/_search', [
-                'json' => $body,
-            ]);
-            $data = json_decode((string) $response->getBody(), true);
+            $results = $this->elastic->search('novels', $body);
+            $data = $results->asArray();
             $total = (int) ($data['hits']['total']['value'] ?? 0);
             $hits  = $data['hits']['hits'] ?? [];
 
@@ -126,9 +171,9 @@ class EsSearchService implements SearchServiceInterface
                     'word_count' => (int) ($source['word_count'] ?? 0),
                 ];
             }
-        } catch (RequestException $e) {
-            $status = $e->getResponse() ? $e->getResponse()->getStatusCode() : 0;
-            $respBody = $e->getResponse() ? (string) $e->getResponse()->getBody() : '';
+        } catch (ClientResponseException|ServerResponseException $e) {
+            $status = method_exists($e, 'getResponse') && $e->getResponse() ? $e->getResponse()->getStatusCode() : 0;
+            $respBody = method_exists($e, 'getResponse') && $e->getResponse() ? (string) $e->getResponse()->getBody() : '';
             $msg = json_encode([
                 'endpoint' => $index . '/_search',
                 'status'   => $status,
@@ -142,6 +187,12 @@ class EsSearchService implements SearchServiceInterface
                 'error'    => $e->getMessage(),
             ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
             Log::error('ES search failed: ' . $msg);
+        }
+
+        // 当 ES 返回空结果时，回退到 MySQL 搜索以保证有可用结果
+        if ($total === 0 && $safeKeyword !== '') {
+            $mysql = new MysqlSearchService($this->configService);
+            return $mysql->searchNovels($safeKeyword, $page, $pageSize, $options);
         }
 
         return [

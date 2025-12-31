@@ -220,15 +220,20 @@ class CacheModel extends Model
                     $name = method_exists($m,'getName') ? (string)$m->getName() : '';
                     $enabledTables = (array)(config('sync.enable_types') ?? []);
                     if ($name && in_array($name, $enabledTables, true)) 
-                        {
-                            if(in_array($name, ['site_comments', 'site_users', 'site_feedbacks', 'site_tickets'])){
-                                $site_id = $m->where($pk, $id)->value('site_id');
-                            if(!empty($site_id)){
+                    {
+                        $site_id = $m->where($pk, $id)->value('site_id')??0;
+                        if($site_id>0){
                             \app\common\service\SyncService::enqueueForSite((int)$site_id, $name, (int)$id, $op);
-                            }
                         }else{
                             \app\common\service\SyncService::enqueue($name, (int)$id, $op);
-                        }                    
+                        }
+                        // $forSites= ['domain_list', 'site_comments', 'site_users', 'site_feedbacks', 'site_tickets'];
+                        // if(in_array($name, $forSites))
+                        // {
+                            
+                        // }else{
+                            
+                        // }                    
                     }
                 }
             }

@@ -28,7 +28,7 @@ class Search extends Common
         $options = [
             'category_id' => $this->request->param('category_id', 0, 'intval'),
             'tag_ids'     => $this->request->param('tag_ids'),
-            'status'      => $this->request->param('status', 0, 'intval'),
+            'status'      => $this->request->param('status'),
             'order'       => $this->request->param('order', 'newest', 'trim'),
         ];
         $configService = app(ConfigService::class);

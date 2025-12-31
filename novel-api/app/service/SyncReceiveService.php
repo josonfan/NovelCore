@@ -26,6 +26,7 @@ class SyncReceiveService
             if (str_ends_with($type, '_config')) {
                 $config_type = $type;
                 $type = 'system_config';
+                
             }
             $modelClass = self::resolveModelClass($type);
             if ($modelClass === null) {
@@ -130,7 +131,7 @@ class SyncReceiveService
             case 'site_feedback_attachments':
                 $payload['id'] =$payload['feedback_attachment_id'];
                 $unset = ['feedback_attachment_id','site_id','last_synced_at'];
-                break;      
+                break;            
             default:
                 break;
         }

@@ -9,6 +9,7 @@ return [
         'email_config',
         'storage_config',
         'telegram_audit_config',
+        'base_config',
         'categories',
         'tags',
         'novels',
