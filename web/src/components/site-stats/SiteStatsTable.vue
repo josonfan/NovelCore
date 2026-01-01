@@ -244,3 +244,4 @@ function getSummaries(param: SummaryMethodProps) {
   font-weight: 600;
 }
 </style>
+
