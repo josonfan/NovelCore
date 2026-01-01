@@ -1,4 +1,5 @@
 export { default as StorageConfigForm } from './StorageConfigForm.vue'
+export { default as BaseConfigForm } from './BaseConfigForm.vue'
 export { default as EmailConfigForm } from './EmailConfigForm.vue'
 export { default as SearchConfigForm } from './SearchConfigForm.vue'
 export { default as AiConfigForm } from './AiConfigForm.vue'

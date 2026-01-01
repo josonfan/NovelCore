@@ -15,6 +15,16 @@
 
       <el-tabs v-model="activeTab">
         <el-tab-pane
+          label="基础配置"
+          name="base"
+        >
+          <BaseConfigForm
+            v-if="activeTab === 'base'"
+            :site-id="siteId"
+          />
+        </el-tab-pane>
+
+        <el-tab-pane
           label="存储配置"
           name="storage"
         >
@@ -103,6 +113,7 @@ import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   StorageConfigForm,
+  BaseConfigForm,
   EmailConfigForm,
   SearchConfigForm,
   AiConfigForm,
@@ -118,7 +129,7 @@ const props = defineProps<{
 
 const route = useRoute()
 const siteId = Number(props.siteId ?? route.params.id ?? 0)
-const activeTab = ref('storage')
+const activeTab = ref('base')
 </script>
 
 <style scoped>

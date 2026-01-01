@@ -1,29 +1,162 @@
 <template>
-  <div class="rte" :style="{ minHeight: height + 'px' }">
-    <div class="rte-toolbar" v-if="!useQuill">
+  <div
+    class="rte"
+    :style="{ minHeight: height + 'px' }"
+  >
+    <div
+      v-if="!useQuill"
+      class="rte-toolbar"
+      @mousedown.prevent
+    >
       <div class="tools-left">
-        <el-tooltip content="加粗"><el-button class="icon-btn" text circle @click="cmd('bold')"><el-icon><component :is="icon('EditPen')" /></el-icon></el-button></el-tooltip>
-        <el-tooltip content="斜体"><el-button class="icon-btn" text circle @click="cmd('italic')"><el-icon><component :is="icon('MagicStick')" /></el-icon></el-button></el-tooltip>
-        <el-tooltip content="下划线"><el-button class="icon-btn" text circle @click="cmd('underline')"><el-icon><component :is="icon('Brush')" /></el-icon></el-button></el-tooltip>
-        <el-tooltip content="无序列表"><el-button class="icon-btn" text circle @click="cmd('insertUnorderedList')"><el-icon><component :is="icon('List')" /></el-icon></el-button></el-tooltip>
-        <el-tooltip content="有序列表"><el-button class="icon-btn" text circle @click="cmd('insertOrderedList')"><el-icon><component :is="icon('List')" /></el-icon></el-button></el-tooltip>
-        <span class="divider"></span>
-        <el-tooltip content="标题一"><el-button class="icon-btn" text circle @click="formatBlock('H1')">H1</el-button></el-tooltip>
-        <el-tooltip content="标题二"><el-button class="icon-btn" text circle @click="formatBlock('H2')">H2</el-button></el-tooltip>
-        <el-tooltip content="正文"><el-button class="icon-btn" text circle @click="formatBlock('P')">P</el-button></el-tooltip>
-        <span class="divider"></span>
-        <el-tooltip content="居左"><el-button class="icon-btn" text circle @click="cmd('justifyLeft')"><el-icon><component :is="icon('Menu')" /></el-icon></el-button></el-tooltip>
-        <el-tooltip content="居中"><el-button class="icon-btn" text circle @click="cmd('justifyCenter')"><el-icon><component :is="icon('MoreFilled')" /></el-icon></el-button></el-tooltip>
-        <el-tooltip content="居右"><el-button class="icon-btn" text circle @click="cmd('justifyRight')"><el-icon><component :is="icon('Operation')" /></el-icon></el-button></el-tooltip>
-        <span class="divider"></span>
-        <el-tooltip content="链接"><el-button class="icon-btn" text circle @click="insertLink()"><el-icon><component :is="icon('Link')" /></el-icon></el-button></el-tooltip>
-        <el-tooltip content="清除样式"><el-button class="icon-btn" text circle @click="clear()"><el-icon><component :is="icon('Delete')" /></el-icon></el-button></el-tooltip>
+        <el-tooltip content="加粗">
+          <el-button
+            class="icon-btn"
+            text
+            circle
+            @click="cmd('bold')"
+          >
+            <el-icon><component :is="icon('EditPen')" /></el-icon>
+          </el-button>
+        </el-tooltip>
+        <el-tooltip content="斜体">
+          <el-button
+            class="icon-btn"
+            text
+            circle
+            @click="cmd('italic')"
+          >
+            <el-icon><component :is="icon('MagicStick')" /></el-icon>
+          </el-button>
+        </el-tooltip>
+        <el-tooltip content="下划线">
+          <el-button
+            class="icon-btn"
+            text
+            circle
+            @click="cmd('underline')"
+          >
+            <el-icon><component :is="icon('Brush')" /></el-icon>
+          </el-button>
+        </el-tooltip>
+        <el-tooltip content="无序列表">
+          <el-button
+            class="icon-btn"
+            text
+            circle
+            @click="cmd('insertUnorderedList')"
+          >
+            <el-icon><component :is="icon('List')" /></el-icon>
+          </el-button>
+        </el-tooltip>
+        <el-tooltip content="有序列表">
+          <el-button
+            class="icon-btn"
+            text
+            circle
+            @click="cmd('insertOrderedList')"
+          >
+            <el-icon><component :is="icon('List')" /></el-icon>
+          </el-button>
+        </el-tooltip>
+        <span class="divider" />
+        <el-tooltip content="标题一">
+          <el-button
+            class="icon-btn"
+            text
+            circle
+            @click="formatBlock('H1')"
+          >
+            H1
+          </el-button>
+        </el-tooltip>
+        <el-tooltip content="标题二">
+          <el-button
+            class="icon-btn"
+            text
+            circle
+            @click="formatBlock('H2')"
+          >
+            H2
+          </el-button>
+        </el-tooltip>
+        <el-tooltip content="正文">
+          <el-button
+            class="icon-btn"
+            text
+            circle
+            @click="formatBlock('P')"
+          >
+            P
+          </el-button>
+        </el-tooltip>
+        <span class="divider" />
+        <el-tooltip content="居左">
+          <el-button
+            class="icon-btn"
+            text
+            circle
+            @click="cmd('justifyLeft')"
+          >
+            <el-icon><component :is="icon('Menu')" /></el-icon>
+          </el-button>
+        </el-tooltip>
+        <el-tooltip content="居中">
+          <el-button
+            class="icon-btn"
+            text
+            circle
+            @click="cmd('justifyCenter')"
+          >
+            <el-icon><component :is="icon('MoreFilled')" /></el-icon>
+          </el-button>
+        </el-tooltip>
+        <el-tooltip content="居右">
+          <el-button
+            class="icon-btn"
+            text
+            circle
+            @click="cmd('justifyRight')"
+          >
+            <el-icon><component :is="icon('Operation')" /></el-icon>
+          </el-button>
+        </el-tooltip>
+        <span class="divider" />
+        <el-tooltip content="链接">
+          <el-button
+            class="icon-btn"
+            text
+            circle
+            @click="insertLink()"
+          >
+            <el-icon><component :is="icon('Link')" /></el-icon>
+          </el-button>
+        </el-tooltip>
+        <el-tooltip content="清除样式">
+          <el-button
+            class="icon-btn"
+            text
+            circle
+            @click="clear()"
+          >
+            <el-icon><component :is="icon('Delete')" /></el-icon>
+          </el-button>
+        </el-tooltip>
       </div>
       <div class="tools-right">
         <span class="meta">字数：{{ plainLength }}</span>
       </div>
     </div>
-    <div class="rte-editor" contenteditable="true" :placeholder="placeholder" ref="ed" v-html="content" @input="onInput" @blur="onInput" @paste="onPaste"></div>
+    <div
+      ref="ed"
+      class="rte-editor"
+      contenteditable="true"
+      :placeholder="placeholder"
+      @input="onInput"
+      @focus="onFocus"
+      @blur="onBlur"
+      @paste="onPaste"
+    />
   </div>
 </template>
 
@@ -31,37 +164,43 @@
 import { ref, onMounted, watch, computed } from 'vue'
 import * as Icons from '@element-plus/icons-vue'
 const props = defineProps<{ modelValue: string; placeholder?: string; height?: number }>()
-const emit = defineEmits<{ (e: 'update:modelValue', v: string): void }>()
+const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 const ed = ref<HTMLDivElement | null>(null)
 const height = computed(() => Number(props.height ?? 280))
 const content = ref(props.modelValue || '')
+const isFocused = ref(false)
 const useQuill = ref(false)
-const QuillComp = ref<any>(null)
-const toolbar = [
-  [{ header: [1, 2, 3, false] }],
-  ['bold', 'italic', 'underline'],
-  [{ list: 'ordered' }, { list: 'bullet' }],
-  [{ align: [] }],
-  ['link', 'clean'],
-]
-
-onMounted(async () => {
+onMounted(() => {
   useQuill.value = false
   if (ed.value) ed.value.innerHTML = props.modelValue || ''
 })
 
 watch(() => props.modelValue, (v) => {
-  content.value = v || ''
-  if (!useQuill.value && ed.value && ed.value.innerHTML !== (v || '')) ed.value.innerHTML = v || ''
+  const next = v || ''
+  if (next === content.value) return
+  content.value = next
+  if (!useQuill.value && !isFocused.value && ed.value && ed.value.innerHTML !== next) {
+    ed.value.innerHTML = next
+  }
 })
-watch(content, (v) => emit('update:modelValue', v || ''))
 
-function onInput() { content.value = (ed.value?.innerHTML || '').trim() }
-function cmd(c: string) { document.execCommand(c, false) }
-function clear() { document.execCommand('removeFormat', false) }
+function onInput() {
+  const next = ed.value?.innerHTML || ''
+  if (next === content.value) return
+  content.value = next
+  emit('update:modelValue', next)
+}
+function onFocus() { isFocused.value = true }
+function onBlur() {
+  isFocused.value = false
+  onInput()
+}
+function focusEditor() { ed.value?.focus() }
+function cmd(c: string) { focusEditor(); document.execCommand(c, false) }
+function clear() { focusEditor(); document.execCommand('removeFormat', false) }
 function onPaste(e: ClipboardEvent) { const d = e.clipboardData?.getData('text/plain') || ''; if (d) { e.preventDefault(); document.execCommand('insertText', false, d) } }
-function formatBlock(tag: string) { document.execCommand('formatBlock', false, tag) }
-function insertLink() { const url = prompt('输入链接地址'); if (url) document.execCommand('createLink', false, url) }
+function formatBlock(tag: string) { focusEditor(); document.execCommand('formatBlock', false, tag) }
+function insertLink() { const url = prompt('输入链接地址'); if (url) { focusEditor(); document.execCommand('createLink', false, url) } }
 const plainLength = computed(() => (useQuill.value ? (content.value || '').replace(/<[^>]*>/g, '') : (ed.value?.innerText || '')).trim().length)
 function icon(name: string){ return (Icons as any)[name] || (Icons as any).Brush }
 </script>

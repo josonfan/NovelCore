@@ -1,0 +1,77 @@
+{
+  "sandbox": {
+    "fs": {
+      "read": true,
+      "write": true,
+      "root": "."
+    },
+    "exec": {
+      "enabled": true,
+      "ask": true,
+      "allow": [
+        "zsh",
+        "bash",
+        "sh",
+
+        "pwd",
+        "ls",
+        "cat",
+        "sed",
+        "awk",
+        "grep",
+        "find",
+        "head",
+        "tail",
+        "xargs",
+        "wc",
+
+        "whoami",
+        "uname",
+        "sw_vers",
+        "sysctl",
+        "arch",
+
+        "which",
+        "where",
+        "env",
+        "printenv",
+        "echo",
+
+        "node",
+        "npm",
+        "npx",
+        "pnpm",
+        "yarn",
+        "corepack",
+
+        "python",
+        "python3",
+        "pip",
+        "pip3",
+
+        "git"
+      ],
+      "deny": [
+        "rm",
+        "mv",
+        "dd",
+        "mkfs",
+        "diskutil",
+        "sudo",
+        "chmod",
+        "chown",
+        "launchctl",
+        "kill",
+        "killall",
+        "shutdown",
+        "reboot",
+        "curl",
+        "wget"
+      ]
+    },
+    "network": {
+      "enabled": false,
+      "ask": true
+    }
+  }
+}
