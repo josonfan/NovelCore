@@ -52,3 +52,4 @@ export async function fetchSiteStatsDetail(id: number | string): Promise<SiteSta
   return res.data?.data || null
 }
 
+
