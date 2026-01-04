@@ -15,12 +15,13 @@
 
       <el-tabs v-model="activeTab">
         <el-tab-pane
+          v-if="siteId !== 0"
           label="基础配置"
           name="base"
         >
           <BaseConfigForm
-            v-if="activeTab === 'base'"
-            :site-id="siteId"
+            v-if="activeTab === 'base' && siteId != 0"
+            :site-id="1"
           />
         </el-tab-pane>
 
@@ -29,7 +30,7 @@
           name="storage"
         >
           <StorageConfigForm
-            v-if="activeTab === 'storage'"
+            v-if="activeTab === 'storage' && siteId == 0"
             :site-id="siteId"
           />
         </el-tab-pane>
@@ -39,7 +40,7 @@
           name="email"
         >
           <EmailConfigForm
-            v-if="activeTab === 'email'"
+            v-if="activeTab === 'email' && siteId == 0"
             :site-id="siteId"
           />
         </el-tab-pane>
@@ -49,7 +50,7 @@
           name="search"
         >
           <SearchConfigForm
-            v-if="activeTab === 'search'"
+            v-if="activeTab === 'search' && siteId == 0"
             :site-id="siteId"
           />
         </el-tab-pane>
@@ -59,7 +60,7 @@
           name="ai"
         >
           <AiConfigForm
-            v-if="activeTab === 'ai'"
+            v-if="activeTab === 'ai' && siteId == 0"
             :site-id="siteId"
           />
         </el-tab-pane>
@@ -69,7 +70,7 @@
           name="recommendation"
         >
           <RecommendationConfigForm
-            v-if="activeTab === 'recommendation'"
+            v-if="activeTab === 'recommendation' && siteId == 0"
             :site-id="siteId"
           />
         </el-tab-pane>
@@ -79,7 +80,7 @@
           name="customerService"
         >
           <CustomerServiceConfigForm
-            v-if="activeTab === 'customerService'"
+            v-if="activeTab === 'customerService' && siteId == 0"
             :site-id="siteId"
           />
         </el-tab-pane>
@@ -89,7 +90,7 @@
           name="commentReview"
         >
           <CommentReviewConfigForm
-            v-if="activeTab === 'commentReview'"
+            v-if="activeTab === 'commentReview' && siteId == 0"
             :site-id="siteId"
           />
         </el-tab-pane>
@@ -99,7 +100,7 @@
           name="telegramAudit"
         >
           <TelegramAuditConfigForm
-            v-if="activeTab === 'telegramAudit'"
+            v-if="activeTab === 'telegramAudit' && siteId == 0"
             :site-id="siteId"
           />
         </el-tab-pane>
@@ -129,7 +130,13 @@ const props = defineProps<{
 
 const route = useRoute()
 const siteId = Number(props.siteId ?? route.params.id ?? 0)
-const activeTab = ref('base')
+const activeTab = ref((() => {
+  if (siteId !== 0) {
+    return 'base'
+  }
+  return 'storage'
+})())
+
 </script>
 
 <style scoped>

@@ -8,7 +8,7 @@
       <el-input v-model="config.provider" />
     </el-form-item>
     <el-form-item label="基础地址">
-      <el-input v-model="config.base_url" />
+      <el-input v-model="config.api_base_url" />
     </el-form-item>
     <el-form-item label="访问密钥">
       <el-input
@@ -45,11 +45,14 @@ import { useSiteConfig } from '../../composables/useSiteConfig'
 import { fetchAiConfigBySite, saveAiConfig } from '../../api/siteConfigs'
 
 interface AiConfig {
+  id?: string
+  site_id?: number
   provider: string
-  base_url: string
+  api_base_url: string
   api_key: string
   model: string
   is_active: number
+  updated_at?: string
 }
 
 const props = defineProps<{
@@ -61,7 +64,7 @@ const { config, saving, load, save } = useSiteConfig<AiConfig>(props.siteId, {
   saveFn: saveAiConfig,
   defaultValue: () => ({
     provider: '',
-    base_url: '',
+    api_base_url: '',
     api_key: '',
     model: '',
     is_active: 1,

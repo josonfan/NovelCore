@@ -7,8 +7,8 @@
     <el-form-item label="服务商">
       <el-input v-model="config.provider" />
     </el-form-item>
-    <el-form-item label="基础地址">
-      <el-input v-model="config.base_url" />
+    <el-form-item label="API地址">
+      <el-input v-model="config.api_url" />
     </el-form-item>
     <el-form-item label="访问密钥">
       <el-input
@@ -42,10 +42,13 @@ import { useSiteConfig } from '../../composables/useSiteConfig'
 import { fetchRecommendationConfigBySite, saveRecommendationConfig } from '../../api/siteConfigs'
 
 interface RecommendationConfig {
+  id?: string
+  site_id?: number
   provider: string
-  base_url: string
+  api_url: string
   api_key: string
   is_active: number
+  updated_at?: string
 }
 
 const props = defineProps<{
@@ -57,7 +60,7 @@ const { config, saving, load, save } = useSiteConfig<RecommendationConfig>(props
   saveFn: saveRecommendationConfig,
   defaultValue: () => ({
     provider: '',
-    base_url: '',
+    api_url: '',
     api_key: '',
     is_active: 1,
   }),

@@ -4,21 +4,17 @@
     label-width="140px"
     class="config-form"
   >
-    <el-form-item label="服务商">
-      <el-input v-model="config.provider" />
+    <el-form-item label="客服邮箱">
+      <el-input v-model="config.support_email" />
     </el-form-item>
-    <el-form-item label="基础地址">
-      <el-input v-model="config.base_url" />
+    <el-form-item label="客服链接">
+      <el-input v-model="config.support_url" />
     </el-form-item>
-    <el-form-item label="访问密钥">
-      <el-input
-        v-model="config.api_key"
-        type="password"
-        show-password
-      />
+    <el-form-item label="AppID">
+      <el-input v-model="config.appid" />
     </el-form-item>
-    <el-form-item label="回调地址">
-      <el-input v-model="config.webhook_url" />
+    <el-form-item label="备注">
+      <el-input v-model="config.remark" />
     </el-form-item>
     <el-form-item label="启用">
       <el-switch
@@ -45,11 +41,14 @@ import { useSiteConfig } from '../../composables/useSiteConfig'
 import { fetchCustomerServiceConfigBySite, saveCustomerServiceConfig } from '../../api/siteConfigs'
 
 interface CustomerServiceConfig {
-  provider: string
-  base_url: string
-  api_key: string
-  webhook_url: string
-  is_active: number
+  id?: string
+  site_id?: string
+  support_email: string
+  support_url: string
+  appid: string
+  is_active: number | string
+  remark: string
+  updated_at?: string
 }
 
 const props = defineProps<{
@@ -60,11 +59,11 @@ const { config, saving, load, save } = useSiteConfig<CustomerServiceConfig>(prop
   fetchFn: fetchCustomerServiceConfigBySite,
   saveFn: saveCustomerServiceConfig,
   defaultValue: () => ({
-    provider: '',
-    base_url: '',
-    api_key: '',
-    webhook_url: '',
+    support_email: '',
+    support_url: '',
+    appid: '',
     is_active: 1,
+    remark: '',
   }),
 })
 
