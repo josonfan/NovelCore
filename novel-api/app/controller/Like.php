@@ -38,4 +38,21 @@ class Like extends Common
         $data = \app\service\LikeService::unlikeNovel($userId, $novelId);
         return $this->ajaxReturn(200, '已取消点赞', $data);
     }
+    /**
+     * 获取用户点赞的小说列表
+     * 路由：GET /api/Like/getList
+     * 鉴权：需登录
+     * 返回：data { novels:[] }
+     */
+    public function getList()
+    {
+        $page = $this->request->param('page', 1, 'intval');
+        $limit = $this->request->param('limit', 10, 'intval');
+        $where = [];
+        $where['user_id'] = (int) ($this->request->user_id ?? 0);
+        $orderby = 'created_at DESC';
+        $fields = 'novel_uuid as id,title,category_id,cover,intro,author_name,is_r18,status,is_vip,word_count,updated_at';
+        $data = \app\service\LikeService::getList(formatWhere($where), $fields, $orderby, $page, $limit);
+        return $this->ajaxReturn(200, '获取成功', $data);
+    }
 }

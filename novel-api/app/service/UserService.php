@@ -138,5 +138,24 @@ class UserService
         ], '*', 'id desc', $pageSize, $page);
     }
     
-    
+    public static function getEmail(string $username): string
+    {
+        
+        $email = cache('user_email_' . $username);
+        if ($email === null) {
+            $userId = UserModel::where('username', $username)->value('id');
+            if (!$userId) {
+                throw new ValidateException('用户不存在');
+            }
+            $user = (new UserModel())->infoById($userId, 'email');   
+            // 邮箱部分隐藏
+            $email = $user['email'] ?? '';
+            if ($email !== '') {                
+                cache('user_email_' . $username, $email, 60 * 5);                
+            }else{
+                throw new ValidateException('邮箱不存在');
+            }
+        }
+        return $email;
+    }
 }

@@ -55,5 +55,22 @@ class LikeService
             'liked'    => false,
         ];
     }
+    /**
+     * 获取用户点赞的小说列表
+     * @param array $where
+     * @param int $page
+     * @param int $limit
+     * @param string $orderby
+     * @return array
+     */
+    public static function getList(array $where,$field, string $orderby, int $page, int $limit): array
+    {
+        $model = new UserNovelLike();
+        $res = $model->getList($where, '*', $orderby, $limit, $page);
+        foreach ($res['list'] as $key => $value) {
+            $res['list'][$key] = NovelService::info((int)$value['novel_id'], $field);
+        }
+        return $res;
+    }
 }
 

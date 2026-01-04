@@ -73,7 +73,7 @@ class ExceptionHandle extends Handle
         }
         // 业务异常
         if ($e instanceof BusinessException) {
-            $status = method_exists($e, 'getHttpStatus') ? $e->getHttpStatus() : 400;
+            $status = method_exists($e, 'getHttpStatus') ? $e->getCode() : 400;
             return json(['code'=>$status,'msg'=>lang($e->getMessage()),'data'=>$e->getData()]);
         }
 

@@ -146,6 +146,20 @@ Route::group('CustomerServiceConfig', function () {
     Route::rule('save', 'CustomerServiceConfig/save', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
     
 });
+
+Route::group('CommentReviewConfig', function () {
+    Route::rule('index', 'CommentReviewConfig/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'CommentReviewConfig/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detailBySite', 'CommentReviewConfig/detailBySite', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('save', 'CommentReviewConfig/save', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+});
+Route::group('TelegramAuditConfig', function () {
+    Route::rule('index', 'TelegramAuditConfig/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detail', 'TelegramAuditConfig/detail', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('detailBySite', 'TelegramAuditConfig/detailBySite', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('save', 'TelegramAuditConfig/save', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+});
+
 Route::group('Upload', function () {
     Route::rule('uploadImage', 'Upload/uploadImage', 'POST')->middleware('AdminAuth');
     Route::rule('uploadVideo', 'Upload/uploadVideo', 'POST')->middleware('AdminAuth');

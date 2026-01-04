@@ -24,8 +24,7 @@ class MailService
     {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new ValidateException(lang('邮箱格式错误'));
-        }
-
+        }        
         // 生成验证码
         $code = (string) random_int(100000, 999999);
         

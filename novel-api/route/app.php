@@ -13,9 +13,13 @@ Route::group('api', function () {
     Route::rule('User/register', 'User/register', 'POST');
     Route::rule('User/login', 'User/login', 'POST');
     // 忘记密码
-    Route::rule('User/sendForgotPasswordCode', 'User/sendForgotPasswordCode', 'POST')
-        ->middleware(\app\middleware\ApiThrottle::class, ['visit_rate' => '1/m', 'key_field' => 'email']);
+    Route::rule('User/sendForgotPasswordCode', 'User/sendForgotPasswordCode', 'POST');
+        // ->middleware(\app\middleware\ApiThrottle::class, ['visit_rate' => '1/m', 'key_field' => 'username']);
     Route::rule('User/resetPassword', 'User/resetPassword', 'POST')->middleware(\app\middleware\ValidateEmailCode::class);
+    // 账户查询邮箱 注意邮箱部分隐藏 忘记密码配套使用
+    Route::rule('User/getEmail', 'User/getEmail', 'POST');
+
+
 
     // 分类与标签（统一 Controller/Action，参数走 Body）
     Route::rule('Category/index', 'Category/index', 'POST');
@@ -97,6 +101,9 @@ Route::group('api', function () {
         // 点赞小说
         Route::rule('Like/like', 'Like/like', 'POST');
         Route::rule('Like/unlike', 'Like/unlike', 'POST');
+        Route::rule('Like/getList', 'Like/getList', 'POST');
+
+
 
         // 收藏小说
         Route::rule('Favorite/favorite', 'Favorite/favorite', 'POST');
@@ -145,27 +152,27 @@ Route::group('api', function () {
     Route::rule('Ticket/statuses', 'Ticket/statuses', 'GET')->middleware(\app\middleware\NoAuth::class);
 
     // 后台只读接口，受 AdminAuth 保护
-    Route::group('admin', function () {
-        Route::get('search-logs', 'AdminData/searchLogsList');
-        Route::get('favorites', 'AdminData/favoritesList');
-        Route::get('reading-history', 'AdminData/readingHistoryList');
-        Route::get('read-logs', 'AdminData/readLogsList');
-        Route::get('device-logs', 'AdminData/deviceLogsList');
-        Route::get('login-logs', 'AdminData/loginLogsList');
-        Route::get('novels', 'AdminNovel/index');
-        Route::put('comments/:id', 'AdminComment/updateStatus');
-        // 配置下发
-        Route::post('config/storage', 'admin.Config/saveStorage');
-        Route::post('config/email', 'admin.Config/saveEmail');
-        Route::post('config/search', 'admin.Config/saveSearch');
-        Route::post('config/comment', 'admin.Config/saveComment');
-        Route::post('config/ai', 'admin.Config/saveAi');
-        Route::post('config/customer-service', 'admin.Config/saveCustomerService');
-        Route::post('config/recommendation', 'admin.Config/saveRecommendation');
-        Route::post('config/domains', 'admin.Config/saveDomains');
-        Route::get('stats/daily', 'admin.Stats/getDailyStats');
+    // Route::group('admin', function () {
+    //     Route::get('search-logs', 'AdminData/searchLogsList');
+    //     Route::get('favorites', 'AdminData/favoritesList');
+    //     Route::get('reading-history', 'AdminData/readingHistoryList');
+    //     Route::get('read-logs', 'AdminData/readLogsList');
+    //     Route::get('device-logs', 'AdminData/deviceLogsList');
+    //     Route::get('login-logs', 'AdminData/loginLogsList');
+    //     Route::get('novels', 'AdminNovel/index');
+    //     Route::put('comments/:id', 'AdminComment/updateStatus');
+    //     // 配置下发
+    //     Route::post('config/storage', 'admin.Config/saveStorage');
+    //     Route::post('config/email', 'admin.Config/saveEmail');
+    //     Route::post('config/search', 'admin.Config/saveSearch');
+    //     Route::post('config/comment', 'admin.Config/saveComment');
+    //     Route::post('config/ai', 'admin.Config/saveAi');
+    //     Route::post('config/customer-service', 'admin.Config/saveCustomerService');
+    //     Route::post('config/recommendation', 'admin.Config/saveRecommendation');
+    //     Route::post('config/domains', 'admin.Config/saveDomains');
+    //     Route::get('stats/daily', 'admin.Stats/getDailyStats');
         
-    })->middleware(\app\middleware\AdminAuth::class);
+    // })->middleware(\app\middleware\AdminAuth::class);
 })->middleware(\think\middleware\Throttle::class);
 
 /**

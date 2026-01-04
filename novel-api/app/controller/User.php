@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace app\controller;
 use app\service\UserAuthService;
 use app\service\UserService;
+use app\model\User as UserModel;
 
 class User extends Common
 {
@@ -31,17 +32,16 @@ class User extends Common
      */
     public function sendForgotPasswordCode()
     {
-        $email = $this->request->param('email', '', 'trim');
+        
+        $username = $this->request->param('username', '', 'trim');
+        if (empty($username)) {
+            return $this->ajaxReturn(400, '用户名不能为空');
+        }
+        $email = UserModel::where('username', $username)->value('email');
         if (empty($email)) {
-            return $this->ajaxReturn(400, '邮箱不能为空');
+            return $this->ajaxReturn(400, '该用户名未绑定邮箱');
         }
-        // 检查邮箱是否存在
-        $user = \app\model\User::where('email', $email)->find();
-        if (!$user) {
-             return $this->ajaxReturn(400, '该邮箱未注册');
-        }
-
-        \app\service\MailService::sendVerificationCode($email, 'reset_pwd');
+        \app\service\MailService::sendVerificationCode((string)$email, 'reset_pwd');
         return $this->ajaxReturn(200, '验证码已发送');
     }
 
@@ -54,7 +54,7 @@ class User extends Common
      */
     public function resetPassword()
     {
-        $email = $this->request->param('email', '', 'trim');
+        $username = $this->request->param('username', '', 'trim');
         $password = $this->request->param('password', '', 'trim');
         $confirmPassword = $this->request->param('confirm_password', '', 'trim');
         
@@ -66,7 +66,7 @@ class User extends Common
         if ($password !== $confirmPassword) {
             return $this->ajaxReturn(400, '两次密码输入不一致');
         }
-        
+        $email = UserService::getEmail($username);
         UserAuthService::resetPassword($email, $password);
         
         return $this->ajaxReturn(200, '密码重置成功');
@@ -228,5 +228,20 @@ class User extends Common
         $logs = UserService::getDeviceLogs($userId, $page, $pageSize);
         return $this->ajaxReturn(200, '登录日志', $logs);
     }
-
+    //账户查询邮箱 注意邮箱部分隐藏 忘记密码配套使用
+    /**
+     * 用户查询邮箱
+     * 路由：POST /api/User/getEmail
+     * 鉴权：无需登录
+     * 入参：username
+     * 返回：data 邮箱
+     */
+    public function getEmail()
+    {
+        $username = $this->request->param('username', '', 'trim');
+        $email = UserService::getEmail($username);
+        $email = substr($email, 0, 3) . '****' . substr($email, -4);
+        return $this->ajaxReturn(200, '返回成功', $email);
+    }
+    
 }
