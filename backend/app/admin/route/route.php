@@ -179,6 +179,8 @@ Route::group('Novels', function () {
     Route::rule('update', 'Novels/update', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('delete', 'Novels/delete', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('bindTags', 'Novels/bindTags', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('toggle', 'Novels/toggle', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('audit', 'Novels/audit', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
 });
 
 Route::group('Chapters', function () {
@@ -188,6 +190,8 @@ Route::group('Chapters', function () {
     Route::rule('update', 'Chapters/update', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('delete', 'Chapters/delete', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('batchImport', 'Chapters/batchImport', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('content', 'Chapters/content', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('toggle', 'Chapters/toggle', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
 });
 Route::group('Categories', function () {
     Route::rule('index', 'Categories/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
@@ -195,7 +199,8 @@ Route::group('Categories', function () {
     Route::rule('create', 'Categories/create', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('toggle', 'Categories/toggle', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('options', 'Categories/options', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
-
+    Route::rule('update', 'Categories/update', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('delete', 'Categories/delete', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
 });
 
 Route::group('Tags', function () {
@@ -204,6 +209,8 @@ Route::group('Tags', function () {
     Route::rule('create', 'Tags/create', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('update', 'Tags/update', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
     Route::rule('delete', 'Tags/delete', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('toggle', 'Tags/toggle', 'POST')->middleware('AdminAuth')->middleware('RbacAuth');
+    Route::rule('options', 'Tags/options', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
 });
 
 Route::group('SiteTickets', function () {

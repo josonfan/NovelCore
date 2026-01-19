@@ -74,6 +74,7 @@ class MessageService
             $from_user_info = UserService::info((int)$info['from_uid'],'id,nickname,avatar');
             unset($from_user_info['id']);
             $info['from_user_info'] = $from_user_info;
+            $info['source_info'] = self::get_source_info($info['source_info']);
         }
         return $info;
     }
@@ -107,6 +108,25 @@ class MessageService
             'is_read' => 2,
         ]);
         return (int)$id;
+    }
+    public static function get_source_info(array $sourceInfo): array
+    {
+        if (empty($sourceInfo)) {
+            throw new ValidateException('参数错误');
+        }
+        $service = null;
+        switch ($sourceInfo['type'] ?? '') {
+            case 'comments':
+                $service = new \app\service\CommentService();
+            break;
+            default:
+                throw new ValidateException('参数错误');
+        }
+        $extend = $sourceInfo['extend'] ?? [];
+        foreach ($extend as $key => $item) {            
+            $sourceInfo['extend'][$key] = $service->getMsgInfo($item['id']);
+        }
+        return $sourceInfo;
     }
 }
 

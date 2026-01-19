@@ -9,6 +9,8 @@ use app\service\ContentService;
 use app\service\CommentService;
 use app\service\UserStatsService;
 use app\service\UserService;
+use app\service\ChapterService;
+use app\service\NovelService;
 
 
 
@@ -32,7 +34,13 @@ class Comment extends Common
         $order    = $this->request->param('order', 'desc', 'trim');
         $view     = $this->request->param('view', 'flat', 'trim');
         $rootId   = $this->request->param('rootId', 0, 'intval');
-        $res = CommentService::list((int)$novel['id'], $page, $pageSize, $order);
+        $where = [
+            'novel_id' => (int)$novel['id'],
+            'status' => 1,
+        ];
+        $orderBy = $order === 'asc' ? 'id ASC' : 'id DESC';
+        $fields = 'id,novel_id,chapter_id,parent_id,root_id,content,is_r18,like_count,status,review_source,created_at,user_id';
+        $res = CommentService::list(formatWhere($where), $fields, $page, $pageSize, $orderBy);
         $list = $view === 'tree'
             ? \app\service\CommentViewService::formatTree($res['list'] ?? [])
             : \app\service\CommentViewService::formatList($res['list'] ?? []);
@@ -140,5 +148,39 @@ class Comment extends Common
         
         $data = \app\service\CommentLikeService::unlike($userId, $commentId);
         return $this->ajaxReturn(200, '已取消点赞', $data);
+    }
+
+    /**
+     * 获取我的评论列表
+     * 路由：GET /api/Comment/getMyList
+     * 鉴权：需登录
+     * 返回：data { comments:[] }
+     */
+    public function getMyList()
+    {
+        $page = $this->request->param('page', 1, 'intval');
+        $limit = $this->request->param('limit', 10, 'intval');
+        $userId = (int) ($this->request->user_id ?? 0);
+        $orderby = 'created_at DESC';
+        $fields = 'id,novel_id,chapter_id,parent_id,root_id,content,is_r18,like_count,status,review_source,created_at';
+        $where = [
+            'user_id' => $userId,
+        ];
+        $data = \app\service\CommentService::list($where, $fields, $page, $limit, $orderby);
+        $chapterService = new ChapterService();
+        $novelService = new NovelService();
+        foreach ($data['list'] as &$item) {
+            if($item['novel_id']){
+                $item['novel_info'] = $novelService->info($item['novel_id'], 'id,novel_uuid,title,cover,author,description,word_count,chapter_count,status,created_at');
+            }else{
+                $item['novel_info'] = null;
+            }
+            if ($item['chapter_id']) {
+                $item['chapter_info'] = $chapterService->info($item['chapter_id'], 'id,novel_id,chapter_index,chapter_title,created_at');
+            }else{
+                $item['chapter_info'] = null;
+            }
+        }
+        return $this->ajaxReturn(200, '获取成功', $data);
     }
 }

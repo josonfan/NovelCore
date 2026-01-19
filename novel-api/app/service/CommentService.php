@@ -168,18 +168,55 @@ class CommentService
         }
         return ['content' => $content, 'root_id' => $rootId, 'status' => $status];
     }
-
-    public static function list(int $novelPk, int $page = 1, int $limit = 10, string $order = 'desc'): array
+        
+    /**
+     * 获取评论列表
+     * @param array $where
+     * @param string $fields
+     * @param int $page
+     * @param int $limit
+     * @param string $orderBy
+     * @return array
+     */
+    public static function list(array $where, string $fields = '*', int $page = 1, int $limit = 10, string $orderBy = 'id DESC'): array
     {
-        $order = strtolower($order) === 'asc' ? 'asc' : 'desc';
-        $query = Comment::where('novel_id', $novelPk)->where('status', 1)->order('id', $order);
+        
+        $query = Comment::where($where)->order($orderBy);
         $count = (int) $query->count('id');
         $ids = $query->page($page, $limit)->column('id');
         $rows = [];
         $commentModel = new Comment();
         foreach ($ids as $id) {
-            $rows[] = $commentModel->infoById((int)$id, 'id,novel_id,chapter_id,parent_id,root_id,content,is_r18,like_count,status,review_source,created_at,user_id');
+            $rows[] = $commentModel->infoById((int)$id, $fields);
         }
         return ['list' => $rows, 'count' => $count];
     }
+
+    /**
+     * 获取评论详情
+     * @param int $id
+     * @param string $fields
+     * @return array
+     */
+    public static function getMsgInfo(int $id): array
+    {
+        $fields = 'id,novel_id,chapter_id,parent_id,root_id,content,is_r18,like_count,status,review_source';
+        $commentModel = new Comment();
+        $info = $commentModel->infoById((int)$id, $fields);
+        $chapterService = new ChapterService();
+        $novelService = new NovelService();
+        if($info['novel_id']){
+                $info['novel_info'] = $novelService->info($info['novel_id'], 'id,novel_uuid,title,cover,author,description,word_count,chapter_count,status,created_at');
+            }else{
+                $info['novel_info'] = null;
+            }
+            if ($info['chapter_id']) {
+                $info['chapter_info'] = $chapterService->info($info['chapter_id'], 'id,novel_id,chapter_index,chapter_title,created_at');
+            }else{
+                $info['chapter_info'] = null;
+            }
+        return $info;
+    }
+
+    
 }

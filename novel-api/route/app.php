@@ -82,6 +82,9 @@ Route::group('api', function () {
         Route::rule('User/loginLogs', 'User/getLoginLogs', 'POST');
         // 用户设备日志
         Route::rule('User/deviceLogs', 'User/getDeviceLogs', 'POST');
+        Route::rule('User/updatePassword', 'User/updatePassword', 'POST');// 重置密码
+
+
 
         // 小说用户状态
         Route::rule('Novel/userStatus', 'Novel/userStatus', 'POST');
@@ -130,8 +133,10 @@ Route::group('api', function () {
         // 发表评论与评论点赞
         Route::rule('Comment/store', 'Comment/store', 'POST')
             ->middleware(\app\middleware\ApiThrottle::class, ['visit_rate' => '3/m']);
+        Route::rule('Comment/getMyList', 'Comment/getMyList', 'POST');
         Route::rule('Comment/like', 'Comment/like', 'POST');
         Route::rule('Comment/unlike', 'Comment/unlike', 'POST');
+
         
         // 消息中心
         Route::rule('Message/index', 'Message/index', 'POST');
