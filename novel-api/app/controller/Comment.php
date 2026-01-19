@@ -31,14 +31,18 @@ class Comment extends Common
         $novel = \app\service\NovelService::getInfoByUuid($novelId, 'id,novel_uuid');
         $page     = $this->request->param('page', 1, 'intval');
         $pageSize = $this->request->param('limit', 10, 'intval');
-        $order    = $this->request->param('order', 'desc', 'trim');
+        $order    = $this->request->param('order', 'hot', 'trim');
         $view     = $this->request->param('view', 'flat', 'trim');
         $rootId   = $this->request->param('rootId', 0, 'intval');
         $where = [
             'novel_id' => (int)$novel['id'],
             'status' => 1,
         ];
-        $orderBy = $order === 'asc' ? 'id ASC' : 'id DESC';
+        if($order === 'hot'){
+            $orderBy = 'like_count DESC, id DESC';
+        }else{
+            $orderBy = 'id DESC';
+        }
         $fields = 'id,novel_id,chapter_id,parent_id,root_id,content,is_r18,like_count,status,review_source,created_at,user_id';
         $res = CommentService::list(formatWhere($where), $fields, $page, $pageSize, $orderBy);
         $list = $view === 'tree'

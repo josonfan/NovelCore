@@ -219,9 +219,11 @@ class CacheModel extends Model
                 if($isAsync){
                     $name = method_exists($m,'getName') ? (string)$m->getName() : '';
                     $enabledTables = (array)(config('sync.enable_types') ?? []);
-                    if ($name && in_array($name, $enabledTables, true)) 
+                    
+                    if ((bool)$name && in_array($name, $enabledTables, true)) 
                     {
-                        $site_id = $m->where($pk, $id)->value('site_id')??0;
+                        $info = $m->where($pk, $id)->find();
+                        $site_id = $info->site_id??0;
                         if($site_id>0){
                             \app\common\service\SyncService::enqueueForSite((int)$site_id, $name, (int)$id, $op);
                         }else{
@@ -240,7 +242,7 @@ class CacheModel extends Model
            
             return $res;
         } catch (\Throwable $e) {
-            // dd($e->getMessage());
+            dd($e->getMessage());
             return false;
         }
     }

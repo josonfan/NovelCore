@@ -161,9 +161,7 @@ Route::group('TelegramAuditConfig', function () {
 });
 
 Route::group('Upload', function () {
-    Route::rule('uploadImage', 'Upload/uploadImage', 'POST')->middleware('AdminAuth');
-    Route::rule('uploadVideo', 'Upload/uploadVideo', 'POST')->middleware('AdminAuth');
-    Route::rule('uploadFile', 'Upload/uploadFile', 'POST')->middleware('AdminAuth');
+    Route::rule('file', 'Upload/file', 'POST')->middleware('AdminAuth');
 });
 Route::group('PaymentConfig', function () {
     Route::rule('index', 'PaymentConfig/index', 'GET|POST')->middleware('AdminAuth')->middleware('RbacAuth');
