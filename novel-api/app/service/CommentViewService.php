@@ -53,21 +53,26 @@ class CommentViewService
     public static function formatTree(array $rows, int $currentUserId = 0): array
     {
         $likedIds = self::getLikedIds($rows, $currentUserId);
+        $likedIdSet = array_fill_keys(array_map('intval', $likedIds), true);
         $nodes = [];
         foreach ($rows as $row) {
-            $isLiked = in_array($row['id'] ?? 0, $likedIds);
+            $id = (int)($row['id'] ?? 0);
+            $isLiked = isset($likedIdSet[$id]);
             $node = self::formatRow($row, $isLiked);
             $node['children'] = [];
-            $nodes[(int)($row['id'] ?? 0)] = $node;
+            $nodes[$id] = $node;
         }
         $tree = [];
         foreach ($rows as $row) {
             $id = (int)($row['id'] ?? 0);
             $pid = (int)($row['parent_id'] ?? 0);
+            if ($id <= 0 || !isset($nodes[$id])) {
+                continue;
+            }
             if ($pid > 0 && isset($nodes[$pid])) {
-                $nodes[$pid]['children'][] = $nodes[$id];
+                $nodes[$pid]['children'][] =& $nodes[$id];
             } else {
-                $tree[] = $nodes[$id];
+                $tree[] =& $nodes[$id];
             }
         }
         return $tree;
