@@ -145,7 +145,7 @@ Route::group('api', function () {
     })->middleware(\app\middleware\Auth::class);
 
     // 评论列表无需登录（统一 Controller/Action）
-    Route::rule('Comment/index', 'Comment/index', 'POST');
+    Route::rule('Comment/index', 'Comment/index', 'POST')->middleware(\app\middleware\NoAuth::class);
     // 支付回调无需登录
     Route::rule('Order/notify', 'Order/notify', 'POST');
     // App 初始化

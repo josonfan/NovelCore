@@ -5,10 +5,11 @@ namespace app\service;
 
 use app\model\User as UserModel;
 use app\model\Comment;
+use app\model\CommentLike;
 
 class CommentViewService
 {
-    public static function formatRow(array $row): array
+    public static function formatRow(array $row, bool $isLiked = false): array
     {
         $userView = null;
         if (!empty($row['user_id'])) {
@@ -34,23 +35,28 @@ class CommentViewService
             'review_source' => (int)($row['review_source'] ?? 0),
             'created_at' => $row['created_at'] ?? null,
             'user' => $userView,
+            'is_liked' => (int)$isLiked,
         ];
     }
 
-    public static function formatList(array $rows): array
+    public static function formatList(array $rows, int $currentUserId = 0): array
     {
+        $likedIds = self::getLikedIds($rows, $currentUserId);
         $list = [];
         foreach ($rows as $row) {
-            $list[] = self::formatRow($row);
+            $isLiked = in_array($row['id'] ?? 0, $likedIds);
+            $list[] = self::formatRow($row, $isLiked);
         }
         return $list;
     }
 
-    public static function formatTree(array $rows): array
+    public static function formatTree(array $rows, int $currentUserId = 0): array
     {
+        $likedIds = self::getLikedIds($rows, $currentUserId);
         $nodes = [];
         foreach ($rows as $row) {
-            $node = self::formatRow($row);
+            $isLiked = in_array($row['id'] ?? 0, $likedIds);
+            $node = self::formatRow($row, $isLiked);
             $node['children'] = [];
             $nodes[(int)($row['id'] ?? 0)] = $node;
         }
@@ -67,7 +73,21 @@ class CommentViewService
         return $tree;
     }
 
-    public static function fetchThread(int $novelPk, int $rootId): array
+    private static function getLikedIds(array $rows, int $userId): array
+    {
+        if ($userId <= 0 || empty($rows)) {
+            return [];
+        }
+        $ids = array_column($rows, 'id');
+        if (empty($ids)) {
+            return [];
+        }
+        return CommentLike::where('user_id', $userId)
+            ->whereIn('comment_id', $ids)
+            ->column('comment_id');
+    }
+
+    public static function fetchThread(int $novelPk, int $rootId, int $currentUserId = 0): array
     {
         $rows = Comment::where('novel_id', $novelPk)
             ->where('root_id', $rootId)
@@ -75,12 +95,16 @@ class CommentViewService
             ->order('id', 'asc')
             ->select()
             ->toArray();
-        return self::formatTree($rows);
+        return self::formatTree($rows, $currentUserId);
     }
 
-    public static function formatDetail(int $id): array
+    public static function formatDetail(int $id, int $currentUserId = 0): array
     {
         $row = (new Comment())->infoById($id, 'id,novel_id,chapter_id,parent_id,root_id,content,is_r18,like_count,status,review_source,created_at,user_id');
-        return self::formatRow($row);
+        $isLiked = false;
+        if ($currentUserId > 0) {
+            $isLiked = (bool)CommentLike::where('user_id', $currentUserId)->where('comment_id', $id)->value('id');
+        }
+        return self::formatRow($row, $isLiked);
     }
 }

@@ -13,11 +13,11 @@ class NoAuth
             try {
                 $jwt = app(\app\service\JwtService::class);
                 $payload = $jwt->parseToken($token);
-            } catch (\app\exception\BusinessException $e) {                
+            } catch (\app\exception\BusinessException $e) {                         
             }
             $userId = (int) ($payload['uid'] ?? 0);
             if ($userId > 0) {
-            $request->user_id = $userId;
+                $request->user_id = $userId;
             }
         }
 

@@ -239,8 +239,26 @@ class User extends Common
     public function getEmail()
     {
         $username = $this->request->param('username', '', 'trim');
+        if (empty($username)) {
+            throw new \think\exception\ValidateException('用户名不能为空');
+        }
         $email = UserService::getEmail($username);
-        $email = substr($email, 0, 3) . '****' . substr($email, -4);
+        
+        // 邮箱脱敏处理
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $parts = explode('@', $email);
+            $name = $parts[0];
+            $domain = $parts[1];
+            if (mb_strlen($name) > 2) {
+                $name = mb_substr($name, 0, 2) . '****' . mb_substr($name, -1);
+            } else {
+                $name = mb_substr($name, 0, 1) . '****';
+            }
+            $email = $name . '@' . $domain;
+        } else {
+            $email = substr($email, 0, 3) . '****' . substr($email, -4);
+        }
+        
         return $this->ajaxReturn(200, '返回成功', $email);
     }
     

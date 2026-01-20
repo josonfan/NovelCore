@@ -45,11 +45,13 @@ class Comment extends Common
         }
         $fields = 'id,novel_id,chapter_id,parent_id,root_id,content,is_r18,like_count,status,review_source,created_at,user_id';
         $res = CommentService::list(formatWhere($where), $fields, $page, $pageSize, $orderBy);
+        
+        $userId = (int) ($this->request->user_id ?? 0);
         $list = $view === 'tree'
-            ? \app\service\CommentViewService::formatTree($res['list'] ?? [])
-            : \app\service\CommentViewService::formatList($res['list'] ?? []);
+            ? \app\service\CommentViewService::formatTree($res['list'] ?? [], $userId)
+            : \app\service\CommentViewService::formatList($res['list'] ?? [], $userId);
         if ($view === 'thread' && $rootId > 0) {
-            $list = \app\service\CommentViewService::fetchThread((int)$novel['id'], $rootId);
+            $list = \app\service\CommentViewService::fetchThread((int)$novel['id'], $rootId, $userId);
         }
         return $this->ajaxReturn(200, '获取成功', [
             'list'  => $list,

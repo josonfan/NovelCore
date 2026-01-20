@@ -39,18 +39,26 @@ class Novel extends Common
             $novelIds = array_values(array_unique(array_map('intval', $novelIds)));
             $where['id'] = ['in', !empty($novelIds) ? $novelIds : [-1]];
         }
+        $status = $this->request->param('status', 0, 'intval');
+        if($status){
+            $where['status'] = $status;
+        }
+        $is_r18 = $this->request->param('is_r18', 0, 'intval');
+        if($is_r18){
+            $where['is_r18'] = $is_r18;
+        }
         switch($order){
             case 'newest':
                 $orderby  = 'created_at desc, id desc';
                 break;
-            case 'hotest':
+            case 'hotest':                
                 $orderby  = 'view_count desc, id desc';
                 break;
             default:
                 $orderby  = 'created_at desc, id desc';
                 break;
         }
-        $fields = 'novel_uuid as id,title,category_id,cover,intro,author_name,is_r18,status,is_vip,word_count,updated_at';
+        $fields = 'novel_uuid as id,title,category_id,cover,tags_json,intro,author_name,is_r18,status,is_vip,word_count,updated_at';
         $result = NovelService::getList(formatWhere($where), $fields, $orderby, $page, $limit);       
         return $this->ajaxReturn(200, '获取成功', $result);
     }
@@ -71,8 +79,8 @@ class Novel extends Common
         if (empty($novelId)) {
             throw new ValidateException('小说ID不能为空');
         }
-        $fields = 'novel_uuid as id,title,category_id,cover,intro,status,is_vip,view_count,word_count,updated_at';
-        $row = \app\service\NovelService::getInfoByUuid($novelId, $fields);        
+        $fields = 'novel_uuid as id,title,category_id,cover,intro,tags_json,status,is_vip,is_r18,view_count,word_count,like_count,updated_at';
+        $row = \app\service\NovelService::getInfoByUuid($novelId, $fields);
         return $this->ajaxReturn(200, '获取成功', $row);
     }
     /**
@@ -81,7 +89,7 @@ class Novel extends Common
      * 路由：POST /api/Novel/userStatus
      * 鉴权：登录用户
      * 参数：novelId 使用 `novel_uuid`（兼容内部数值ID）
-     * 返回：data { is_liked: 0/1, is_favorited: 0/1 }
+     * 返回：data { is_liked: 0/1, is_favorited: 0/1, reading_progress }
      *
      * @return \think\Response
      */
@@ -93,6 +101,7 @@ class Novel extends Common
         }
         $userId = (int)($this->request->user_id ?? 0);
         $status = \app\service\NovelService::getUserStatus($novelId, $userId);
+        $status['reading_progress'] = \app\service\ReadingService::getProgress($userId, $novelId);
         return $this->ajaxReturn(200, '获取成功', $status);
     }
 }
