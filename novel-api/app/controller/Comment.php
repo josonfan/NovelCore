@@ -160,14 +160,30 @@ class Comment extends Common
      * 获取我的评论列表
      * 路由：GET /api/Comment/getMyList
      * 鉴权：需登录
-     * 返回：data { comments:[] }
+     * 入参：page, limit, sort(time|like)
+     * 返回：data { list:[], count }
      */
     public function getMyList()
     {
         $page = $this->request->param('page', 1, 'intval');
         $limit = $this->request->param('limit', 10, 'intval');
         $userId = (int) ($this->request->user_id ?? 0);
-        $orderby = 'created_at DESC';
+        $sort = $this->request->param('sort', '', 'trim');
+        if ($sort === '') {
+            $sort = $this->request->param('order', 'time', 'trim');
+        }
+        switch ($sort) {
+            case 'like':
+            case 'likes':
+            case 'like_count':
+                $orderby = 'like_count DESC, created_at DESC, id DESC';
+                break;
+            case 'time':
+            case 'created_at':
+            default:
+                $orderby = 'created_at DESC, id DESC';
+                break;
+        }
         $fields = 'id,novel_id,chapter_id,parent_id,root_id,content,is_r18,like_count,status,review_source,created_at';
         $where = [
             'user_id' => $userId,

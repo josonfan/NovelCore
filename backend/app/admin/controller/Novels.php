@@ -24,7 +24,7 @@ class Novels extends Backend
         if ($tagId !== null && $tagId > 0) {
             $where['tags_json'] = ['like', '%"tag_id":' . (int)$tagId . '%'];
         }
-        $field = 'id,novel_uuid,title,slug,author_id,author_name,category_id,cover,intro,status,is_r18,is_vip,word_count,like_count,fav_count,view_count,audit_status,audit_remark,audit_admin_id,audit_at,created_at,updated_at';
+        $field = 'id,novel_uuid,title,slug,author_id,author_name,category_id,cover,intro,status,is_r18,is_vip,word_count,like_count,fav_count,view_count,audit_status,audit_remark,audit_admin_id,audit_at,site_count_json,created_at,updated_at';
         $orderby = 'id desc';
         $res = NovelsService::list(formatWhere($where), $field, $orderby, $limit, $page);
         return $this->ajaxReturn(200, '成功', $res);
@@ -32,7 +32,7 @@ class Novels extends Backend
     public function detail()
     {
         $id = (int)($this->request->param('id') ?? 0);
-        $field = 'id,novel_uuid,title,slug,author_id,author_name,category_id,cover,intro,status,is_r18,is_vip,word_count,like_count,fav_count,view_count,audit_status,audit_remark,audit_admin_id,audit_at,created_at,updated_at';
+        $field = 'id,novel_uuid,title,slug,author_id,author_name,category_id,cover,intro,status,is_r18,is_vip,word_count,like_count,fav_count,view_count,audit_status,audit_remark,audit_admin_id,audit_at,site_count_json,created_at,updated_at';
         $info = NovelsService::detail($id, $field);
         if (empty($info)) {
             return $this->ajaxReturn(404, '小说不存在');

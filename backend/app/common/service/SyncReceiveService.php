@@ -177,6 +177,34 @@ class SyncReceiveService
                 }
                 
                 break;
+            case 'novel':
+                $site_count_json = $model->where('novel_uuid',$payload['novel_uuid'])->value('site_count_json');
+                $data = [];
+                if(!empty($site_count_json)){
+                    $site_count_json = json_decode($site_count_json,true);
+                }else{
+                    $site_count_json = [];
+                }
+                $site_count_json[$siteId] = [
+                    'like_count' => (int)$payload['like_count'],
+                    'fav_count' => (int)$payload['fav_count'],
+                    'view_count' => (int)$payload['view_count'],
+                ];
+                $like_count = 0;
+                $fav_count = 0;
+                $view_count = 0;
+                $data['site_count_json'] = json_encode($site_count_json,JSON_UNESCAPED_UNICODE);
+                foreach ($site_count_json as $key => $value) {
+                    $like_count = $like_count+(int)$value['like_count'];
+                    $fav_count = $fav_count+(int)$value['fav_count'];
+                    $view_count = $view_count+(int)$value['view_count'];
+                }
+                $data['like_count'] = $like_count;
+                $data['fav_count'] = $fav_count;
+                $data['view_count'] = $view_count;
+                $data[$pk] = $payload[$pk];                
+                $payload = $data;
+                break;
             default:
                 break;
         }
@@ -197,6 +225,7 @@ class SyncReceiveService
             'ticket_reply' => \app\common\model\SiteTicketReplies::class,
             'feedback' => \app\common\model\SiteFeedbacks::class,
             'feedback_attachment' => \app\common\model\SiteFeedbackAttachments::class,
+            'novel' => \app\common\model\Novels::class,
             default      => null,
         };
     }

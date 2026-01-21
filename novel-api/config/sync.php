@@ -10,6 +10,7 @@ return [
         'feedback',
         'feedback_attachment',
         'ticket_reply',
+        'novel',
     ],
     'push_path' => '/Sync/receive',
     'timeout' => 5,

@@ -46,7 +46,7 @@ class MysqlSearchService implements SearchServiceInterface
         $orderBy = $order . ' desc';
         $res = $model->getList(
             formatWhere($where),
-            'novel_uuid as novel_id,title,cover as cover_url,author_id,status,is_vip,word_count',
+            'novel_uuid as novel_id,title,cover as cover_url,author_id,status,is_vip,word_count,category_id,is_r18,view_count,like_count,fav_count',
             $orderBy,            
             $pageSize,
             $page
