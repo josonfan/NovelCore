@@ -123,11 +123,16 @@
       </el-tabs>
     </el-form>
     <template #footer>
-      <el-button @click="$emit('update:visible', false)">
+      <el-button
+        :disabled="submitting"
+        @click="$emit('update:visible', false)"
+      >
         取消
       </el-button>
       <el-button
         type="primary"
+        :loading="submitting"
+        :disabled="submitting"
         @click="$emit('save')"
       >
         保存
@@ -146,6 +151,7 @@ const props = defineProps<{
   mode: 'add' | 'edit'
   activeTab: string
   categories: Array<{ id: number | string; name: string }>
+  submitting?: boolean
 }>()
 
 const formData = defineModel<NovelFormData>('form', { required: true })

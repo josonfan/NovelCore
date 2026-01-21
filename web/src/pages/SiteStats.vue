@@ -88,5 +88,3 @@ onMounted(() => {
   gap: 12px;
 }
 </style>
-
-

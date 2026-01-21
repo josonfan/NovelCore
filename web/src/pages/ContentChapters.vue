@@ -32,6 +32,7 @@
       v-model:form="form"
       :mode="formMode"
       :hide-novel-id="!!novelId"
+      :submitting="submitting"
       @save="saveForm"
     />
 
@@ -84,6 +85,7 @@ const {
   formMode,
   activeTab,
   form,
+  submitting,
   openAdd,
   openEdit,
   saveForm,

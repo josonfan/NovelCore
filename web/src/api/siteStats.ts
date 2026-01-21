@@ -51,5 +51,3 @@ export async function fetchSiteStatsDetail(id: number | string): Promise<SiteSta
   const res = await http.post('SiteStats/detail', { id })
   return res.data?.data || null
 }
-
-

@@ -21,7 +21,7 @@ export type Novel = {
 export interface NovelListParams {
   page?: number | string
   limit?: number | string
-  kw?: string
+  title?: string
   category_id?: number | string
   status?: number | string
   is_vip?: number | string

@@ -28,6 +28,7 @@ export function useChapterForm(reload: () => void, novelId: () => string) {
   const showForm = ref(false)
   const formMode = ref<'add' | 'edit'>('add')
   const activeTab = ref('basic')
+  const submitting = ref(false)
   const form = ref<ChapterFormData>({
     novel_id: '',
     title: '',
@@ -111,11 +112,13 @@ export function useChapterForm(reload: () => void, novelId: () => string) {
   }
 
   async function saveForm() {
+    if (submitting.value) return
+    if (!form.value.novel_id || !form.value.title) {
+      ElMessage.error('请填写小说ID与标题')
+      return
+    }
+    submitting.value = true
     try {
-      if (!form.value.novel_id || !form.value.title) {
-        ElMessage.error('请填写小说ID与标题')
-        return
-      }
       const payload = {
         novel_id: form.value.novel_id,
         title: form.value.title,
@@ -144,6 +147,8 @@ export function useChapterForm(reload: () => void, novelId: () => string) {
     } catch (e: unknown) {
       const resp = (e as { response?: { data?: { message?: string; msg?: string } } })?.response?.data
       ElMessage.error(resp?.message || resp?.msg || '保存失败')
+    } finally {
+      submitting.value = false
     }
   }
 
@@ -152,6 +157,7 @@ export function useChapterForm(reload: () => void, novelId: () => string) {
     formMode,
     activeTab,
     form,
+    submitting,
     openAdd,
     openEdit,
     saveForm,

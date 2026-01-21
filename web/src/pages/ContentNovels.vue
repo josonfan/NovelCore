@@ -37,6 +37,7 @@
       v-model:form="form"
       :mode="formMode"
       :categories="categories"
+      :submitting="submitting"
       @save="saveForm"
     />
 
@@ -104,6 +105,7 @@ const {
   formMode,
   form,
   activeTab,
+  submitting,
   openAdd,
   openEdit,
   saveForm,

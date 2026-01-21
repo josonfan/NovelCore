@@ -40,6 +40,7 @@ export function useNovelForm(onSuccess?: () => void) {
   const formMode = ref<'add' | 'edit'>('add')
   const form = ref<NovelFormData>(defaultForm())
   const activeTab = ref('basic')
+  const submitting = ref(false)
 
   function openAdd() {
     formMode.value = 'add'
@@ -92,11 +93,13 @@ export function useNovelForm(onSuccess?: () => void) {
   }
 
   async function saveForm() {
+    if (submitting.value) return
+    if (!form.value.title) {
+      ElMessage.error('请填写标题')
+      return
+    }
+    submitting.value = true
     try {
-      if (!form.value.title) {
-        ElMessage.error('请填写标题')
-        return
-      }
       const payload = {
         title: form.value.title,
         author_id: form.value.author_id,
@@ -126,6 +129,8 @@ export function useNovelForm(onSuccess?: () => void) {
       const err = e as { response?: { data?: { message?: string; msg?: string } } }
       const resp = err?.response?.data
       ElMessage.error(resp?.message || resp?.msg || '保存失败')
+    } finally {
+      submitting.value = false
     }
   }
 
@@ -138,6 +143,7 @@ export function useNovelForm(onSuccess?: () => void) {
     formMode,
     form,
     activeTab,
+    submitting,
     openAdd,
     openEdit,
     saveForm,

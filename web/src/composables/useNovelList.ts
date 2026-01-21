@@ -28,15 +28,8 @@ export function useNovelList() {
     is_r18: '',
   })
 
-  const filtered = computed(() => {
-    if (!kw.value) return rows.value
-    const k = kw.value.toLowerCase()
-    return rows.value.filter(
-      (x) =>
-        (x.title || '').toLowerCase().includes(k) ||
-        (x.author_name || '').toLowerCase().includes(k)
-    )
-  })
+  // 搜索由后端处理，直接返回后端结果
+  const filtered = computed(() => rows.value)
 
   async function load() {
     loading.value = true
@@ -45,7 +38,7 @@ export function useNovelList() {
         page: page.value,
         limit: limit.value,
       }
-      if (kw.value) params.kw = kw.value
+      if (kw.value) params.title = kw.value
       if (filters.value.category_id) params.category_id = filters.value.category_id
       if (filters.value.status !== '') params.status = filters.value.status
       if (filters.value.is_vip !== '') params.is_vip = filters.value.is_vip
