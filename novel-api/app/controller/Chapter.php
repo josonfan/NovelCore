@@ -74,7 +74,7 @@ class Chapter extends Common
         $user = (new \app\service\UserService())->info($user_id);
         $isCheckUserCanRead = true;
         if ((int) $chapter['is_free'] === 1) {
-            return;
+            $isCheckUserCanRead = true;
         }elseif((int) $chapter['is_vip'] === 1){
             if ((int) $user['vip_expire'] <= time()) {
                 $isCheckUserCanRead = false;
