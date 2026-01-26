@@ -88,7 +88,31 @@ class Ticket extends Common
         TicketService::evaluate($userId, $ticketId, $score, $content);
         return $this->ajaxReturn(200, '评价成功');
     }
-
+    /**
+     * 工单关闭
+     * 路由：POST /api/Ticket/close
+     * 鉴权：需登录
+     * 入参：ticket_id
+     */
+    public function close()
+    {
+        $userId = (int) $this->request->user_id;
+        $ticketId = $this->request->param('ticket_id', 0, 'intval');
+        
+        if ($ticketId <= 0) {
+             throw new ValidateException('参数错误');
+        }
+        
+        TicketService::close($userId, $ticketId);
+        return $this->ajaxReturn(200, '关闭成功');
+    }
+    /**
+     * 工单列表
+     * 路由：POST /api/Ticket/list
+     * 鉴权：需登录
+     * 入参：page, limit, type, status
+     * 返回：list 列表
+     */
     public function list()
     {
         $userId = (int) $this->request->user_id;

@@ -120,6 +120,7 @@ Route::group('api', function () {
         Route::rule('Ticket/reply', 'Ticket/reply', 'POST');
         Route::rule('Ticket/replies', 'Ticket/replies', 'POST');
         Route::rule('Ticket/evaluate', 'Ticket/evaluate', 'POST');
+        Route::rule('Ticket/close', 'Ticket/close', 'POST');
         // 投诉建议（我的）
         Route::rule('Feedback/list', 'Feedback/list', 'POST');
         Route::rule('Feedback/info', 'Feedback/info', 'POST');

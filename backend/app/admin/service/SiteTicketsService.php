@@ -54,10 +54,10 @@ class SiteTicketsService
         }
     }
 
-    public static function reply(int $id, string $content, array $attachments = [], int $adminId = 0): bool
+    public static function reply(int $id, string $content, int $status, array $attachments = [], int $adminId = 0): bool
     {
         try {
-            validate(\app\admin\validate\SiteTicketReply::class)->scene('reply')->check(['id' => $id, 'content' => $content]);
+            validate(\app\admin\validate\SiteTicketReply::class)->scene('reply')->check(['id' => $id, 'content' => $content,'status'=>$status]);
             
             $ticketModel = new SiteTickets();
             $ticket = $ticketModel->infoById($id);
@@ -83,9 +83,7 @@ class SiteTicketsService
                 'reply_admin_id' => $adminId,
                 'reply_at' => date('Y-m-d H:i:s'),
             ];
-            if ($ticket['status'] == 0) {
-                $updateData['status'] = 1;
-            }
+            $updateData['status'] = $status;
             $ticketModel->writeById($id, $updateData);
 
             return true;

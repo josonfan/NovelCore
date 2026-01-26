@@ -64,6 +64,9 @@ class SiteTickets extends Backend
         return $this->ajaxReturn(200, '成功', $info);
     }
 
+    /**
+     * 工单处理
+     */
     public function process()
     {
         $postField = 'id,status,reply_content';
@@ -85,21 +88,26 @@ class SiteTickets extends Backend
     {
         return $this->ajaxReturn(200, '成功', SiteTicketsService::statuses());
     }
-
+    /**
+     * 工单回复
+     */
     public function reply()
     {
-        $postField = 'id,content,attachments';
+        $postField = 'id,content,attachments,status';
         $data = $this->request->only(explode(',', $postField), 'post', null);
         $id = (int)($data['id'] ?? 0);
         $content = (string)($data['content'] ?? '');
         $attachments = (array)($data['attachments'] ?? []);
         $adminId = (int)($this->request->uid ?? 0);
-        $ok = SiteTicketsService::reply($id, $content, $attachments, $adminId);
+        $status = (int)($data['status'] ?? 0);
+        $ok = SiteTicketsService::reply($id, $content, $status, $attachments, $adminId);
         return $this->ajaxReturn(200, '回复成功', ['success' => $ok]);
     }
 
 
-
+    /**
+     * 工单回复列表
+     */
     public function replies()
     {
         $id = (int)($this->request->param('id') ?? 0);

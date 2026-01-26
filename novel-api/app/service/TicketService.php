@@ -102,8 +102,8 @@ class TicketService
             throw new ValidateException('工单不存在');
         }
 
-        // 状态：0待处理 1处理中 2已解决 3已关闭 4已拒绝
-        if (in_array((int)$ticket['status'], [3, 4], true)) {
+        // 状态：0待处理 1处理中 2用户关闭 3已解决 4已拒绝
+        if (in_array((int)$ticket['status'], [2, 3, 4], true)) {
              throw new ValidateException('该工单已结束，无法回复');
         }
 
@@ -131,6 +131,34 @@ class TicketService
         (new TicketReply())->writeById(0, $replyData);
         
         return $replyData;
+    }
+
+    public static function close(int $userId, int $ticketId): bool
+    {
+        $ticketModel = new Ticket();
+        $ticket = $ticketModel->infoById($ticketId, 'id,user_id,status,ticket_no');
+        if (!$ticket || (int)$ticket['user_id'] !== $userId) {
+            throw new ValidateException('工单不存在');
+        }
+
+        $status = (int)($ticket['status'] ?? 0);
+        if (in_array($status, [2, 3, 4], true)) {
+            return true;
+        }
+
+        $ticketModel->writeById($ticketId, [
+            'status' => 2,
+        ]);
+
+        (new TicketReply())->writeById(0, [
+            'ticket_id'  => $ticketId,
+            'user_id'    => $userId,
+            'user_type'  => 3,
+            'content'    => '用户已关闭工单',
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        return true;
     }
 
     public static function getReplies(int $userId, int $ticketId): array
@@ -272,8 +300,8 @@ class TicketService
         return [
             ['code' => 0, 'name' => '待处理'],
             ['code' => 1, 'name' => '处理中'],
-            ['code' => 2, 'name' => '已解决'],
-            ['code' => 3, 'name' => '已关闭'],
+            ['code' => 2, 'name' => '已关闭'],
+            ['code' => 3, 'name' => '已解决'],
             ['code' => 4, 'name' => '已拒绝'],
         ];
     }
