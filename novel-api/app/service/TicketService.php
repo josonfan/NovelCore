@@ -257,30 +257,30 @@ class TicketService
             ];
         }, $attachments));
 
-        // 获取沟通记录
-        $replies = TicketReply::where('ticket_id', $ticket['id'])
-            ->order('id', 'asc')
-            ->select()
-            ->toArray();
-
-        $ticket['replies'] = array_map(function($row) use ($storage) {
-            $attachments = [];
-            if (!empty($row['attachments'])) {
-                $arr = json_decode($row['attachments'], true);
-                if (is_array($arr)) {
-                    foreach ($arr as $url) {
-                        $attachments[] = $storage->getPublicUrl($url);
-                    }
-                }
-            }
-            return [
-                'id'        => $row['id'],
-                'user_type' => (int)$row['user_type'], // 1=User, 2=Admin, 3=System
-                'content'   => $row['content'],
-                'attachments' => $attachments,
-                'created_at' => $row['created_at'],
-            ];
-        }, $replies);
+        // // 获取沟通记录
+        // $replies = TicketReply::where('ticket_id', $ticket['id'])
+        //     ->order('id', 'asc')
+        //     ->select()
+        //     ->toArray();
+        
+        // $ticket['replies'] = array_map(function($row) use ($storage) {
+        //     $attachments = [];
+        //     if (!empty($row['attachments'])) {
+        //         $arr = $row['attachments'];
+        //         if (is_array($arr)) {
+        //             foreach ($arr as $url) {
+        //                 $attachments[] = $storage->getPublicUrl($url);
+        //             }
+        //         }
+        //     }
+        //     return [
+        //         'id'        => $row['id'],
+        //         'user_type' => (int)$row['user_type'], // 1=User, 2=Admin, 3=System
+        //         'content'   => $row['content'],
+        //         'attachments' => $attachments,
+        //         'created_at' => $row['created_at'],
+        //     ];
+        // }, $replies);
 
         return $ticket;
     }

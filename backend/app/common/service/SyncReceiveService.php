@@ -135,7 +135,7 @@ class SyncReceiveService
                 break;
             case 'ticket_attachment':
                 $payload['ticket_attachment_id'] = $payload['id'];
-                $payload[$pk] = $model->where('site_id',$siteId)->where('ticket_attachment_id',$payload['ticket_attachment_id'])->value('id');
+                $payload[$pk] = $model->where('site_id',$siteId)->where('ticket_no',$payload['ticket_no'])->value('id');
                 
                 if(empty($payload[$pk])){
                     $payload[$pk] = 0;
