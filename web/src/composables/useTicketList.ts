@@ -5,7 +5,7 @@ import {
   fetchTicketDetail,
   fetchTicketTypes,
   fetchTicketStatuses,
-  processTicket,
+  fetchTicketReplies,
   TICKET_STATUS_TYPE_MAP,
   TICKET_PRIORITY_MAP,
 } from '../api/tickets'
@@ -14,7 +14,7 @@ import type {
   TicketType,
   TicketStatus,
   TicketListParams,
-  TicketProcessParams,
+  TicketReply,
 } from '../api/tickets'
 
 export interface TicketFilters {
@@ -44,17 +44,10 @@ export function useTicketList() {
     type: '',
   })
 
-  // 详情
+  // 详情/处理面板
   const showDetail = ref(false)
   const detail = ref<Ticket | null>(null)
-
-  // 处理工单弹窗
-  const showProcess = ref(false)
-  const processForm = ref({
-    id: '',
-    status: 2,
-    reply_content: '',
-  })
+  const replies = ref<TicketReply[]>([])
 
   // 工单类型和状态选项
   const ticketTypes = ref<TicketType[]>([])
@@ -138,11 +131,26 @@ export function useTicketList() {
   }
 
   /**
-   * 查看详情
+   * 加载回复列表
+   */
+  async function loadReplies(id: string) {
+    try {
+      replies.value = await fetchTicketReplies(id)
+    } catch {
+      replies.value = []
+      console.error('加载回复列表失败')
+    }
+  }
+
+  /**
+   * 查看详情（同时加载回复列表）
    */
   async function handleDetail(row: Ticket) {
     try {
-      const d = await fetchTicketDetail(row.id)
+      const [d] = await Promise.all([
+        fetchTicketDetail(row.id),
+        loadReplies(row.id),
+      ])
       detail.value = d
       showDetail.value = true
     } catch {
@@ -151,45 +159,18 @@ export function useTicketList() {
   }
 
   /**
-   * 打开处理工单弹窗
+   * 回复成功后刷新
    */
-  function handleProcess(row: Ticket) {
-    processForm.value = {
-      id: row.id,
-      status: row.status === 0 ? 1 : 2, // 默认：待处理→处理中，否则→已解决
-      reply_content: '',
-    }
-    showProcess.value = true
-  }
-
-  /**
-   * 提交处理工单
-   */
-  async function submitProcess() {
-    if (!processForm.value.reply_content.trim()) {
-      ElMessage.warning('请输入回复内容')
-      return false
-    }
-
-    try {
-      const params: TicketProcessParams = {
-        id: processForm.value.id,
-        status: processForm.value.status,
-        reply_content: processForm.value.reply_content,
-      }
-      const res = await processTicket(params)
-      if (res?.code === 200) {
-        ElMessage.success('处理成功')
-        showProcess.value = false
-        load()
-        return true
-      } else {
-        ElMessage.error(res?.msg || '处理失败')
-        return false
-      }
-    } catch {
-      ElMessage.error('处理失败')
-      return false
+  async function onReplied() {
+    if (detail.value) {
+      // 重新加载详情和回复
+      const [d] = await Promise.all([
+        fetchTicketDetail(detail.value.id),
+        loadReplies(detail.value.id),
+      ])
+      detail.value = d
+      // 刷新列表
+      load()
     }
   }
 
@@ -238,8 +219,7 @@ export function useTicketList() {
     filters,
     showDetail,
     detail,
-    showProcess,
-    processForm,
+    replies,
     ticketTypes,
     ticketStatuses,
 
@@ -250,8 +230,7 @@ export function useTicketList() {
     onPageChange,
     onSizeChange,
     handleDetail,
-    handleProcess,
-    submitProcess,
+    onReplied,
     getStatusInfo,
     getTypeName,
     getPriorityInfo,
