@@ -87,6 +87,30 @@ export interface TicketProcessParams {
 }
 
 /**
+ * 工单回复类型
+ */
+export interface TicketReply {
+  id: string
+  ticket_id: string
+  user_id: string
+  user_type: 1 | 2  // 1=用户, 2=管理员
+  user_type_text: string  // "用户" | "管理员"
+  content: string
+  attachments: string[]  // 图片URL数组
+  created_at: string
+}
+
+/**
+ * 回复工单参数
+ */
+export interface TicketReplyParams {
+  id: string           // 工单ID
+  content: string      // 回复内容
+  attachments: string[] // 图片URL数组
+  status: number       // 0=待处理, 1=处理中, 3=已关闭
+}
+
+/**
  * 获取工单列表
  */
 export async function fetchTicketList(params: TicketListParams): Promise<TicketListResponse> {
@@ -127,6 +151,33 @@ export async function processTicket(
   const res = await http.post('SiteTickets/process', params)
   return res.data
 }
+
+/**
+ * 获取工单回复列表
+ */
+export async function fetchTicketReplies(id: string): Promise<TicketReply[]> {
+  const res = await http.post('SiteTickets/replies', { id })
+  return res.data?.data || []
+}
+
+/**
+ * 回复工单
+ */
+export async function replyTicket(
+  params: TicketReplyParams
+): Promise<{ code?: number; msg?: string; data?: unknown }> {
+  const res = await http.post('SiteTickets/reply', params)
+  return res.data
+}
+
+/**
+ * 回复状态选项
+ */
+export const REPLY_STATUS_OPTIONS = [
+  { code: 0, name: '待处理' },
+  { code: 1, name: '处理中' },
+  { code: 3, name: '已关闭' },
+] as const
 
 /**
  * 工单状态颜色映射

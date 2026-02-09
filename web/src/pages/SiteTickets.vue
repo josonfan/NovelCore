@@ -28,28 +28,18 @@
       :get-type-name="getTypeName"
       :get-priority-info="getPriorityInfo"
       @detail="handleDetail"
-      @process="handleProcess"
+      @process="handleDetail"
       @page-change="onPageChange"
       @size-change="onSizeChange"
     />
 
-    <!-- 详情弹窗 -->
-    <TicketDetailDialog
+    <!-- 工单处理面板 -->
+    <TicketProcessPanel
       v-model="showDetail"
       :detail="detail"
+      :replies="replies"
       :get-status-info="getStatusInfo"
-      :get-type-name="getTypeName"
-      :get-priority-info="getPriorityInfo"
-      @process="handleProcessFromDetail"
-    />
-
-    <!-- 处理工单弹窗 -->
-    <TicketProcessDialog
-      v-model="showProcess"
-      :form="processForm"
-      :ticket-statuses="ticketStatuses"
-      :submitting="processing"
-      @submit="onSubmitProcess"
+      @replied="onReplied"
     />
   </div>
 </template>
@@ -59,13 +49,11 @@ import { ref, onMounted } from 'vue'
 import {
   TicketToolbar,
   TicketTable,
-  TicketDetailDialog,
-  TicketProcessDialog,
+  TicketProcessPanel,
 } from '../components/tickets'
 import { useTicketList } from '../composables/useTicketList'
 import { fetchSiteList } from '../api/sites'
 import type { Site } from '../api/sites'
-import type { Ticket } from '../api/tickets'
 
 // 站点列表
 const sites = ref<Site[]>([])
@@ -89,8 +77,7 @@ const {
   filters,
   showDetail,
   detail,
-  showProcess,
-  processForm,
+  replies,
   ticketTypes,
   ticketStatuses,
   loadOptions,
@@ -99,31 +86,11 @@ const {
   onPageChange,
   onSizeChange,
   handleDetail,
-  handleProcess,
-  submitProcess,
+  onReplied,
   getStatusInfo,
   getTypeName,
   getPriorityInfo,
 } = useTicketList()
-
-// 处理中状态
-const processing = ref(false)
-
-// 从详情弹窗发起处理
-function handleProcessFromDetail(row: Ticket) {
-  showDetail.value = false
-  handleProcess(row)
-}
-
-// 提交处理
-async function onSubmitProcess() {
-  processing.value = true
-  try {
-    await submitProcess()
-  } finally {
-    processing.value = false
-  }
-}
 
 onMounted(() => {
   loadSites()
