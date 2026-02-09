@@ -58,7 +58,7 @@ class Novel extends Common
                 $orderby  = 'created_at desc, id desc';
                 break;
         }
-        $fields = 'novel_uuid as id,title,category_id,cover,tags_json,intro,author_name,is_r18,status,is_vip,word_count,updated_at';
+        $fields = 'novel_uuid as id,title,category_id,cover,tags_json,intro,author_name,is_r18,status,is_vip,view_count,word_count,like_count,updated_at';
         $result = NovelService::getList(formatWhere($where), $fields, $orderby, $page, $limit);       
         return $this->ajaxReturn(200, '获取成功', $result);
     }
@@ -89,7 +89,7 @@ class Novel extends Common
      * 路由：POST /api/Novel/userStatus
      * 鉴权：登录用户
      * 参数：novelId 使用 `novel_uuid`（兼容内部数值ID）
-     * 返回：data { is_liked: 0/1, is_favorited: 0/1, reading_progress }
+     * 返回：data { is_liked: 0/1, is_favorited: 0/1, read_chapter_count, reading_progress }
      *
      * @return \think\Response
      */

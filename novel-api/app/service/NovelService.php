@@ -6,6 +6,7 @@ namespace app\service;
 use app\model\Novel;
 use app\model\UserNovelLike;
 use app\model\UserNovelFavorite;
+use app\model\UserReadLog;
 use think\facade\Db;
 use think\exception\ValidateException;
 use think\exception\HttpException;
@@ -96,6 +97,7 @@ class NovelService
         $id = $m->where('novel_uuid', $uuid)->value($pk);
         $isLiked = 0;
         $isFavorited = 0;
+        $readChapterCount = 0;
         if ($userId > 0 && $id) {
             $data=['user_id' => (int)$userId,'novel_id' => (int)$id];
             $userNovelLike = (new \app\model\UserNovelLike());
@@ -127,7 +129,18 @@ class NovelService
             } 
             $isLiked = $likedId ? 1 : 0;
             $isFavorited = $favId ? 1 : 0;
+
+            $chapterIds = UserReadLog::where('user_id', $userId)
+                ->where('novel_id', (int)$id)
+                ->column('chapter_id');
+            if (!empty($chapterIds)) {
+                $readChapterCount = count(array_unique(array_map('intval', $chapterIds)));
+            }
         }
-        return ['is_liked' => (int)$isLiked, 'is_favorited' => (int)$isFavorited];
+        return [
+            'is_liked' => (int)$isLiked,
+            'is_favorited' => (int)$isFavorited,
+            'read_chapter_count' => (int)$readChapterCount,
+        ];
     }
 }
