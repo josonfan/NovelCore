@@ -43,6 +43,7 @@ class PushToElastic extends Command
             ],
             'author_name' => ['type' => 'text'],
             'category_id' => ['type' => 'integer'],
+            'cover' => ['type' => 'keyword'],
             'intro' => ['type' => 'text'],
             'is_r18' => ['type' => 'byte'],
             'is_vip' => ['type' => 'byte'],
@@ -90,7 +91,7 @@ class PushToElastic extends Command
     {
         $model = new Novels();
         $lastSyncTime = Cache::get('last_up_es_time','1970-01-01 00:00:00');
-        $list =  $model->where('updated_at', '>', $lastSyncTime)->field('id,novel_uuid,title,author_name,category_id,intro,is_r18,is_vip,like_count,fav_count,view_count,word_count,status,updated_at')->limit(100)->select()->toArray();
+        $list =  $model->where('updated_at', '>', $lastSyncTime)->field('id,novel_uuid,title,author_name,category_id,cover,intro,is_r18,is_vip,like_count,fav_count,view_count,word_count,status,updated_at')->limit(100)->select()->toArray();
         foreach ($list as $key => $value) {
             $tagIds = (new NovelTags())->whereIn('novel_id', $value['id'])->column('tag_id');
             $list[$key]['tag_ids'] = $tagIds;
