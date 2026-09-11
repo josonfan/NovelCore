@@ -9,10 +9,10 @@ services:
     restart: always
     environment:
       # ⚠️ 务必替换为你自己的安全密码
-      MYSQL_ROOT_PASSWORD: XK6MemT8cDSkHRyp
+      MYSQL_ROOT_PASSWORD: your_root_password_here
       MYSQL_DATABASE: novelcore
       MYSQL_USER: novelcore
-      MYSQL_PASSWORD: XK6MemT8cDSkHRyp
+      MYSQL_PASSWORD: your_db_password_here
     # 将容器的 3306 端口映射到主机的 3306 端口
     ports:
       - "0.0.0.0:3306:3306"

@@ -144,7 +144,7 @@ class CacheModel extends Model
             $updKey = $this->getCacheKey($id, 'upd');
         }
         $ok = $this->setCacheData($updKey, $info, 0);
-        Async::delayUseCustomQueue(0, \app\common\model\CacheModel::class, 'persistByIdRef', getAsyncQueueKey(md5((string)$id), $type), static::class, $id, $updKey, $isAsync);       
+        Async::execUseCustomQueue(\app\common\model\CacheModel::class, 'persistByIdRef', getAsyncQueueKey(md5((string)$id), $type), static::class, $id, $updKey, $isAsync);       
         return $ok;
     }
     /**
