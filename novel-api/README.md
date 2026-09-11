@@ -1,77 +1,111 @@
-![](https://www.thinkphp.cn/uploads/images/20230630/300c856765af4d8ae758c503185f8739.png)
+# NovelCore — 用户端 API
 
-ThinkPHP 8
-===============
+面向 C 端的用户 API 服务，基于 PHP 8.0+ 和 ThinkPHP 8。提供小说阅读、章节浏览、评论、收藏、点赞、工单、反馈、VIP 订阅、订单、搜索、多语言等完整用户链路。
 
-## 特性
+## 技术栈
 
-* 基于PHP`8.0+`重构
-* 升级`PSR`依赖
-* 依赖`think-orm`3.0+版本
-* 全新的`think-dumper`服务，支持远程调试
-* 支持`6.0`/`6.1`无缝升级
+- **框架**: ThinkPHP 8
+- **ORM**: think-orm 3.x/4.x
+- **鉴权**: firebase/php-jwt（JWT）
+- **缓存**: predis/predis（Redis）
+- **队列**: baiy/think-async
+- **搜索**: elasticsearch 8.7 / MySQL 双后端（SearchServiceFactory 工厂切换）
+- **邮件**: daniel-zahariev/php-aws-ses
+- **UUID**: ramsey/uuid
+- **其他**: guzzlehttp/guzzle（HTTP）、geoip2（IP 地理）、think-throttle（限流）
 
-> ThinkPHP8的运行环境要求PHP8.0+
+## 目录结构
 
-现在开始，你可以使用官方提供的[ThinkChat](https://chat.topthink.com/)，让你在学习ThinkPHP的旅途中享受私人AI助理服务！
+```
+app/
+├── controller/               # C 端控制器
+│   ├── Novel.php / Chapter.php / Category.php / Tag.php
+│   ├── Comment.php / Like.php / Favorite.php / Follow.php
+│   ├── User.php / Vip.php / Order.php
+│   ├── Ticket.php / Feedback.php / Message.php
+│   ├── Search.php / Reading.php
+│   └── Common.php / Index.php / Health.php / Sync.php
+├── admin/controller/         # 后台只读接口（Config / Stats）
+├── model/                    # ORM 模型（BaseModel / CacheModel 封装异步 CRUD）
+├── service/
+│   ├── search/               # 搜索服务（ES / MySQL / Factory / Interface）
+│   ├── JwtService.php        # JWT 生成与解析
+│   ├── UserAuthService.php   # 登录注册、邮箱验证码
+│   ├── ContentService.php    # 跨模型聚合（小说详情组装）
+│   ├── SyncService.php       # 内容同步接收
+│   ├── StatsService.php      # 统计数据
+│   └── ...
+├── middleware/
+│   ├── Auth.php              # JWT 鉴权（支持 Authorization: Bearer）
+│   ├── AdminAuth.php         # 后台接口鉴权
+│   ├── Cors.php              # 跨域
+│   ├── ApiThrottle.php       # 频率限制
+│   ├── BotBlock.php          # 爬虫拦截
+│   ├── ApiAccessLog.php      # 请求日志（生成 X-Request-Id）
+│   └── SiteInit.php          # 站点初始化检查
+├── lang/                     # 多语言包（zh-cn / en-us / ja-jp / zh-tw / th-th）
+└── command/                  # 控制台命令（DailyStats / DataSync / SyncPush ...）
 
-![](https://www.topthink.com/uploads/assistant/20230630/4d1a3f0ad2958b49bb8189b7ef824cb0.png)
+config/                       # jwt / redis / database / sync / site / throttle ...
+route/app.php                 # 路由定义（/api + /api/admin 分组）
+```
 
-ThinkPHP生态服务由[顶想云](https://www.topthink.com)（TOPThink Cloud）提供，为生态提供专业的开发者服务和价值之选。
+## 关键设计
 
-## 文档
+### 异步 CRUD（CacheModel）
 
-[完全开发手册](https://doc.thinkphp.cn)
+统一通过 `CacheModel` 封装的接口操作数据库，不直接写 SQL：
 
+| 操作 | 方法 | 说明 |
+|------|------|------|
+| 新增 | `writeById(null, $data)` | 同步写缓存 → 入队异步插库 |
+| 编辑 | `writeById($id, $data)` | 同步更新缓存 → 入队异步更新 |
+| 删除 | `deleteById($id)` | 清理缓存 → 入队异步删除 |
+| 读取 | `infoById($id, $fields)` | 优先读缓存，MISS 查库回写 |
 
-## 赞助
+### 搜索服务（工厂模式）
 
-全新的[赞助计划](https://www.thinkphp.cn/sponsor)可以让你通过我们的网站、手册、欢迎页及GIT仓库获得巨大曝光，同时提升企业的品牌声誉，也更好保障ThinkPHP的可持续发展。
+```php
+$service = SearchServiceFactory::create();  // 根据配置返回 ES 或 MySQL 实现
+$service->search($keyword, $options);
+```
 
-[![](https://www.thinkphp.cn/sponsor/special.svg)](https://www.thinkphp.cn/sponsor/special)
+### 多语言
 
-[![](https://www.thinkphp.cn/sponsor.svg)](https://www.thinkphp.cn/sponsor)
+- Query 变量 `?lang=<locale>` 或 Header `think-lang: <locale>` 切换
+- 错误响应自动翻译（`lang('未登录或令牌无效')`）
 
-## 安装
+### 请求头约定
 
-~~~
-composer create-project topthink/think tp
-~~~
+| Header | 用途 |
+|--------|------|
+| `Authorization` | JWT 令牌（支持 `Bearer` 前缀自动剥离） |
+| `X-Device-Id` | 设备指纹（登录日志 / 设备画像） |
+| `Device-Brand` / `Device-Model` / `OS` | 设备信息 |
+| `Client-Version` | 客户端版本号 |
+| `think-lang` | 多语言选择 |
 
-启动服务
+## 快速运行
 
-~~~
-cd tp
-php think run
-~~~
+```bash
+# 安装依赖
+composer install
 
-然后就可以在浏览器中访问
+# 配置环境
+cp .example.env .env   # 替换密码、密钥、域名等占位符
 
-~~~
-http://localhost:8000
-~~~
+# 开发启动（8080 端口）
+php -S 127.0.0.1:8080 -t public public/router.php
 
-如果需要更新框架使用
-~~~
-composer update topthink/framework
-~~~
+# 日统计重建
+php think UserWeekStatsRebuild
+```
 
-## 命名规范
+## 开发规范
 
-`ThinkPHP`遵循PSR-2命名规范和PSR-4自动加载规范。
-
-## 参与开发
-
-直接提交PR或者Issue即可
-
-## 版权信息
-
-ThinkPHP遵循Apache2开源协议发布，并提供免费使用。
-
-本项目包含的第三方源码和二进制文件之版权信息另行标注。
-
-版权所有Copyright © 2006-2024 by ThinkPHP (http://thinkphp.cn) All rights reserved。
-
-ThinkPHP® 商标和著作权所有者为上海顶想信息科技有限公司。
-
-更多细节参阅 [LICENSE.txt](LICENSE.txt)
+- 控制器继承 `app\controller\Common`，统一 `$this->request->param()` 取参
+- 业务逻辑落 Service 层，数据访问落 Model 层
+- 列表查询：`Model::getList($where, $field, $orderby, $limit, $page)`
+- 详情查询：先查主键，再 `infoById($id, $fields)` 取指定字段
+- 所有带参数接口统一用 `POST` + `application/json` Body
+- 提交遵循 Conventional Commits
