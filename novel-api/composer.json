@@ -1,6 +1,6 @@
 {
     "name": "topthink/think",
-    "description": "the new thinkphp framework - BL文学平台用户端接口服务",
+    "description": "the new thinkphp framework - NovelCore 用户端接口服务",
     "type": "project",
     "keywords": [
         "framework",
